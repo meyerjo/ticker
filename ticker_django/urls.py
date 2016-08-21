@@ -13,9 +13,15 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.contrib import admin
+
+import ticker
+from ticker.views.startpage import start_page
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url('', start_page),
+    url(r'^ticker/', include('ticker.urls')),
+    url(r'^api/v1/json/', include('ticker.urls_api'))
 ]
