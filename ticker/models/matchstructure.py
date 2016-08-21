@@ -39,8 +39,26 @@ class Set(models.Model):
     def add_point_team_a(self):
         pass
 
+    def remove_point_team_a(self):
+        pass
+
     def add_point_team_b(self):
         pass
+
+    def remove_point_team_b(self):
+        pass
+
+    def is_started(self):
+        return self.points_team_a.filter(canceled=False).count() != 0 or \
+               self.points_team_b.filter(canceled=False).count() != 0
+
+    def is_finished(self):
+
+        return False
+
+    def get_score(self):
+        return [self.points_team_a.filter(canceled=False).count(),
+                self.points_team_b.filter(canceled==False).count()]
 
 
 class Game(models.Model):
@@ -58,6 +76,22 @@ class Game(models.Model):
     def __str__(self):
         return '{0} {1} {2}'.format(self.name, self.game_type, '0')
 
+    def is_finished(self):
+        return False
+
+    def is_won(self):
+        # TODO: change that
+        return False
+
+    def get_sets(self):
+        sets = self.sets.all()
+        if len(sets) != 5:
+            return 'error'
+        sets = []
+        for set in sets:
+            sets.append(':'.join(set.get_score()))
+        return ' '.join(sets)
+
 
 class Match(models.Model):
     match_time = models.DateTimeField()
@@ -72,3 +106,24 @@ class Match(models.Model):
     def all_matches():
         matches = Match.objects.filter(canceled=True)
         return matches
+
+    def get_all_games(self):
+        return self.objects.games()
+
+    def get_team_names(self):
+        return [self.team_a.get_name(), self.team_b.get_name()]
+
+    def get_score(self):
+        games = self.get_all_games()
+        score_team_a = 0
+        score_team_b = 0
+        for game in games:
+            if not game.is_finished():
+                continue
+            if game.is_won():
+                score_team_a +=1
+            else:
+                score_team_b +=1
+        return [score_team_a, score_team_b]
+
+

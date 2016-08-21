@@ -1,10 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+    <div class="container-fluid">
+        <div class="row-fluid headline">
+            {% with score=match.get_score team_names=match.get_team_names %}
+                <div class="col-sm-4">{{ team_names.0 }}</div>
+                <div class="col-sm-4">{{ score.0 }} - score.1</div>
+                <div class="col-sm-4">{{ team_names.1 }}</div>
+            {% endwith %}
+        </div>
+        <div class="row-fluid fields">
+
+        </div>
+        <div class="row-fluid matches">
+            <div class="col-sm-12">
+            <table class="table table-responsive">
+                <tr>
+                    <th>ID</th>
+                    <th>Spieler (Heim)</th>
+                    <th>Spieler (Gast)</th>
+                    <th>Saetze</th>
+                    <th>Feld</th>
+                    <th>Editieren</th>
+                </tr>
+                {% for game in match.get_all_games %}
+                    <tr>
+                        <td>{{ game.id }}</td>
+                        <td></td>
+                        <td></td>
+                        <td>{{ game.get_sets }}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                {% endfor %}
+            </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
