@@ -1,11 +1,13 @@
 from django.db import models
 from django.db.models import ManyToManyField
+from django.utils import timezone
 
 from ticker.models.player_clubs import Player, Team
 
 
 class Point(models.Model):
     canceled = models.BooleanField(default=False)
+    create_time = models.DateTimeField(default=timezone.now())
 
 class Rules(models.Model):
     rule_name = models.CharField(max_length=32)
@@ -14,21 +16,38 @@ class Rules(models.Model):
         return 7
 
     def validate(self, set_score_team_a, set_score_team_b):
+        """
+        Checks whether the score is valid
+        :param set_score_team_a:
+        :param set_score_team_b:
+        :return:
+        """
         if set_score_team_a < 0 or set_score_team_b < 0:
             return False
         if set_score_team_a > 15 or set_score_team_b > 15:
             return False
-        if set_score_team_a <= 10 and set_score_team_b <= 10:
+        if set_score_team_a == 15 and set_score_team_b == 15:
             return False
-        if (set_score_team_a == 15) and (set_score_team_b == 14) or \
-            (set_score_team_a == 14) and (set_score_team_b == 15):
+        if set_score_team_a > 11 and (set_score_team_a - set_score_team_b) > 2:
+            return False
+        if set_score_team_b > 11 and (set_score_team_b - set_score_team_a) > 2:
+            return False
+        return True
+
+    def team_a_won(self, score):
+        if score[0] == 11 and (score[0] - score[1]) >= 2:
             return True
-        diff = abs(set_score_team_b - set_score_team_a)
-        if set_score_team_a >= 11 and diff == 2:
+        if score[0] > 11 and (score[0] - score[1]) == 2:
             return True
-        if set_score_team_b >= 11 and diff == 2:
+        if score[0] == 15 and score[1] == 14:
             return True
         return False
+
+    def team_b_won(self, score):
+        return self.team_a_won(list(reversed(score)))
+
+    def set_started(self, score):
+        return score != [0, 0]
 
 
 class Set(models.Model):
@@ -36,29 +55,61 @@ class Set(models.Model):
     points_team_a = ManyToManyField(Point, related_name='points_team_a')
     points_team_b = ManyToManyField(Point, related_name='points_team_b')
 
-    def add_point_team_a(self):
-        pass
+    def add_point_team_a(self, rule):
+        old_score = self.get_score()
+        if rule.validate(old_score[0] + 1, old_score[1]):
+            self.points_team_a.add(Point())
+            return True
+        return False
 
-    def remove_point_team_a(self):
-        pass
+    def remove_point_team_a(self, rule):
+        old_score = self.get_score()
+        if rule.validate(old_score[0] - 1, old_score[1]):
+            p = self.points_team_a.all().sort_by('-create_time')[:1]
+            p.update(canceled=True)
+            return True
+        return False
 
-    def add_point_team_b(self):
-        pass
+    def add_point_team_b(self, rule):
+        old_score = self.get_score()
+        if rule.validate(old_score[0], old_score[1]+1):
+            self.points_team_a.add(Point())
+            return True
+        return False
 
-    def remove_point_team_b(self):
-        pass
+    def remove_point_team_b(self, rule):
+        old_score = self.get_score()
+        if rule.validate(old_score[0], old_score[1]-1):
+            p = self.points_team_a.all().sort_by('-create_time')[:1]
+            p.update(canceled=True)
+            return True
+        return False
 
     def is_started(self):
         return self.points_team_a.filter(canceled=False).count() != 0 or \
                self.points_team_b.filter(canceled=False).count() != 0
 
-    def is_finished(self):
-
+    def is_finished(self, rule):
+        score = self.get_score()
+        if not rule.validate(score[0], score[1]):
+            return False
+        if rule.team_a_won(score):
+            return True
+        if rule.team_b_won(score):
+            return True
         return False
+
+    def set_won_by_team_a(self, rule):
+        score = self.get_score()
+        return rule.team_a_won(score)
+
+    def set_won_by_team_b(self, rule):
+        score = self.get_score()
+        return rule.team_b_won(score)
 
     def get_score(self):
         return [self.points_team_a.filter(canceled=False).count(),
-                self.points_team_b.filter(canceled==False).count()]
+                self.points_team_b.filter(canceled=False).count()]
 
 
 class Game(models.Model):
@@ -76,11 +127,19 @@ class Game(models.Model):
     def __str__(self):
         return '{0} {1} {2}'.format(self.name, self.game_type, '0')
 
-    def is_finished(self):
-        return False
+    def is_finished(self, rule):
+        return self.is_won(rule)
 
-    def is_won(self):
-        # TODO: change that
+    def is_won(self, rule):
+        won_team_a = 0
+        won_team_b = 0
+        for set in self.sets.all():
+            if set.set_won_by_team_a(rule):
+                won_team_a += 1
+            if set.set_won_by_team_b(rule):
+                won_team_b += 1
+        if won_team_a == 2 or won_team_b == 2:
+            return True
         return False
 
     def get_sets(self):

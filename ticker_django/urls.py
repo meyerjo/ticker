@@ -20,8 +20,8 @@ import ticker
 from ticker.views.startpage import start_page
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url('', start_page),
+    url(r'^admin/?', admin.site.urls),
     url(r'^ticker/', include('ticker.urls')),
-    url(r'^api/v1/json/', include('ticker.urls_api'))
+    url(r'^api/v1/json/', include('ticker.urls_api')),
+    url(r'^$', start_page),
 ]
