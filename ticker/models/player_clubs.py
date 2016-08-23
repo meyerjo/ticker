@@ -28,6 +28,9 @@ class Club(models.Model):
     def get_ten_players(self):
         return Player.objects.filter(teamplayerassociation__team__parent_club=self)[:9]
 
+    def get_fields(self):
+        return self.fields.all()
+
 
 class Player(models.Model):
     prename = models.CharField(max_length=255)
@@ -73,6 +76,19 @@ class Team(models.Model):
         teams =  Team.objects.filter(parent_club=self.parent_club).exclude(id=self.id)
         print(teams)
         return teams
+
+    def get_fields_annotated(self):
+        parent_club_fields = self.parent_club.fields.filter(id__in=self.fields.all().values_list('id', flat=True))
+        other_club_fields = self.parent_club.fields.exclude(id__in=self.fields.all().values_list('id', flat=True))
+        result = []
+        for field in parent_club_fields:
+            result.append((field.id, field.get_name(), 1))
+        for field in other_club_fields:
+            result.append((field.id, field.get_name(), 0))
+        return result
+
+    def get_fields(self):
+        return self.fields.all()
 
 
 class TeamPlayerAssociation(models.Model):

@@ -6,7 +6,9 @@ from ticker.models import Match, Game
 
 class Field(models.Model):
     field_name = models.CharField(max_length=255)
-    
+
+    def get_name(self):
+        return self.field_name
 
 class FieldAllocation(models.Model):
     field = models.ForeignKey(Field, CASCADE)

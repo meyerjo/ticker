@@ -131,6 +131,12 @@
             </div>
             <div class="col-sm-3">
                 <h3>Fields</h3>
+                {% for field in team.get_fields_annotated %}
+                    <label for="field_{{ field.0 }}">
+                        {{ field.1 }}
+                    </label>
+                    <input id="field_{{ field.0 }}" name="field_{{ field.0 }}" value="{{ field.2 }}"/>
+                {% endfor %}
                 TODO
             </div>
         </div>

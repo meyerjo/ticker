@@ -68,8 +68,12 @@
                 </div>
                 <div class="col-sm-3">
                     <h3>Fields</h3>
-
                     <ul>
+                            {% for field in details.get_fields %}
+                                <li>
+                                    {{ field.get_name }}
+                                </li>
+                            {% endfor %}
                         <li>
                             <a href="{% url 'manage_fields' details.id %}">Add Fields</a>
                         </li>
@@ -106,7 +110,7 @@
                                         <td>{{ team.id }}</td>
                                         <td>{{ team.team_name }}</td>
                                         <td>{{ team.get_players|length }}</td>
-                                        <td>TODO fields</td>
+                                        <td>{{ team.get_fields|length }}</td>
                                         <td><a href="{% url 'manage_teams_details' team.id %}">Edit</a></td>
                                     </tr>
                                 {% endfor %}
@@ -124,7 +128,7 @@
                                     <input type="text" name="team_name"
                                            value="{{ details.club_name }} {{ details.get_next_team_index }}"/>
                                 </td>
-                                <td>0</td>
+                                <td></td>
                                 <td></td>
                                 <td><button type="submit">Add team</button></td>
                             </tr>
