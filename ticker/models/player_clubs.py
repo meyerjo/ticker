@@ -13,6 +13,20 @@ class Club(models.Model):
     def get_name(self):
         return self.club_name
 
+    def get_associated_profile(self):
+        return Profile.objects.filter(associated_club=self)
+
+    def get_teams(self):
+        return Team.objects.filter(parent_club=self).order_by('team_name')
+
+    def get_next_team_index(self):
+        return Team.objects.filter(parent_club=self).count() + 1
+
+    def get_players(self):
+        return Player.objects.filter(teamplayerassociation__team__parent_club=self)
+
+    def get_ten_players(self):
+        return Player.objects.filter(teamplayerassociation__team__parent_club=self)[:9]
 
 
 class Player(models.Model):
@@ -37,6 +51,7 @@ class Player(models.Model):
 
 
 class Team(models.Model):
+    parent_club = models.ForeignKey(Club, CASCADE, default=1)
     team_name = models.CharField(max_length=255)
     players = models.ManyToManyField(Player)
     fields = models.ManyToManyField('Field')
@@ -50,6 +65,9 @@ class Team(models.Model):
 
     def get_name(self):
         return self.team_name
+
+    def get_players(self):
+        return self.players.all()
 
 
 class TeamPlayerAssociation(models.Model):

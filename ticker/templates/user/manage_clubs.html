@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <form method="post" action="{% url 'club_add' %}" >
+                    {% csrf_token %}
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                                    {{ message }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <table class="table table-bordered table-striped">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Bearbeiten</th>
+                        </tr>
+                        {% for club in clubs %}
+                            {% if club.responsible_profiles|check_if_in_responsible_profiles:request.user%}
+                                <tr class="responsible_club">
+                                    <td>{{ club.id }}</td>
+                                    <td>{{ club.get_name }}</td>
+                                    <td><a href="{% url 'manage_club_details' club.id %}" class="editbutton">Bearbeiten</a></td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td>{{ club.id }}</td>
+                                    <td>{{ club.get_name }}</td>
+                                    <td><a href="{% url 'manage_club_details' club.id %}" class="editbutton">Bearbeiten</a></td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        <tr class="new_row">
+                            <td>TBD</td>
+                            <td>
+                                <input type="text" name="clubname" placeholder="Club Name"/>
+                            </td>
+                            <td>
+                                <button class="addbutton" type="submit">Hinzufuegen</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        </div>
+        {% if details %}
+            <div class="row">
+                <div class="col-sm-12">
+                    <h1>Team-Details: {{ details.get_name }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <h3>Information</h3>
+                    <form method="post" action="{% url 'club_edit' %}">
+                        {% csrf_token %}
+                        <label for="clubname">Club-Name</label>
+                        <input type="text" id="clubname" name="clubname" value="{{ details.get_name }}"/>
+
+                        <input type="hidden" name="clubid" value="{{ details.id }}"/>
+                        <button type="submit">Edit</button>
+                    </form>
+                </div>
+                <div class="col-sm-3">
+                    <h3>Fields</h3>
+
+                    <ul>
+                        <li>
+                            <a href="#">Add Fields</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-sm-3">
+                    <h3>Players</h3>
+                    <ul>
+                        {% for player in details.get_ten_players %}
+                            <li>{{ player.get_name }}</li>
+                        {% endfor %}
+                        <li><a href="#">Manage players</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <h3>Teams</h3>
+                </div>
+                <div class="col-sm-12">
+                    <form method="post" action="{% url 'team_add' details.id %}">
+                        {% csrf_token %}
+                        <table class="table table-responsive table-striped">
+                            <tr>
+                                <th>ID</th>
+                                <th>Teamname</th>
+                                <th>Associated players</th>
+                                <th>Fields</th>
+                                <th>Edit</th>
+                            </tr>
+                            {% if details.get_teams %}
+                                {% for team in details.get_teams %}
+                                    <tr>
+                                        <td>{{ team.id }}</td>
+                                        <td>{{ team.team_name }}</td>
+                                        <td>{{ team.players|length }}</td>
+                                        <td>TODO fields</td>
+                                        <td><a href="{% url 'manage_teams_details' team.id %}">Edit</a></td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5">No teams added yet</td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <td>
+                                    TBD
+                                    <input type="hidden" name="club_id" value="{{ details.id }}"/>
+                                </td>
+                                <td>
+                                    <input type="text" name="team_name"
+                                           value="{{ details.club_name }} {{ details.get_next_team_index }}"/>
+                                </td>
+                                <td>0</td>
+                                <td></td>
+                                <td><button type="submit">Add team</button></td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

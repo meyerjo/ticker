@@ -9,6 +9,7 @@ class Point(models.Model):
     canceled = models.BooleanField(default=False)
     create_time = models.DateTimeField(default=timezone.now())
 
+
 class Rules(models.Model):
     rule_name = models.CharField(max_length=32)
 
@@ -184,5 +185,13 @@ class Match(models.Model):
             else:
                 score_team_b +=1
         return [score_team_a, score_team_b]
+
+    @staticmethod
+    def get_matches():
+        import datetime
+        current_day = datetime.datetime.now().today()
+        matches = Match.objects.filter(canceled=False,
+                                       match_time__day=current_day)
+        return matches
 
 

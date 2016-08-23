@@ -1,11 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="col-sm-6">
-                Test
+    <div class="container">
+        {% for match in matches %}
+            <div class="row-fluid">
+                <div class="col-sm-12">
+                    {{ match.match_time }}
+                </div>
+                <div class="col-sm-4">
+                    {{ match.team_a.get_name }}
+                </div>
+                <div class="col-sm-4">
+                    {{ match.get_score }}
+                </div>
+                <div class="col-sm-4">
+                    {{ match.team_b.get_name }}
+                </div>
             </div>
-        </div>
+        {% endfor %}
     </div>
 {% endblock %}

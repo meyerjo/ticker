@@ -29,8 +29,14 @@
                         <td></td>
                         <td></td>
                         <td>{{ game.get_sets }}</td>
-                        <td></td>
-                        <td></td>
+                        <td>
+                            {% for field in game.get_fields %}
+                                <a href="#TODO" class="fieldname">{{ field.shortform }}</a>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <a href="#EDIT">Edit</a>
+                        </td>
                     </tr>
                 {% endfor %}
             </table>
