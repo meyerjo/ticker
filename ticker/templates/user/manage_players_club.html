@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+{% block extracss %}
+
+    <style>
+    .member {
+        background-color: lightgreen;
+    }
+
+    .nonmember {
+        background-color: lightsalmon;
+    }
+
+    .teamcell a {
+        width: 100%;
+        display: block;
+    }
+
+    </style>
+
+    <script>
+        $(document).ready(function() {
+            $('.teamcell a').on('click', function () {
+                if ($(this).closest('td').hasClass('member')) {
+                    $(this).closest('td').removeClass('member').addClass('nonmember');
+                    $(this).html('<i class="fa fa-ban"></i>');
+                } else {
+                    $(this).closest('td').removeClass('nonmember').addClass('member');
+                    $(this).html('<i class="fa fa-check"></i>');
+                }
+                if ($(this).closest('td').hasClass('changed')) {
+                    $(this).closest('td').removeClass('changed');
+                } else {
+                    $(this).closest('td').addClass('changed');
+                }
+            });
+
+            $('button[name="save_changes"]').on('click', function() {
+                event.preventDefault();
+               var cells = $('td.changed');
+                var array = [];
+                $.each(cells, function(i, cell) {
+                    var playerid = $(cell).data('teamid');
+                    var teamid = $(cell).closest('tr').data('playerid');
+                    var ismember = $(cell).hasClass('member');
+                    array.push(
+                            {'player_id': playerid, 'team_id': teamid, 'is_member': ismember}
+                    );
+                });
+
+                $.ajax({
+                    url: '',
+                    method: 'post',
+                    data: array
+                }).done(function(data) {
+                   console.log(data)
+                });
+            });
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <h1>Manage players for club {{ club.get_name }} (<a href="{% url 'manage_club_details' club.id %}"><i class="fa fa-link"></i></a>)</h1>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                                    {{ message }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <table class="table table-bordered table-striped">
+                        <tr>
+                            <th>Spieler</th>
+                            {% for team in club.get_teams %}
+                                <th>
+                                    {{ team.get_name }}
+                                </th>
+                            {% endfor %}
+                        </tr>
+                        {% for player in club.get_players %}
+                            <tr data-playerid="{{ player.id }}">
+                                <th>{{ player.get_name }}</th>
+                                {% for team in club.get_teams %}
+                                    <td class="{{ team|player_in_team:player }} teamcell" data-teamid="{{ team.id }}">
+                                        <a href="#">{{ team|player_in_team_icon:player|safe }}</a>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                        <tr data-playerid="-1">
+                            <td><a href="#">New player</a></td>
+                                {% for team in club.get_teams %}
+                                    <td class="nonmember teamcell" data-teamid="{{ team.id }}">
+                                        <a href="#"><i class="fa fa-ban"></i></a>
+                                    </td>
+                                {% endfor %}
+                        </tr>
+                        <tr>
+                            <td colspan="{{ club.get_teams|length }}">
+                                <button class="btn btn-success" name="save_changes">Aenderungen uebertragen</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

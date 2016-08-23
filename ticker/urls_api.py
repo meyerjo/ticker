@@ -11,4 +11,8 @@ urlpatterns = [
     url(r'^field/add?$', not_yet_implemented, name='field_add'),
     url(r'^field/([0-9]+)/add/club/([0-9]+)/??$', not_yet_implemented, name='field_add_to_club'),
 
+    url(r'^player/add/?$', add_player, name='player_add'),
+
+    url(r'^player/parse/dynamic/$', player_dynamic, name='player_dynamic'),
+
 ]

@@ -1,5 +1,73 @@
 {% extends 'base.html' %}
 
+{% block extracss %}
+    <style type="text/css">
+        #dynamic_csv_load {
+            width: 100%;
+            min-height: 200px;
+        }
+    </style>
+{% endblock %}
+
+{% block extrajs %}
+    <script type="text/javascript">
+    $(document).ready(function () {
+        function strEndsWith(str, suffix) {
+            return str.match(suffix+"$")==suffix;
+        }
+
+        function parseContent(content) {
+            $.ajax({
+                url: '{% url 'player_dynamic' %}',
+                method: 'get',
+                data: {'dynamic_content': content}
+            }).done(function (data) {
+                var obj = $.parseJSON(data);
+                var tr = $('tr.addrow');
+                $('.generated').remove();
+                for (var i = 0; i < obj.length; i++) {
+                    var clone = $(tr).clone();
+                    $(clone).removeClass('addrow');
+                    $(clone).addClass('generated')
+                    $(clone).find('input[name="prename"]')[0].value = obj[i]['prename'];
+                    $(clone).find('input[name="lastname"]')[0].value = obj[i]['lastname'];
+                    $(clone).find('option[value="' + obj[i]['sex'] + '"]').attr('selected', true);
+
+                    $(tr).before($(clone));
+                }
+                $('tr button').remove();
+                $('tr:last').after(
+                        $('<tr>')
+                                .addClass('generated')
+                                .append(
+                                $('<td>')
+                                        .attr('colspan', '6')
+                                        .attr('style', 'text-align:right;')
+                                        .append(
+                                                $('<button>')
+                                                        .attr('type', 'submit')
+                                                        .addClass('btn btn-success')
+                                                        .html('Alle hinzuefugen')
+                                        )
+
+                        )
+                );
+                // delete the last row
+                $('.addrow input').prop('required', false);
+                $('.addrow select').prop('required', false);
+            });
+        }
+
+        $('#dynamic_csv_load').on('keyup', function () {
+            var content = this.value;
+            if (strEndsWith(content, '\n')) {
+                parseContent(content);
+            }
+        });
+    });
+    </script>
+{% endblock %}
+
 {% block content %}
     <div class="container">
         <div class="row">
@@ -8,9 +76,15 @@
                 <a href="{% url 'manage_club_details' team.parent_club.id %}">Edit parent club</a>
             </div>
             <div class="col-sm-9">
+                <form action="{% url 'player_add' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="club_id" value="{{ team.parent_club.id }}"/>
+                <input type="hidden" name="team_id" value="{{ team.id }}"/>
                 <h3>Players</h3>
                 <table class="table table-striped table-responsive">
                     <tr>
+                        <th></th>
+                        <th>ID</th>
                         <th>Vorname</th>
                         <th>Nachname</th>
                         <th>Geschlecht</th>
@@ -18,25 +92,29 @@
                     </tr>
                     {% for player in team.get_players %}
                     <tr>
+                        <td></td>
+                        <td>{{ player.id }}</td>
                         <td>{{ player.prename }}</td>
                         <td>{{ player.lastname }}</td>
                         <td>
                             {{ player.sex }}
                         </td>
                         <td>
-                            <a href="#">Editieren</a>
+                            <a href="{% url 'manage_players' player.id %}">Editieren</a>
                         </td>
                     </tr>
                     {% endfor %}
-                    <tr>
+                    <tr class="addrow">
+                        <td></td>
+                        <td></td>
                         <td>
-                            <input type="text" name="prename"/>
+                            <input type="text" name="prename" required/>
                         </td>
                         <td>
-                            <input type="text" name="lastname"/>
+                            <input type="text" name="lastname" required/>
                         </td>
                         <td>
-                            <select name="sex">
+                            <select name="sex" required>
                                 {% for sex in possible_sex %}
                                     <option value="{{ sex.0 }}">{{ sex.1 }}</option>
                                 {% endfor %}
@@ -47,10 +125,24 @@
                         </td>
                     </tr>
                 </table>
+                </form>
+                <label for="dynamic_csv_load">Spieler dynamisch hinzufuegen</label>
+                <textarea id="dynamic_csv_load" onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}"></textarea>
             </div>
             <div class="col-sm-3">
                 <h3>Fields</h3>
-
+                TODO
+            </div>
+        </div>
+        <hr/>
+        <div class="row">
+            <div class="col-sm-12">
+                <h2>Other teams of club</h2>
+                <ul class="also_relevant">
+                    {% for t in team.get_other_teams %}
+                        <li><a href="{% url 'manage_teams_details' t.id %}">{{ t.get_name }}</a></li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>

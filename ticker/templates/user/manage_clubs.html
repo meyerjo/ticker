@@ -4,6 +4,7 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12">
+                <h1>Manage clubs</h1>
                 <form method="post" action="{% url 'club_add' %}" >
                     {% csrf_token %}
                     {% if messages %}
@@ -70,7 +71,7 @@
 
                     <ul>
                         <li>
-                            <a href="#">Add Fields</a>
+                            <a href="{% url 'manage_fields' details.id %}">Add Fields</a>
                         </li>
                     </ul>
                 </div>
@@ -80,7 +81,7 @@
                         {% for player in details.get_ten_players %}
                             <li>{{ player.get_name }}</li>
                         {% endfor %}
-                        <li><a href="#">Manage players</a></li>
+                        <li><a href="{% url 'manage_players' details.id %}">Manage players</a></li>
                     </ul>
                 </div>
             </div>
@@ -104,7 +105,7 @@
                                     <tr>
                                         <td>{{ team.id }}</td>
                                         <td>{{ team.team_name }}</td>
-                                        <td>{{ team.players|length }}</td>
+                                        <td>{{ team.get_players|length }}</td>
                                         <td>TODO fields</td>
                                         <td><a href="{% url 'manage_teams_details' team.id %}">Edit</a></td>
                                     </tr>

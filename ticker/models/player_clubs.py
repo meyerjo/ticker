@@ -69,6 +69,11 @@ class Team(models.Model):
     def get_players(self):
         return self.players.all()
 
+    def get_other_teams(self):
+        teams =  Team.objects.filter(parent_club=self.parent_club).exclude(id=self.id)
+        print(teams)
+        return teams
+
 
 class TeamPlayerAssociation(models.Model):
     team = models.ForeignKey(Team, CASCADE)
