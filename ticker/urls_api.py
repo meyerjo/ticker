@@ -13,6 +13,16 @@ urlpatterns = [
 
     url(r'^player/add/?$', add_player, name='player_add'),
 
-    url(r'^player/parse/dynamic/$', player_dynamic, name='player_dynamic'),
+    url(r'^player/parse/dynamic/?$', player_dynamic, name='player_dynamic'),
+
+    url(r'^season/add/?$', add_season, name='add_season'),
+
+    url(r'^season/([0-9]+)/edit/?$', not_yet_implemented, name='edit_season'),
+
+    url(r'^league/add/?$', add_league, name='add_league'),
+
+    url(r'^league/([0-9]+)/edit/?$', edit_league, name='edit_league'),
+
+    url(r'^league/([0-9]+)/dynamic/matchplan/?', not_yet_implemented, name='dynamic_matchplan')
 
 ]

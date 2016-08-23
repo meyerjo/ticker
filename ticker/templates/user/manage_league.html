@@ -4,8 +4,106 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12">
-                <h1>TODO leagues</h1>
+                <h1>Leagues</h1>
+                <form action="{% url 'add_league' %}" method="post">
+                    {% csrf_token %}
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Teams</th>
+                        <th>Season</th>
+                        <th>#matches</th>
+                        <th>Edit</th>
+                    </tr>
+                    {% for league in leagues %}
+                        <tr>
+                            <td>{{ league.id }}</td>
+                            <td>{{ league.get_name }}</td>
+                            <td>
+                                <ul>
+                                    {% for team in league.get_teams_in_league %}
+                                        <li>{{ team.get_name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>
+                                {{ league.get_season.get_name }}
+                            </td>
+                            <td>
+                                {{ league.get_matches_in_league|length }}
+                            </td>
+                            <td>
+                                <a href="{% url 'manage_league_details' league.id %}">Edit</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td></td>
+                        <td>
+                            <input name="league_name" type="text"/>
+                        </td>
+                        <td>
+                            <select name="teams" multiple>
+                                {% for team in teams %}
+                                    <option value="{{ team.id }}">{{ team.get_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <select name="season">
+                                {% for season in seasons %}
+                                    <option value="{{ season.id }}">{{ season.get_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td></td>
+                        <td><button class="btn btn-success" type="submit">Add</button></td>
+                    </tr>
+                </table>
+                </form>
             </div>
+            {% if league %}
+                <div class="col-sm-12">
+                    <h3>Details: {{ league.get_name }}</h3>
+                </div>
+                <form action="{% url 'edit_league' league.id %}" method="post">
+                {% csrf_token %}
+                <div class="col-sm-6">
+                    <input type="hidden" value="{{ league.id }}" name="league_id"/>
+                    <label for="league_name">Leaguename</label>
+                    <input type="text" id="league_name" name="details_league_name" value="{{ league.get_name }}"/>
+                    <label for="season_name">Season:</label>
+                    <select id="season_name" name="details_season_name">
+                        {% for season in seasons %}
+                            {% if season.id == league.get_season.id %}
+                                <option value="{{ season.id }}" selected>{{ season.get_name }}</option>
+                            {% else %}
+                                <option value="{{ season.id }}">{{ season.get_name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-6">
+                    <ul class="teamlist">
+                        {% for team in league.get_all_possible_teams  %}
+                            <li>
+                                <label for="team_{{ team.0 }}">
+                                <input type="checkbox" value="{{ team.0 }}"
+                                       name="team" id="team_{{ team.0 }}"
+                                {% if team.2 %}
+                                        checked
+                                {% endif %}
+                                />{{ team.1 }}</label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-sm-12">
+                    <button type="submit" class="btn btn-success">Update</button>
+                </div>
+                </form>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

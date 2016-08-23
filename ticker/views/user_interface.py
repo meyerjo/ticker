@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from ticker.models import Club, Team, Player
+from ticker.models import Club, Team, Player, Season, League
 
 
 def manage_clubs(request):
@@ -28,11 +28,25 @@ def manage_fields(request, clubid):
     return render(request, 'user/manage_fields.html', dict(club=club))
 
 
-def manage_season(request):
-    context = dict()
+def manage_season(request, season_id=None):
+    season = Season.objects.get(id=season_id) if season_id is not None else None
+    context = dict(seasons=Season.get_seasons(), season=season)
     return render(request, 'user/manage_season.html', context)
 
 
-def manage_league(request):
-    context = dict()
+def manage_league(request, league_id=None):
+    if league_id is not None:
+        league = League.objects.get(id=league_id)
+    else:
+        league = None
+    context = dict(leagues=League.objects.all(),
+                   teams=Team.objects.all(),
+                   seasons=Season.objects.filter(active=True),
+                   league=league
+                   )
     return render(request, 'user/manage_league.html', context)
+
+
+def manage_dashboard(request):
+    context = dict()
+    return render(request, 'user/manage_dashboard.html', context)

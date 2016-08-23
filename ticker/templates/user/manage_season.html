@@ -1,11 +1,103 @@
 {% extends 'base.html' %}
 {% load custom_tags %}
+{% block extrajs %}
+<script type="text/javascript">
+$(document).ready(function () {
+    $('.datepicker').datepicker();
+
+
+    {% if season %}
+        $('#season_start_date div').datepicker({
+            format: 'dd.mm.yyyy'
+            //startDate: {{ season.start_date|get_date_string }}
+        });
+
+        $('#season_end_date').datepicker({
+            format: 'dd.mm.yyyy',
+            // startDate: {{ season.end_date|get_date_string }}
+        });
+
+    {% endif %}
+})
+</script>
+{% endblock %}
+
 {% block content %}
     <div class="container">
         <div class="row">
             <div class="col-sm-12">
-                <h1>TODO season</h1>
+                <h1>Season</h1>
+                <form action="{% url 'add_season' %}" method="post">
+                    {% csrf_token %}
+                <table class="table table-responsive table-striped">
+                    <tr>
+                        <th>ID</th>
+                        <th>Saisonname</th>
+                        <th>Start-Date</th>
+                        <th>End-Date</th>
+                        <th>#Assoziierte Ligen</th>
+                        <th>Editieren</th>
+                    </tr>
+                    {% for season in seasons %}
+                        <tr class="{{ season|is_current_season_class }}">
+                            <td>{{ season.id }}</td>
+                            <td>{{ season.get_name }}</td>
+                            <td>{{ season.start_date }}</td>
+                            <td>{{ season.end_date }}</td>
+                            <td>{{ season.get_leagues|length }}</td>
+                            <td><a href="{% url 'manage_season' season.id %}">Edit</a></td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td></td>
+                        <td>
+                            <input type="text" name="season_name" required/>
+                        </td>
+                        <td>
+                            <input class="datepicker" data-date-format="dd.mm.yyyy" name="start_date"/>
+                        </td>
+                        <td>
+                            <input class="datepicker" data-date-format="dd.mm.yyyy" name="end_date"/>
+                        </td>
+                        <td>
+                            <label for="edit_afterwards">Danach bearbeiten</label>
+                            <input type="checkbox" name="edit_afterwards" id="edit_afterwards"/>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" >
+                            <button class="btn btn-success" type="submit" style="float:right">Hinzufuegen</button>
+                        </td>
+                    </tr>
+                </table>
+                </form>
             </div>
+            {% if season %}
+                <div class="col-sm-12">
+                    <h3>{{ season.get_name }}</h3>
+                    <label for="season_name">Seasonname</label>
+                    <input type="text" id="season_name" name="update_season_name" value="{{ season.get_name }}"/>
+                </div>
+                <div class="col-sm-6">
+                    <h4>Startdate (TODO)</h4>
+                    <div id="season_start_date">
+                        <div></div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <h4>Enddate (TODO)</h4>
+                    <div id="season_end_date"></div>
+                </div>
+                <div class="col-sm-12">
+                    <h4>Related seasons</h4>
+                    <ul class="leaguelist">
+                        {% for league in season.get_leagues %}
+                            <li><a href="{% url 'manage_league_details' league.id %}">{{ league.get_name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

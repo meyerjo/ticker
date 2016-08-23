@@ -18,6 +18,10 @@ urlpatterns = [
 
     url(r'^manage/fields/([0-9]+)/?$', manage_fields, name='manage_fields'),
     url(r'^manage/league/?$', manage_league, name='manage_league'),
+    url(r'^manage/league/([0-9]+)/?$', manage_league, name='manage_league_details'),
     url(r'^manage/season/?$', manage_season, name='manage_season'),
+    url(r'^manage/season/([0-9]+)/?$', manage_season, name='manage_season'),
+    url(r'^manage/?$', manage_dashboard, name='manage_dashboard'),
+
     url('', start_page),
 ]

@@ -12,3 +12,16 @@ ul.also_relevant li a {
 
 }
 
+ul.teamlist {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+   label {
+       display: block;
+       color: WindowText;
+       background-color: Window;
+       margin: 0;
+       padding: 0;
+       width: 100%; }

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load custom_tags %}
+
 {% block content %}
     <div class="container">
         <div class="row">
@@ -15,20 +15,11 @@
                 {% endif %}
             </div>
             <div class="col-sm-12">
-                <h1>TODO fields for club {{ club.get_name }}</h1>
-                <table class="table table-striped table-bordered">
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                    {% for field in club.get_fields %}
-                        <td colspan="4">
-                            TODO {{ field }}
-                        </td>
-                    {% endfor %}
-                </table>
+                <ul>
+                    <li><a href="{% url 'manage_clubs' %}">Manage Clubs</a></li>
+                    <li><a href="{% url 'manage_season' %}">Manage Season</a></li>
+                    <li><a href="{% url 'manage_league' %}">Manage League</a></li>
+                </ul>
             </div>
         </div>
     </div>

@@ -2,11 +2,11 @@ import json
 
 import datetime
 from django.contrib import messages
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import reverse, reverse_lazy, resolve
 from django.db import transaction
 from django.http import HttpResponse
 
-from ticker.models import Club, Team
+from ticker.models import Club, Team, Season, League
 from django.http import HttpResponseRedirect
 
 from ticker.models import Player
@@ -152,5 +152,69 @@ def player_dynamic(request):
     return HttpResponse(json.dumps(persons))
 
 
-def not_yet_implemented():
-    return HttpResponse('not yet implemented')
+def add_season(request):
+    dic = request.POST
+    with transaction.atomic():
+        season_name = dic['season_name']
+        start_date = datetime.datetime.strptime(dic['start_date'], '%d.%m.%Y')
+        end_date = datetime.datetime.strptime(dic['end_date'], '%d.%m.%Y')
+
+        if start_date > end_date:
+            messages.error(request, 'Startdatum muss vor dem Enddatum liegen')
+        else:
+            s = Season(season_name=season_name, start_date=start_date, end_date=end_date)
+            s.save()
+            messages.info(request, 'Erfolgreich Saison hinzugefuegt')
+
+    edit_afterwards = 'edit_afterwards' in dic
+
+    return HttpResponseRedirect(reverse('manage_season'))
+
+
+def add_league(request):
+    dic = request.POST
+    with transaction.atomic():
+        league_name = dic['league_name']
+        season_id = dic['season']
+        teams = request.POST.getlist('teams')
+        teams = Team.objects.filter(id__in=teams)
+        season = Season.objects.get(id=season_id)
+
+        with transaction.atomic():
+            l = League(associated_season=season,
+                       name=league_name)
+            l.save()
+            l.teams.add(*teams)
+
+            messages.info(request, 'Added new season')
+
+    return HttpResponseRedirect(reverse('manage_league'))
+
+
+def edit_league(request, league_id):
+    dic = request.POST
+    with transaction.atomic():
+        print(request.POST)
+        league_name = dic['details_league_name']
+        season_id = int(dic['details_season_name'])
+        league_id = int(league_id)
+        team_ids = request.POST.getlist('team')
+        teams = Team.objects.filter(id__in=team_ids)
+
+        l = League.objects.get(id=league_id)
+        if l.get_name() != league_name:
+            l.name = league_name
+        if l.associated_season.id != season_id:
+            l.associated_season.id = season_id
+        l.teams.remove()
+        l.teams.add(*teams)
+    return HttpResponseRedirect(reverse_lazy('manage_league_details', args=[league_id]))
+
+
+def not_yet_implemented(request, *args):
+    return HttpResponse('NOT YET IMPLEMENTED<br/>'
+                        'RouteName: {0}<br/>'
+                        'Args: {1}<br/>'.format(
+        resolve(request.path_info).url_name,
+        json.dumps(args)
+    ))

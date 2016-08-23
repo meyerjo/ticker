@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from ticker.models.matchstructure import Match
 from ticker.models.player_clubs import Team
@@ -6,7 +7,7 @@ from ticker.models.player_clubs import Team
 
 class League(models.Model):
     name = models.CharField(max_length=255)
-
+    associated_season = models.ForeignKey('Season')
     teams = models.ManyToManyField(Team)
 
     matches = models.ManyToManyField(Match)
@@ -29,9 +30,52 @@ class League(models.Model):
         return True
 
     def get_table(self):
-        pass
+        return self.teams.all()
+
+    def get_name(self):
+        return self.name
+
+    def get_season(self):
+        return self.associated_season
+
+    def get_teams_in_league(self):
+        return self.teams.all()
+
+    def get_matches_in_league(self):
+        return self.matches.filter(canceled=False)
+
+    def get_all_possible_teams(self):
+        teams_not_in_league = Team.objects.exclude(id__in=self.teams.values_list('id', flat=True))
+        result = []
+        for team in self.teams.all():
+            result.append(
+                (team.id, team.get_name(), True)
+            )
+        for team in teams_not_in_league:
+            result.append(
+                (team.id, team.get_name(), False)
+            )
+        return result
+
 
 class Season(models.Model):
     season_name = models.CharField(max_length=255)
+    start_date = models.DateTimeField(default=timezone.now())
+    end_date = models.DateTimeField(default=timezone.now())
+    active = models.BooleanField(default=True)
 
-    leagues = models.ManyToManyField(League)
+    @staticmethod
+    def get_seasons():
+        return Season.objects.filter(
+            active=True
+        )
+
+    def season_is_on(self):
+        now_date = timezone.now()
+        return (now_date >= self.start_date) and (now_date <= self.end_date)
+
+    def get_name(self):
+        return self.season_name
+
+    def get_leagues(self):
+        return League.objects.filter(associated_season=self)

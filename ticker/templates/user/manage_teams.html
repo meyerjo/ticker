@@ -97,7 +97,7 @@
                         <td>{{ player.prename }}</td>
                         <td>{{ player.lastname }}</td>
                         <td>
-                            {{ player.sex }}
+                            <i class="fa fa-{{ player.sex }}"></i>({{ player.sex }})
                         </td>
                         <td>
                             <a href="{% url 'manage_players' player.id %}">Editieren</a>
