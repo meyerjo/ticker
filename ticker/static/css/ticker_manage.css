@@ -1,0 +1,14 @@
+ul.also_relevant {
+    list-style: none;
+}
+
+ul.also_relevant li {
+    float:left;
+    margin: 10px;
+    border-radius: 3px;
+}
+
+ul.also_relevant li a {
+
+}
+
