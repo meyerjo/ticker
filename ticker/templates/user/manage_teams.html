@@ -10,11 +10,42 @@
             <div class="col-sm-9">
                 <h3>Players</h3>
                 <table class="table table-striped table-responsive">
+                    <tr>
+                        <th>Vorname</th>
+                        <th>Nachname</th>
+                        <th>Geschlecht</th>
+                        <th>Editieren</th>
+                    </tr>
                     {% for player in team.get_players %}
                     <tr>
-                        <td>{{ player }}</td>
+                        <td>{{ player.prename }}</td>
+                        <td>{{ player.lastname }}</td>
+                        <td>
+                            {{ player.sex }}
+                        </td>
+                        <td>
+                            <a href="#">Editieren</a>
+                        </td>
                     </tr>
                     {% endfor %}
+                    <tr>
+                        <td>
+                            <input type="text" name="prename"/>
+                        </td>
+                        <td>
+                            <input type="text" name="lastname"/>
+                        </td>
+                        <td>
+                            <select name="sex">
+                                {% for sex in possible_sex %}
+                                    <option value="{{ sex.0 }}">{{ sex.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <button type="submit">Hinzufuegen</button>
+                        </td>
+                    </tr>
                 </table>
             </div>
             <div class="col-sm-3">

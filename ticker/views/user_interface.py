@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from ticker.models import Club, Team
+from ticker.models import Club, Team, Player
 
 
 def manage_clubs(request):
@@ -15,4 +15,4 @@ def manage_club_details(request, clubid):
 
 def manage_team_details(request, teamid):
     teams = Team.objects.filter(id=int(teamid)).first()
-    return render(request, 'user/manage_teams.html', dict(team=teams))
+    return render(request, 'user/manage_teams.html', dict(team=teams, possible_sex=Player.possible_sex))
