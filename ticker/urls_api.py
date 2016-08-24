@@ -23,6 +23,6 @@ urlpatterns = [
 
     url(r'^league/([0-9]+)/edit/?$', edit_league, name='edit_league'),
 
-    url(r'^league/([0-9]+)/dynamic/matchplan/?', not_yet_implemented, name='dynamic_matchplan')
+    url(r'^league/dynamic/matchplan/?', dynamic_matchplan, name='dynamic_matchplan')
 
 ]

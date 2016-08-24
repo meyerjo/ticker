@@ -1,6 +1,8 @@
 import json
 
 import datetime
+import re
+
 from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy, resolve
 from django.db import transaction
@@ -209,6 +211,25 @@ def edit_league(request, league_id):
         l.teams.remove()
         l.teams.add(*teams)
     return HttpResponseRedirect(reverse_lazy('manage_league_details', args=[league_id]))
+
+
+def dynamic_matchplan(request):
+    content = request.GET['dynamic_content']
+    lines = content.split('\n')
+    result = []
+    format_1_regex = re.compile(r'^.*([0-9]{2}.[0-9]{2}.[0-9]{4} [0-9]{2}:[0-9]{2})'
+                                r'\t.*\t.*\t.*\t(.*)\t-\t([^\t]*)\t*.*')
+
+    for line in lines:
+        if format_1_regex.match(line):
+            matches = format_1_regex.match(line)
+            result.append(dict(
+                datetime=matches.group(1),
+                team_a=matches.group(2),
+                team_b=matches.group(3)
+            ))
+
+    return HttpResponse(json.dumps(result))
 
 
 def not_yet_implemented(request, *args):
