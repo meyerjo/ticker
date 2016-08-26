@@ -11,6 +11,8 @@ from django.http import HttpResponse
 from ticker.models import Club, Team, Season, League
 from django.http import HttpResponseRedirect
 
+from ticker.models import Game
+from ticker.models import Match
 from ticker.models import Player
 from ticker.models import TeamPlayerAssociation
 
@@ -168,8 +170,6 @@ def add_season(request):
             s.save()
             messages.info(request, 'Erfolgreich Saison hinzugefuegt')
 
-    edit_afterwards = 'edit_afterwards' in dic
-
     return HttpResponseRedirect(reverse('manage_season'))
 
 
@@ -223,13 +223,224 @@ def dynamic_matchplan(request):
     for line in lines:
         if format_1_regex.match(line):
             matches = format_1_regex.match(line)
+            tmp_dt = matches.group(1)
+            tmp_d = re.match(r'[0-9]{2}.[0-9]{2}.[0-9]{4}', tmp_dt).group(0)
+            tmp_t = re.match('^.*(\d{2}:\d{2}).*$', tmp_dt).group(1)
             result.append(dict(
-                datetime=matches.group(1),
+                date=tmp_d,
+                time=tmp_t,
                 team_a=matches.group(2),
                 team_b=matches.group(3)
             ))
-
     return HttpResponse(json.dumps(result))
+
+def exists_team(request):
+    def levenshteinDistance(s1, s2):
+        if len(s1) > len(s2):
+            s1, s2 = s2, s1
+
+        distances = range(len(s1) + 1)
+        for i2, c2 in enumerate(s2):
+            distances_ = [i2 + 1]
+            for i1, c1 in enumerate(s1):
+                if c1 == c2:
+                    distances_.append(distances[i1])
+                else:
+                    distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
+            distances = distances_
+        return distances[-1]
+
+    requested_name = request.GET['teamname']
+    t = Team.objects.all().values_list('team_name', flat=True)
+
+    candidates = []
+    import sys
+    best_dist = sys.maxsize
+    best_non_threshold_candidate = None
+    for tmp_name in t:
+        dist = levenshteinDistance(tmp_name, requested_name)
+        if dist == 0:
+            return HttpResponse('OK')
+        if dist <= best_dist:
+            best_dist =dist
+            best_non_threshold_candidate = tmp_name
+        if dist <=5:
+            candidates.append(tmp_name)
+    if len(candidates) == 0:
+        # if less than half of the words has to be rewritten
+        if best_dist < len(requested_name) / 2:
+            candidates.append(best_non_threshold_candidate)
+            return HttpResponse('BESTFIT {0}'.format(candidates))
+
+
+    if len(candidates) == 0:
+        return HttpResponse('NONE')
+    if len(candidates) > 1:
+        return HttpResponse('MULTIPLE {0}'.format(candidates))
+    return HttpResponse('OK')
+
+
+def add_team_club(request):
+    print(request.GET)
+
+    team_name = request.GET['team_name']
+    if Team.objects.filter(team_name=team_name).first() is not None:
+        return HttpResponse('EXISTS')
+    import re
+    m = re.match('(.*)\d+$', team_name)
+    if m:
+        team_name_without_number = m.group(1).strip(' ')
+    else:
+        team_name_without_number = team_name
+    if 'league_id' in request.GET:
+        league = League.objects.filter(id=request.GET['league_id']).first()
+    else:
+        league = None
+
+    c = Club.objects.filter(club_name=team_name_without_number)
+    if c.exists():
+        if c.count() == 1:
+            c = c.first()
+            # handle the case that the club exists but not the teamnaem
+            with transaction.atomic():
+                t = Team(team_name=team_name, parent_club=c)
+                t.save()
+                # add team to the league
+                if league:
+                    league.teams.add(t)
+                return HttpResponse('OK')
+        else:
+            return HttpResponse('MULTIPLE CLUBS')
+    else:
+        with transaction.atomic():
+            c = Club(club_name=team_name_without_number)
+            c.save()
+            t = Team(team_name=team_name, parent_club=c)
+            t.save()
+            if league:
+                league.teams.add(t)
+            return HttpResponse('OK')
+
+
+def add_match(request, league_id, response_type=None):
+    print(request.GET)
+    date = request.GET['match_date']
+    time = request.GET['match_time']
+    team_a = request.GET['team_a']
+    team_b = request.GET['team_b']
+    submit_button = None
+    response_type = None if response_type == '/' or response_type == '' else response_type
+
+    try:
+        dt = datetime.datetime.strptime('{0} {1}'.format(date, time), '%d.%m.%Y %H:%M')
+    except BaseException as be:
+        messages.error(request, 'Could not parse the given datetime')
+        return HttpResponse('DATEFORMAT')
+    team_a = Team.objects.filter(team_name=team_a).first()
+    team_b = Team.objects.filter(team_name=team_b).first()
+    if team_a is None or team_b is None:
+        messages.error(request, 'One of the requested teams did not exist')
+        return HttpResponse('TEAMEXISTENCE')
+    league = League.objects.filter(id=league_id).first()
+    if league is None:
+        messages.error(request, 'Requested league does not eist')
+        return HttpResponse('LEAGUEEXISTENCE')
+
+    if league.teams.filter(id__in=[team_a.id, team_b.id]).count() != 2:
+        messages.warning(request, 'Did not find both teams in the league.')
+        return HttpResponse('LEAGUEASSOCIATION')
+
+    print(dt, team_a.get_name(), team_b.get_name(), league.get_name())
+    with transaction.atomic():
+        m = Match(match_date=dt,
+                  team_a=team_a,
+                  team_b=team_b)
+        m.save()
+    return HttpResponse('OK')
+
+def add_matches(request, league_id, response_type):
+    return not_yet_implemented(request, [league_id, response_type])
+
+def save_lineup(request, matchid, response_type):
+    match = Match.objects.get(id=matchid)
+    response_type = None if response_type == '/' or response_type == '' else response_type
+    req_dict = request.GET
+    print(req_dict)
+    print(request.POST)
+
+    data_dict = dict()
+    player_game_counter = dict()
+    for game in request.POST.getlist('game_id'):
+        # these are the data fields expected
+        data_fields = ['player_a_one_{0}'.format(game),
+                       'player_a_two_{0}'.format(game),
+                       'player_b_one_{0}'.format(game),
+                       'player_b_two_{0}'.format(game)]
+        data_dict[game] = dict(player_a=[], player_b=[])
+        # iterated over all expected data fields
+        for field in data_fields:
+            if field in request.POST:
+                tmp = request.POST[field]
+                # count the amount of games
+                if tmp in player_game_counter:
+                    player_game_counter[tmp] += 1
+                else:
+                    player_game_counter[tmp] = 1
+                # data dit
+                if '_a_' in field:
+                    data_dict[game]['player_a'].append(tmp)
+                else:
+                    data_dict[game]['player_b'].append(tmp)
+
+    player_violating = []
+    for player, counter in player_game_counter.items():
+        print(player, counter)
+        if counter > 2:
+            player_violating.append(player)
+    if len(player_violating) != 0:
+        if response_type is None:
+            p = Player.objects.filter(id__in=player_violating)
+            messages.error(request, 'Players: {0} have too many games'.format(p))
+            return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[matchid]))
+        else:
+            return HttpResponse('TOOMANYGAMES')
+
+    player_twice_in_same_game_type = []
+    gametype_player_counter = dict()
+    for gameid, players in data_dict.items():
+        g = Game.objects.get(id=gameid)
+        if g.game_type not in gametype_player_counter:
+            gametype_player_counter[g.game_type] = dict()
+        for key, val in players.items():
+            for v in val:
+                if v in gametype_player_counter[g.game_type]:
+                    gametype_player_counter[g.game_type][v] += 1
+                    player_twice_in_same_game_type.append(v)
+                    print(player_twice_in_same_game_type)
+                else:
+                    gametype_player_counter[g.game_type][v] = 1
+    if len(player_twice_in_same_game_type) != 0:
+        if response_type is None:
+            p = Player.objects.filter(id__in=player_twice_in_same_game_type)
+            messages.error(request, 'Players {0} are used twice in the same game type'.format(p))
+            return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[matchid]))
+        return HttpResponse('TWICE-IN-SAME-GAME-TYPE')
+
+    with transaction.atomic():
+        for gameid, players in data_dict.items():
+            g = Game.objects.get(id=gameid)
+            player_team_a = Player.objects.filter(id__in=players['player_a'])
+            player_team_b = Player.objects.filter(id__in=players['player_b'])
+            g.player_a.remove()
+            g.player_a.add(*player_team_a)
+            g.player_b.remove()
+            g.player_b.add(*player_team_b)
+
+
+    if response_type is None:
+        return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[matchid]))
+
+    return HttpResponse('OK')
 
 
 def not_yet_implemented(request, *args):

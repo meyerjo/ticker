@@ -1,7 +1,12 @@
 from django.contrib import admin
 
 # Register your models here.
+from ticker.models import Club
+from ticker.models import Game
+from ticker.models import Match
 from ticker.models import Player
+from ticker.models import Rules
+from ticker.models import Set
 from ticker.models import Team
 
 
@@ -16,3 +21,29 @@ class TeamAdmin(admin.ModelAdmin):
     list_editable = ['team_name']
 
 admin.site.register(Team, TeamAdmin)
+
+
+class MatchAdmin(admin.ModelAdmin):
+    list_display =  ['id', 'match_time', 'team_a', 'team_b', 'get_score']
+
+admin.site.register(Match, MatchAdmin)
+
+class GameAdmin(admin.ModelAdmin):
+    list_display = ['id',  'name',  'game_type', 'get_sets']
+
+admin.site.register(Game, GameAdmin)
+
+class SetAdmin(admin.ModelAdmin):
+    list_display = ['id', 'set_number', 'get_score']
+
+admin.site.register(Set, SetAdmin)
+
+class RuleAdmin(admin.ModelAdmin):
+    list_display = ['id', 'rule_name']
+    list_editable = ['id', 'rule_name']
+
+admin.site.register(Rules, RuleAdmin)
+
+class ClubAdmin(admin.ModelAdmin):
+    list_display = ['id', 'club_name']
+admin.site.register(Club, ClubAdmin)

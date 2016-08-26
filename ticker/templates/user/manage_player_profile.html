@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                {% if player %}
+                    <form method="post" action="TODO">
+                    {% csrf_token %}
+                        <div class="form-control">
+                            <label for="prename">
+                                <input name="prename" type="text" id="prename" value="{{ player.prename }}"/>
+                            </label>
+                        </div>
+                        <div class="form-control">
+                            <label for="lastname">
+                                <input name="lastname" type="text" id="lastname" value="{{ player.lastname }}"/>
+                            </label>
+                        </div>
+                    </form>
+                {% else %}
+                    <h2>Player does not exist</h2>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

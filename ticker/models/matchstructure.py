@@ -1,4 +1,5 @@
 from django.db import models
+from django.db import transaction
 from django.db.models import ManyToManyField
 from django.utils import timezone
 
@@ -7,7 +8,12 @@ from ticker.models.player_clubs import Player, Team
 
 class Point(models.Model):
     canceled = models.BooleanField(default=False)
-    create_time = models.DateTimeField(default=timezone.now())
+    create_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Point {0}'.format(
+            '' if not self.canceled else '(canceled)'
+        )
 
 
 class Rules(models.Model):
@@ -50,11 +56,14 @@ class Rules(models.Model):
     def set_started(self, score):
         return score != [0, 0]
 
+    def __str__(self):
+        return self.rule_name
+
 
 class Set(models.Model):
     set_number = models.IntegerField(default=1)
-    points_team_a = ManyToManyField(Point, related_name='points_team_a')
-    points_team_b = ManyToManyField(Point, related_name='points_team_b')
+    points_team_a = ManyToManyField(Point, related_name='points_team_a', blank=True)
+    points_team_b = ManyToManyField(Point, related_name='points_team_b', blank=True)
 
     def add_point_team_a(self, rule):
         old_score = self.get_score()
@@ -112,14 +121,18 @@ class Set(models.Model):
         return [self.points_team_a.filter(canceled=False).count(),
                 self.points_team_b.filter(canceled=False).count()]
 
+    def __str__(self):
+        return 'Set {0} ({1})'.format(self.set_number, ':'.join(map(str,self.get_score())))
+
 
 class Game(models.Model):
     name = models.CharField(max_length=64)
-    player_a = ManyToManyField(Player, related_name='player_a')
-    player_b = ManyToManyField(Player, related_name='player_b')
+    player_a = ManyToManyField(Player, related_name='player_a', blank=True)
+    player_b = ManyToManyField(Player, related_name='player_b', blank=True)
 
-    sets = ManyToManyField(Set)
-    game_types = (('single', 'Einzel'),
+    sets = ManyToManyField(Set, blank=True)
+    game_types = (('single', 'Herreneinzel'),
+                  ('womansingle', 'Dameneinzel'),
                   ('men_double', 'Herrendoppel'),
                   ('women_double', 'Frauendoppel'),
                   ('mixed', 'Mixed'))
@@ -147,10 +160,24 @@ class Game(models.Model):
         sets = self.sets.all()
         if len(sets) != 5:
             return 'error'
-        sets = []
+        all_sets = []
         for set in sets:
-            sets.append(':'.join(set.get_score()))
-        return ' '.join(sets)
+            tmp_score = set.get_score()
+            tmp_score_str = ':'.join(map(str, tmp_score))
+            all_sets.append(tmp_score_str)
+        return ' '.join(all_sets)
+
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        super(Game, self).save(force_insert, force_update, using, update_fields)
+        if self.sets.count() == 0:
+            with transaction.atomic():
+                for i in range(0, 5):
+                    set = Set(set_number=i+1)
+                    set.save()
+                    self.sets.add(set)
+
 
 
 class Match(models.Model):
@@ -160,7 +187,28 @@ class Match(models.Model):
     rule = models.ForeignKey(Rules)
     team_a = models.ForeignKey(Team, related_name='team_a')
     team_b = models.ForeignKey(Team, related_name='team_b')
-    games = ManyToManyField(Game)
+    games = ManyToManyField(Game, blank=True, null=True)
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        super(Match, self).save(force_insert, force_update, using, update_fields)
+        if self.games.count() == 0:
+            games_dict = [
+                dict(games_name='1. Herreneinzel', games_type='single'),
+                dict(games_name='2. Herreneinzel', games_type='single'),
+                dict(games_name='Dameneinzel', games_type='womansingle'),
+                dict(games_name='1. Herrendoppel', games_type='men_double'),
+                dict(games_name='2. Herrendoppel', games_type='men_double'),
+                dict(games_name='Gemischtes Doppel', games_type='mixed'),
+                dict(games_name='Damendoppel', games_type='women_double'),
+            ]
+            with transaction.atomic():
+                for tmp_dict in games_dict:
+                    g = Game(game_type=tmp_dict['games_type'],
+                             name=tmp_dict['games_name'])
+                    g.save()
+                    self.games.add(g)
+
 
     @staticmethod
     def all_matches():
@@ -168,7 +216,7 @@ class Match(models.Model):
         return matches
 
     def get_all_games(self):
-        return self.objects.games()
+        return self.games.all()
 
     def get_team_names(self):
         return [self.team_a.get_name(), self.team_b.get_name()]
@@ -178,7 +226,7 @@ class Match(models.Model):
         score_team_a = 0
         score_team_b = 0
         for game in games:
-            if not game.is_finished():
+            if not game.is_finished(self.rule):
                 continue
             if game.is_won():
                 score_team_a +=1

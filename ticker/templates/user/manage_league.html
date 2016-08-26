@@ -3,10 +3,82 @@
 {% block extrajs %}
     <script type="text/javascript">
         $(document).ready(function () {
-
             function strEndsWith(str, suffix) {
                 return str.match(suffix+"$")==suffix;
             }
+
+            function request_team_name_ajax(element) {
+                $.ajax({
+                    url: '{% url 'exists_team' %}',
+                    method: 'get',
+                    data: {'teamname': $(element).val()}
+                }).done(function (data) {
+                    if (data != 'OK') {
+                        if (data == 'NONE') {
+                            $(element).closest('td').find('div.exists').html('<button class="btn btn-success addteamclub"><i class="fa fa-ban"></i></button>');
+                            {# TODO move this so that we don't have to send each request million times #}
+                            $('button.addteamclub').on('click', function () {
+                                event.preventDefault();
+                                var team_name = $(this).closest('td').find('input[name^="team_"]').val();
+                                var league_id = $('input[name="league_id"]').val();
+                                $.ajax({
+                                    url: '{% url 'add_team_club_json' %}',
+                                    method: 'get',
+                                    data: {
+                                        'team_name': team_name,
+                                        'league_id': league_id
+                                    }
+                                }).done(function (data) {
+                                    console.log(data);
+                                    if (data == 'OK') {
+                                        $(this).closest('td').find('div.exists').html()
+                                        console.log(team_name)
+                                        var old_element = $(this).closest('td').find('input[name^="load_team_"]');
+                                        $.each($('input[name^="load_team_"]'), function(i, item) {
+                                           if ($(old_element).val() ==  $(item).val()) {
+                                                $(item).closest('td').find('input[name^="team_"]').val(team_name)
+                                               console.log('test')
+                                           }
+                                        });
+                                    }
+                                })
+                            })
+                        } else {
+                            // TODO: multiple create select field
+                            $(element).closest('td').find('div.exists').html(data);
+                        }
+                    } else {
+                        $(element).closest('td').find('div.exists').html('');
+
+                        // push the new value to all the old values
+                        var init_value = $(element).closest('td').find('input[name^="load_team_"]')[0].value;
+                        if ($(element).value != init_value) {
+                            // get all fields with the same initial value
+                            var elements = $('input[name^="load_team_"][value="' + init_value + '"]');
+
+                            $.each(elements, function(i, iter_element) {
+                                // get the corresponding 'real' input field
+                                var team_element = $(iter_element).closest('td').find('input[name^="team_"]')[0];
+                                // check if they mismatch
+                                if (team_element.value != $(element).val()) {
+                                    console.log('replace it');
+                                    $(team_element).val($(element).val());
+                                    // TODO: empty the remarks field
+                                    $(iter_element).closest('td').find('div.exists').html('');
+                                }
+                            })
+                        }
+                    }
+                });
+            }
+
+            function validateTeams() {
+                var elements = $('.generated input[name^="team_"]');
+                $.each(elements, function(i, element) {
+                    request_team_name_ajax(element);
+                });
+            }
+
 
             function parseContent(content) {
                 $.ajax({
@@ -14,17 +86,29 @@
                     method: 'get',
                     data: {'dynamic_content': content}
                 }).done(function (data) {
-                    console.log(data);
-                    $('#content').html(data);
+                    $('tr.generated').remove();
                     var obj = $.parseJSON(data);
                     $.each(obj, function(i, element) {
                         var tr = $('table.matchplantable tr:last');
                         var elm = $(tr).clone();
-                        $(elm).find('input[name="match_date"]')[0].value = element['datetime'];
+                        $(elm).addClass('generated');
+                        $(elm).find('input[name="match_date"]')[0].value = element['date'];
+                        $(elm).find('input[name="match_time"]')[0].value = element['time'];
                         $(elm).find('input[name="team_a"]')[0].value = (element['team_a']);
                         $(elm).find('input[name="team_b"]')[0].value = (element['team_b']);
+                        $(elm).find('input[name="load_team_a"]')[0].value = (element['team_a']);
+                        $(elm).find('input[name="load_team_b"]')[0].value = (element['team_b']);
                         $(tr).before(elm)
                     });
+
+                    $('input[name^="team_"]').on('change', function() {
+                        console.log($(this).closest('td').find('input[name^="load_team_"]')[0]);
+                        request_team_name_ajax(this)
+                    });
+                    var tr = $('table.matchplantable tr:last');
+                    $(tr).find('input').prop('required', false);
+
+                    validateTeams()
                 });
             }
 
@@ -78,17 +162,17 @@
                         <tr>
                             <td></td>
                             <td>
-                                <input name="league_name" type="text"/>
+                                <input name="league_name" type="text" title="Name der Liga"/>
                             </td>
                             <td>
-                                <select name="teams" multiple>
+                                <select title="Teilnehmer der Liga" name="teams" multiple>
                                     {% for team in teams %}
                                         <option value="{{ team.id }}">{{ team.get_name }}</option>
                                     {% endfor %}
                                 </select>
                             </td>
                             <td>
-                                <select name="season">
+                                <select title="Assoziierte Saison" name="season">
                                     {% for season in seasons %}
                                         <option value="{{ season.id }}">{{ season.get_name }}</option>
                                     {% endfor %}
@@ -141,8 +225,14 @@
                         <hr/>
                     </div>
                 </form>
-                <form>
-                    <div class="col-sm-6">
+                <div class="col-sm-12">
+                    <h3>Dynamisch Matchplan erstellen</h3>
+                    <textarea title="Hier Spielplan einfuegen und er wird automatisch erkannt"
+                              style="width:100%;min-height: 400px;" id="dynamic_content"
+                              onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}"></textarea>
+                </div>
+                <form action="{% url 'add_match_league' league.id '' %}" method="get">
+                    <div class="col-sm-12">
                         <h3>Matchplan erstellen</h3>
                         <table class="table table-bordered table-striped matchplantable">
                             <tr>
@@ -150,23 +240,39 @@
                                 <th>Time</th>
                                 <th>Team A</th>
                                 <th>Team B</th>
+                                <th>#Games</th>
+                                <th>Score</th>
+                                <th>Edit</th>
                             </tr>
                             {% for match in league.get_matches_in_league %}
                                 <tr>
-                                <td>{{ match }}</td>
+                                    <td>{{ match.match_time|date:"d m Y" }}</td>
+                                    <td>{{ match.match_time|date:"H:i" }}</td>
+                                    <td>{{ match.team_a.get_name }}</td>
+                                    <td>{{ match.team_b.get_name }}</td>
+                                    <td>#{{ match.get_all_games|length }}</td>
+                                    <td>{{ match.get_score }}</td>
+                                    <td>TODO Edit</td>
                                 </tr>
                             {% endfor %}
                             <tr>
-                                <td><input type="text" name="match_date"/></td>
-                                <td><input type="text" name="match_time"/></td>
-                                <td><input type="text" name="team_a"/></td>
-                                <td><input type="text" name="team_b"/></td>
+                                <td><input title="Spieltag" type="text" name="match_date" required/></td>
+                                <td><input title="Spielzeit am Tag" type="text" name="match_time" required/></td>
+                                <td>
+                                    <input type="hidden" name="load_team_a" required/>
+                                    <input title="Name von Heimteam" type="text" name="team_a" required/>
+                                    <div class="exists"></div>
+                                </td>
+                                <td>
+                                    <input type="hidden" name="load_team_b" required/>
+                                    <input title="Name vom Auswaertsteam" type="text" name="team_b" required/>
+                                    <div class="exists"></div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td><button type="submit" class="btn btn-success">Add</button></td>
                             </tr>
                         </table>
-                    </div>
-                    <div class="col-sm-6">
-                        <h3>Dynamisch Matchplan erstellen</h3>
-                        <textarea style="width:100%;min-height: 400px;" id="dynamic_content" onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}"></textarea>
                     </div>
                 </form>
             {% endif %}

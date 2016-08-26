@@ -7,15 +7,17 @@ $(document).ready(function () {
 
 
     {% if season %}
-        $('#season_start_date div').datepicker({
+        $('#season_start_date').datepicker({
             format: 'dd.mm.yyyy'
-            //startDate: {{ season.start_date|get_date_string }}
         });
 
         $('#season_end_date').datepicker({
-            format: 'dd.mm.yyyy',
-            // startDate: {{ season.end_date|get_date_string }}
+            format: 'dd.mm.yyyy'
         });
+        {# m-1 is necessary because javascripts new Date function is 0-based and m=1 would be interpreted as Feb #}
+        $('#season_start_date').datepicker('setDate', new Date({{ season.start_date|date:'Y, m-1, d' }}));
+
+        $('#season_end_date').datepicker('setDate', new Date({{ season.end_date|date:'Y, m-1, d' }}));
 
     {% endif %}
 })
@@ -42,8 +44,8 @@ $(document).ready(function () {
                         <tr class="{{ season|is_current_season_class }}">
                             <td>{{ season.id }}</td>
                             <td>{{ season.get_name }}</td>
-                            <td>{{ season.start_date }}</td>
-                            <td>{{ season.end_date }}</td>
+                            <td>{{ season.start_date|date:'d.m.Y' }}</td>
+                            <td>{{ season.end_date|date:'d.m.Y' }}</td>
                             <td>{{ season.get_leagues|length }}</td>
                             <td><a href="{% url 'manage_season' season.id %}">Edit</a></td>
                         </tr>
@@ -74,21 +76,25 @@ $(document).ready(function () {
                 </form>
             </div>
             {% if season %}
+                <form>
                 <div class="col-sm-12">
                     <h3>{{ season.get_name }}</h3>
                     <label for="season_name">Seasonname</label>
                     <input type="text" id="season_name" name="update_season_name" value="{{ season.get_name }}"/>
                 </div>
+                    {# TODO: sync the changed in the season_start/end_field to an hidden input field #}
                 <div class="col-sm-6">
                     <h4>Startdate (TODO)</h4>
-                    <div id="season_start_date">
-                        <div></div>
-                    </div>
+                    <div id="season_start_date"></div>
                 </div>
                 <div class="col-sm-6">
                     <h4>Enddate (TODO)</h4>
                     <div id="season_end_date"></div>
                 </div>
+                <div class="col-sm-12">
+                    <button class="btn btn-success" style="float:right;" type="submit">Update (TODO)</button>
+                </div>
+                </form>
                 <div class="col-sm-12">
                     <h4>Related seasons</h4>
                     <ul class="leaguelist">

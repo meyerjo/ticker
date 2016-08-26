@@ -6,6 +6,8 @@ from ticker.views.api import *
 urlpatterns = [
     url(r'^club/add/?$', add_club, name='club_add'),
     url(r'^club/([0-9]+)/addteam/?$', add_team, name='team_add'),
+    url(r'^team/exists/?$', exists_team, name='exists_team' ),
+    url(r'^team/add/json/?', add_team_club, name='add_team_club_json'),
     url(r'^club/edit/?$', edit_club, name='club_edit'),
 
     url(r'^field/add?$', not_yet_implemented, name='field_add'),
@@ -23,6 +25,10 @@ urlpatterns = [
 
     url(r'^league/([0-9]+)/edit/?$', edit_league, name='edit_league'),
 
-    url(r'^league/dynamic/matchplan/?', dynamic_matchplan, name='dynamic_matchplan')
+    url(r'^league/dynamic/matchplan/?', dynamic_matchplan, name='dynamic_matchplan'),
 
+    url(r'^league/([0-9]+)/match/add(/?|/json)$', add_match, name='add_match_league' ),
+    url(r'^league/([0-9]+)/matches/add(/?|/json)$', add_matches, name='add_matches_league' ),
+
+    url(r'^match/([0-9]+)/lineup/save(/?|/json/?)$', save_lineup, name='match_lineup_save'),
 ]

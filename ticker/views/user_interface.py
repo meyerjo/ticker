@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from ticker.models import Club, Team, Player, Season, League
+from ticker.models import Match
 
 
 def manage_clubs(request):
@@ -21,6 +22,8 @@ def manage_team_details(request, teamid):
 def manage_players_club(request, clubid):
     club = Club.objects.get(id=int(clubid))
     return render(request, 'user/manage_players_club.html', dict(club=club))
+
+
 
 
 def manage_fields(request, clubid):
@@ -50,3 +53,9 @@ def manage_league(request, league_id=None):
 def manage_dashboard(request):
     context = dict()
     return render(request, 'user/manage_dashboard.html', context)
+
+
+def manage_ticker_interface(request, match_id):
+    context = dict(match=Match.objects.get(id=match_id))
+    return render(request, 'user/tickerinterface.html', context)
+

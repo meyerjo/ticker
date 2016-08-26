@@ -5,7 +5,7 @@ from django.db.models import CASCADE, Field
 
 class Club(models.Model):
     club_name = models.CharField(max_length=255)
-    fields = models.ManyToManyField('Field')
+    fields = models.ManyToManyField('Field', blank=True)
 
     def add_team(self, teamname):
         pass
@@ -30,6 +30,9 @@ class Club(models.Model):
 
     def get_fields(self):
         return self.fields.all()
+
+    def __str__(self):
+        return self.get_name()
 
 
 class Player(models.Model):
@@ -56,8 +59,8 @@ class Player(models.Model):
 class Team(models.Model):
     parent_club = models.ForeignKey(Club, CASCADE, default=1)
     team_name = models.CharField(max_length=255)
-    players = models.ManyToManyField(Player)
-    fields = models.ManyToManyField('Field')
+    players = models.ManyToManyField(Player, blank=True)
+    fields = models.ManyToManyField('Field', blank=True)
 
     def add_player(self, player):
         assert (isinstance(player, Player))
@@ -89,6 +92,9 @@ class Team(models.Model):
 
     def get_fields(self):
         return self.fields.all()
+
+    def __str__(self):
+        return self.team_name
 
 
 class TeamPlayerAssociation(models.Model):
