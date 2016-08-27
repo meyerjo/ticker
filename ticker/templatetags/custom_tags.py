@@ -3,6 +3,9 @@ import json
 
 from django.db.models import QuerySet
 
+import math
+
+from ticker.models import FieldAllocation
 from ticker.models import Match
 
 register = template.Library()
@@ -20,6 +23,10 @@ def check_if_in_responsible_profiles(obj, user):
         if elm.user.id == user.id:
             return True
     return False
+
+@register.filter
+def get_field_width(width, col):
+    return math.floor(int(width)/int(col))
 
 
 @register.filter
@@ -92,3 +99,25 @@ def get_players(game, args):
 @register.filter
 def is_in(str, search):
     return search in str
+
+@register.filter
+def format_players(obj):
+    names = [p.get_name() for p in obj.all()]
+    return '<br/>'.join(names)
+
+@register.filter
+def is_current_set(obj, game):
+    return 'setactive' if obj.set_number == game.current_set and game.in_progress() else ''
+
+@register.filter
+def field_active(field, game):
+    fa = FieldAllocation.objects.filter(field=field, game=game, is_active=True)
+    return 'active' if fa.exists() else ''
+
+@register.filter
+def finished_set(set, match):
+    return set.is_finished(match.rule)
+
+@register.filter
+def get_range(count, min=0):
+    return range(min, count)

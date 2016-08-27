@@ -1,0 +1,18 @@
+{% extends 'user/manage_base.html' %}
+
+{% block content %}
+    <div class="container">
+        {% for match in matches %}
+            <a href="{% url 'manage_ticker_interface' match.id %}">
+                <div class="row">
+                    <div class="col-sm-12">
+                        {{ match.match_time|date:"d.m.Y G:i" }}
+                    </div>
+                    <div class="col-sm-4">{{ match.team_a.get_name }}</div>
+                    <div class="col-sm-4">{{ match.get_score.0 }}::{{ match.get_score.1 }}</div>
+                    <div class="col-sm-4">{{ match.team_b.get_name }}</div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+{% endblock %}

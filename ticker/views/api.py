@@ -7,10 +7,13 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy, resolve
 from django.db import transaction
 from django.http import HttpResponse
+from django.utils import timezone
 
 from ticker.models import Club, Team, Season, League
 from django.http import HttpResponseRedirect
 
+from ticker.models import FieldAllocation
+from ticker.models import PlayingField
 from ticker.models import Game
 from ticker.models import Match
 from ticker.models import Player
@@ -95,9 +98,9 @@ def add_player(request):
                                            day=1
                                            )
                 end_date = datetime.date(year=now_date.year+1,
-                                           month=7,
-                                           day=31
-                                           )
+                                         month=7,
+                                         day=31
+                                         )
 
                 team_assoc = TeamPlayerAssociation(
                     team=t,
@@ -431,15 +434,136 @@ def save_lineup(request, matchid, response_type):
             g = Game.objects.get(id=gameid)
             player_team_a = Player.objects.filter(id__in=players['player_a'])
             player_team_b = Player.objects.filter(id__in=players['player_b'])
-            g.player_a.remove()
+            g.player_a.clear()
             g.player_a.add(*player_team_a)
-            g.player_b.remove()
+            g.player_b.clear()
             g.player_b.add(*player_team_b)
 
 
     if response_type is None:
         return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[matchid]))
 
+    return HttpResponse('OK')
+
+
+def add_field(request):
+    c = Club.objects.get(club_name='1. BC Beuel')
+    t = Team.objects.get(team_name='1. BC Beuel 1')
+
+    f1 = PlayingField(field_name='1. BC Beuel 1 (Feld 1)')
+    f2 = PlayingField(field_name='1. BC Beuel 1 (Feld 2)')
+    f1.save()
+    f2.save()
+    if c.fields.count() == 0:
+        c.fields.add(*[f1, f2])
+        t.fields.add(*(f1, f2))
+        return HttpResponse('OK')
+    return HttpResponse('ALREADYEXISTED')
+
+def assign_game_to_field(request, game_id, field_id, response_type):
+    response_type = None if response_type == '/' or response_type == '' else response_type
+    m = Match.objects.filter(games__id=game_id).first()
+    if m is None:
+        return HttpResponse('MATCH NOT FOUND')
+
+    currentallocations = FieldAllocation.objects.filter(is_active=True, field__id=field_id)
+    print(currentallocations)
+    with transaction.atomic():
+        if currentallocations.exists():
+            old_count = currentallocations.count()
+            print(old_count)
+            currentallocations = currentallocations.filter(game__id=game_id)
+            print(currentallocations.count())
+
+            if currentallocations.count() != old_count:
+                if response_type is None:
+                    messages.error(request, 'Field/Game assignment already in place')
+                    return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[m.id]))
+                return HttpResponse('FAIL')
+        else:
+            fa = FieldAllocation(field=PlayingField.objects.get(id=field_id), game=Game.objects.get(id=game_id))
+            fa.save()
+
+    if response_type is None:
+        return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[m.id]))
+    return HttpResponse('OK')
+
+
+def remove_game_from_field(request, gameid, fieldid, response_type):
+    response_type = None if response_type == '/' or response_type == '' else response_type
+    game = Game.objects.get(id=gameid)
+    field = PlayingField.objects.get(id=fieldid)
+    m = Match.objects.filter(games__id=gameid).first()
+    if m is None:
+        return HttpResponse('MATCH NOT FOUND')
+
+    fa = FieldAllocation.objects.filter(is_active=True, game=game, field=field)
+    if fa.exists():
+        fa.update(is_active=False, end_allocation=timezone.now())
+        if response_type is None:
+            return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[m.id]))
+        return HttpResponse('OK')
+    if response_type is None:
+        messages.error(request, 'Field allocation does not exists')
+        return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[m.id]))
+    return HttpResponse('ALLOCATION NOT EXIST')
+
+
+def update_score_field(request, field_id, response_type):
+    """
+    Updates the score for the game on the given field id. Responses either in a json fashion or with an redirect
+    :param request:
+    :param field_id:
+    :param response_type:
+    :return:
+    """
+    response_type = None if response_type == '/' or response_type == '' else response_type
+    # get the corresponding game
+    fa = FieldAllocation.objects.filter(is_active=True, field__id=field_id).order_by('-create_time').first()
+    if fa is None:
+        if response_type is None:
+            messages.error(request, 'Could not find Field allocation for given field')
+            return HttpResponseRedirect(reverse('manage_dashboard'))
+        return HttpResponse('OK')
+    game = fa.game
+    m = Match.objects.filter(games__id=game.id).first()
+    if m is None:
+        if response_type is None:
+            messages.error(request, 'Could not find match for the given game')
+            return HttpResponseRedirect(reverse('manage_dashboard'))
+        return HttpResponse('OK')
+
+    # TODO: check if the requesting user is having the responsibility for the match
+
+    set = game.get_current_set()
+    if 'team_a' in request.POST:
+        value = request.POST['team_a']
+        if value == '+':
+            set.add_point_team_a(m.rule)
+        elif value == '-':
+            set.remove_point_team_a(m.rule)
+    elif 'team_b' in request.POST:
+        value = request.POST['team_b']
+        if value == '+':
+            set.add_point_team_b(m.rule)
+        elif value == '-':
+            set.remove_point_team_b(m.rule)
+    elif 'switch_set' in request.POST:
+        if game.is_won(m.rule):
+            messages.info(request, 'Game is won. Removed it from the field')
+            fa = FieldAllocation.objects.filter(game=game, field__id=field_id, is_active=True)
+            fa.update(
+                is_active=False,
+                end_allocation=timezone.now()
+            )
+        elif game.get_current_set().is_finished(m.rule):
+            game.current_set += 1
+            game.save()
+        else:
+            messages.error(request,'Can not switch sets at this stage')
+
+    if response_type is None:
+        return HttpResponseRedirect(reverse('manage_ticker_interface', args=[m.id]))
     return HttpResponse('OK')
 
 

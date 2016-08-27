@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^team/add/json/?', add_team_club, name='add_team_club_json'),
     url(r'^club/edit/?$', edit_club, name='club_edit'),
 
+    url(r'^field/test/$', add_field, name='fields_add'),
     url(r'^field/add?$', not_yet_implemented, name='field_add'),
     url(r'^field/([0-9]+)/add/club/([0-9]+)/??$', not_yet_implemented, name='field_add_to_club'),
 
@@ -31,4 +32,8 @@ urlpatterns = [
     url(r'^league/([0-9]+)/matches/add(/?|/json)$', add_matches, name='add_matches_league' ),
 
     url(r'^match/([0-9]+)/lineup/save(/?|/json/?)$', save_lineup, name='match_lineup_save'),
+    url(r'^match/assign/game/([0-9]+)/to/field/([0-9]+)(/?|/json/?)$', assign_game_to_field, name='assign_game_to_field'),
+    url(r'^match/remove/game/([0-9]+)/from/field/([0-9]+)(/?|/json/?)$', remove_game_from_field, name='remove_game_to_field'),
+
+    url(r'^update/score/field/([0-9]+)(/?|/json/?)$', update_score_field, name='update_score_field')
 ]

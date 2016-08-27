@@ -68,30 +68,36 @@ class Set(models.Model):
     def add_point_team_a(self, rule):
         old_score = self.get_score()
         if rule.validate(old_score[0] + 1, old_score[1]):
-            self.points_team_a.add(Point())
+            p = Point()
+            p.save()
+            self.points_team_a.add(p)
             return True
         return False
 
     def remove_point_team_a(self, rule):
         old_score = self.get_score()
         if rule.validate(old_score[0] - 1, old_score[1]):
-            p = self.points_team_a.all().sort_by('-create_time')[:1]
-            p.update(canceled=True)
+            p = self.points_team_a.filter(canceled=False).order_by('-create_time').first()
+            p.canceled=True
+            p.save()
             return True
         return False
 
     def add_point_team_b(self, rule):
         old_score = self.get_score()
         if rule.validate(old_score[0], old_score[1]+1):
-            self.points_team_a.add(Point())
+            p = Point()
+            p.save()
+            self.points_team_b.add(p)
             return True
         return False
 
     def remove_point_team_b(self, rule):
         old_score = self.get_score()
         if rule.validate(old_score[0], old_score[1]-1):
-            p = self.points_team_a.all().sort_by('-create_time')[:1]
-            p.update(canceled=True)
+            p = self.points_team_b.filter(canceled=False).order_by('-create_time').first()
+            p.canceled=True
+            p.save()
             return True
         return False
 
@@ -136,10 +142,17 @@ class Game(models.Model):
                   ('men_double', 'Herrendoppel'),
                   ('women_double', 'Frauendoppel'),
                   ('mixed', 'Mixed'))
+    current_set = models.IntegerField(default=1)
     game_type = models.CharField(max_length=32, choices=game_types)
 
     def __str__(self):
         return '{0} {1} {2}'.format(self.name, self.game_type, '0')
+
+    def in_progress(self):
+        if self.current_set != 1:
+            return True
+        s = self.sets.filter(set_number=1).first()
+        return s.is_started()
 
     def is_finished(self, rule):
         return self.is_won(rule)
@@ -152,7 +165,7 @@ class Game(models.Model):
                 won_team_a += 1
             if set.set_won_by_team_b(rule):
                 won_team_b += 1
-        if won_team_a == 2 or won_team_b == 2:
+        if won_team_a == 3 or won_team_b == 3:
             return True
         return False
 
@@ -167,6 +180,13 @@ class Game(models.Model):
             all_sets.append(tmp_score_str)
         return ' '.join(all_sets)
 
+    def get_set_objects(self):
+        return self.sets.all()
+
+    def get_current_set(self):
+        current_set = self.current_set
+        set = self.sets.filter(set_number=current_set).first()
+        return set
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -177,7 +197,6 @@ class Game(models.Model):
                     set = Set(set_number=i+1)
                     set.save()
                     self.sets.add(set)
-
 
 
 class Match(models.Model):
@@ -212,7 +231,16 @@ class Match(models.Model):
 
     @staticmethod
     def all_matches():
-        matches = Match.objects.filter(canceled=True)
+        matches = Match.objects.filter(canceled=False)
+        return matches
+
+
+    @staticmethod
+    def get_matches():
+        import datetime
+        current_day = datetime.datetime.now()
+        matches = Match.objects.filter(canceled=False,
+                                       match_time__day=current_day)
         return matches
 
     def get_all_games(self):
@@ -228,18 +256,16 @@ class Match(models.Model):
         for game in games:
             if not game.is_finished(self.rule):
                 continue
-            if game.is_won():
+            if game.is_won(self.rule):
                 score_team_a +=1
             else:
                 score_team_b +=1
         return [score_team_a, score_team_b]
 
-    @staticmethod
-    def get_matches():
-        import datetime
-        current_day = datetime.datetime.now().today()
-        matches = Match.objects.filter(canceled=False,
-                                       match_time__day=current_day)
-        return matches
+    def get_fields(self):
+        if self.team_a is None:
+            return []
+        return self.team_a.get_fields()
+
 
 

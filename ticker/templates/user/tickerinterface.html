@@ -1,5 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'user/manage_base.html' %}
 
+{% load custom_tags %}
 {% block extracss %}
     <style>
         .teamname {
@@ -14,8 +15,43 @@
             text-align: center;
         }
 
-        .lineupsave {
+        .lineup {
             width: 100%;
+        }
+
+        .fieldtitle {
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .player {
+            text-align: center;
+        }
+
+        .fieldname {
+            border-radius: 100%;
+            display:inline-block;
+            border: 1px solid blue;
+            width: 32px;
+            height: 32px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .fieldname.active {
+            background: lightblue;
+        }
+
+        .fields .set {
+            text-align: center;
+        }
+
+        .fields .set.active {
+            font-weight: bold;
+        }
+
+        .fields .player {
+            height: 50px;
         }
     </style>
 {% endblock %}
@@ -65,7 +101,67 @@
             {% endwith %}
         </div>
         <div class="row-fluid fields">
-
+            {% with fields=match.get_fields %}
+                {% with fieldamount=fields|length %}
+                    {% for field in fields %}
+                        <form method="post" action="{% url 'update_score_field' field.id '' %}">
+                            {% csrf_token %}
+                            <div class="col-sm-{{ 12|get_field_width:fieldamount }}">
+                                <div class="row-fluid">
+                                    <div class="col-sm-12 fieldtitle">{{ field.field_name }}</div>
+                                    {% if field.get_game %}
+                                        {% with game=field.get_game %}
+                                            <div class="col-sm-6 player">
+                                                {{ game.player_a|format_players|safe }}
+                                            </div>
+                                            <div class="col-sm-6 player">
+                                                {{ game.player_b|format_players|safe }}
+                                            </div>
+                                            <div class="row">
+                                            <div class="col-sm-4">
+                                                <button class="btn btn-primary" name="team_a" value="+">+</button>
+                                                <button class="btn btn-primary" name="team_a" value="-">-</button>
+                                            </div>
+                                            <div class="col-sm-1">
+                                                {{ game.get_current_set.get_score.0 }}
+                                            </div>
+                                            <div class="col-sm-2">
+                                                Satz {{ game.get_current_set.set_number }}
+                                            </div>
+                                            <div class="col-sm-1">
+                                                {{ game.get_current_set.get_score.1 }}
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button class="btn btn-primary" name="team_b" value="+">+</button>
+                                                <button class="btn btn-primary" name="team_b" value="-">-</button>
+                                            </div>
+                                            </div>
+                                            {% if game.get_current_set|finished_set:match %}
+                                                <div class="row">
+                                                    <div class="col-sm-12" style="text-align: center">
+                                                        <button class="btn btn-primary" name="switch_set" value="True">
+                                                            Naechster Satz
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            {% for set in game.get_set_objects %}
+                                                <div class="row set {{ set|is_current_set:game }}">
+                                                    {% with score=set.get_score %}
+                                                        <div class="col-sm-5">{{ score.0 }}</div>
+                                                        <div class="col-sm-2">Satz {{ set.set_number }}</div>
+                                                        <div class="col-sm-5">{{ score.1 }}</div>
+                                                    {% endwith %}
+                                                </div>
+                                            {% endfor %}
+                                        {% endwith %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </form>
+                    {% endfor %}
+                {% endwith %}
+            {% endwith %}
         </div>
         <div class="row-fluid matches">
             <div class="col-sm-12">
@@ -86,7 +182,6 @@
                                 <td>{{ game.id }} <input type="hidden" name="game_id" value="{{ game.id }}"/> </td>
                                 <td>{{ game.name }}</td>
                                 <td>
-                                    {% load custom_tags %}
                                     <select name="player_a_one_{{ game.id }}">
                                         {% for player in game|get_players:"1,a" %}
                                             <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
@@ -110,15 +205,23 @@
                                     {% if game.game_type|is_in:"single" == 0 %}
                                         <select name="player_b_two_{{ game.id }}">
                                             {% for player in game|get_players:"2,b" %}
-                                            <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
+                                                <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
                                             {% endfor %}
                                         </select>
                                     {% endif %}
                                 </td>
                                 <td>{{ game.get_sets }}</td>
                                 <td>
-                                    {% for field in game.get_fields %}
-                                        <a href="#TODO" class="fieldname">{{ field.shortform }}</a>
+                                    {% for field in match.get_fields %}
+                                        {% with field_active=field|field_active:game %}
+                                            {% if field_active == 'active' %}
+                                                <a href="{% url 'remove_game_to_field' game.id field.id '' %}"
+                                                   class="fieldname {{ field_active }}">{{ forloop.counter }}</a>
+                                            {% else %}
+                                                <a href="{% url 'assign_game_to_field' game.id field.id '' %}"
+                                                   class="fieldname {{ field_active }}">{{ forloop.counter }}</a>
+                                            {% endif %}
+                                        {% endwith %}
                                     {% endfor %}
                                 </td>
                                 <td>

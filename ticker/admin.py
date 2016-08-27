@@ -2,9 +2,11 @@ from django.contrib import admin
 
 # Register your models here.
 from ticker.models import Club
+from ticker.models import FieldAllocation
 from ticker.models import Game
 from ticker.models import Match
 from ticker.models import Player
+from ticker.models import PlayingField
 from ticker.models import Rules
 from ticker.models import Set
 from ticker.models import Team
@@ -47,3 +49,12 @@ admin.site.register(Rules, RuleAdmin)
 class ClubAdmin(admin.ModelAdmin):
     list_display = ['id', 'club_name']
 admin.site.register(Club, ClubAdmin)
+
+
+class PlayingFieldAdmin(admin.ModelAdmin):
+    list_display = ['id', 'field_name']
+admin.site.register(PlayingField, PlayingFieldAdmin)
+
+class FieldAllocationAdmin(admin.ModelAdmin):
+    list_display = ['id', 'game', 'field']
+admin.site.register(FieldAllocation, FieldAllocationAdmin)

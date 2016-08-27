@@ -1,11 +1,10 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import CASCADE, Field
-
+from django.db.models import CASCADE
 
 class Club(models.Model):
     club_name = models.CharField(max_length=255)
-    fields = models.ManyToManyField('Field', blank=True)
+    fields = models.ManyToManyField('PlayingField', blank=True)
 
     def add_team(self, teamname):
         pass
@@ -60,7 +59,7 @@ class Team(models.Model):
     parent_club = models.ForeignKey(Club, CASCADE, default=1)
     team_name = models.CharField(max_length=255)
     players = models.ManyToManyField(Player, blank=True)
-    fields = models.ManyToManyField('Field', blank=True)
+    fields = models.ManyToManyField('PlayingField', blank=True)
 
     def add_player(self, player):
         assert (isinstance(player, Player))

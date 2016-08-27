@@ -1,21 +1,62 @@
 {% extends 'base.html' %}
 
+{% block extracss %}
+    <style>
+    .matchtime {
+        font-size: 2em;
+        text-align: center;
+    }
+
+    .team, .score {
+        text-align: center;
+        font-size: 1.5em;
+    }
+
+    .score {
+        font-weight: bold;
+    }
+
+    .title {
+        font-size: 3em;
+        text-align: center;
+    }
+
+    a .matchentry {
+        border-radius: 5px;
+        border: 1px solid gray;
+    }
+
+    a:link, a:visited, a:hover {
+        text-decoration: none;
+        color: black;
+    }
+
+    </style>
+{% endblock %}
+
 {% block content %}
     <div class="container">
+        <div class="row title">
+            Live-Ticker: {{ league.get_name }}
+        </div>
         {% for match in matches %}
-            <div class="row-fluid">
-                <div class="col-sm-12">
-                    {{ match.match_time }}
+            <div class="row-fluid matchentry">
+            <a href="{% url 'match_ticker' match.id '' %}">
+                <div class="col-sm-12 matchtime">
+                    {{ match.match_time|date:"d.m.Y G:i" }}
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-4 team">
                     {{ match.team_a.get_name }}
                 </div>
-                <div class="col-sm-4">
-                    {{ match.get_score }}
+                <div class="col-sm-4 score">
+                    {% with score=match.get_score %}
+                        {{ score.0 }}:{{ score.1 }}
+                    {% endwith %}
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-4 team">
                     {{ match.team_b.get_name }}
                 </div>
+            </a>
             </div>
         {% endfor %}
     </div>

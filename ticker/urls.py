@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
 from ticker.views.api import not_yet_implemented
+from ticker.views.match import match_ticker
 from ticker.views.startpage import start_page
 from ticker.views.user_interface import *
 
@@ -22,8 +23,10 @@ urlpatterns = [
     url(r'^manage/league/([0-9]+)/?$', manage_league, name='manage_league_details'),
     url(r'^manage/season/?$', manage_season, name='manage_season'),
     url(r'^manage/season/([0-9]+)/?$', manage_season, name='manage_season'),
+    url(r'^manage/ticker/?$', manage_ticker, name='manage_ticker'),
     url(r'^manage/ticker/([0-9]+)/?', manage_ticker_interface, name='manage_ticker_interface'),
     url(r'^manage/?$', manage_dashboard, name='manage_dashboard'),
 
+    url('^match/([0-9]+)(/?|/json/?)$', match_ticker, name='match_ticker'),
     url('', start_page),
 ]

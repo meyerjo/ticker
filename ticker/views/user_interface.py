@@ -59,3 +59,10 @@ def manage_ticker_interface(request, match_id):
     context = dict(match=Match.objects.get(id=match_id))
     return render(request, 'user/tickerinterface.html', context)
 
+def manage_ticker(request):
+
+    if request.user.is_superuser:
+        matches = Match.all_matches()
+    else:
+        matches = []
+    return render(request, 'user/manage_ticker.html', dict(matches=matches))
