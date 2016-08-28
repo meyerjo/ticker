@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load custom_tags %}
 {% block navigation %}
     <nav class="navbar navbar-default">
         <div class="container-fluid">
@@ -12,35 +12,58 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">Ticker</a>
+                <a class="navbar-brand" href="{% url 'manage_dashboard' %}">Ticker</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="{% url 'manage_ticker' %}">Ticker <span class="sr-only">(current)</span></a></li>
-                    <li><a href="#">Club</a></li>
+                    {% url 'manage_ticker' as tickerurl %}
+                    <li {% if tickerurl == request.get_full_path %} class="active" {% endif %}>
+                        <a href="{{ tickerurl }}">
+                            Ticker
+                            <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                    <li>
+                        {% with responsible_club=request.user|get_club %}
+                            {% if responsible_club %}
+                                <a href="{% url 'manage_club_details' responsible_club.id %}">Club</a>
+                            {% else %}
+                                {% if request.user.is_superuser %}
+                                    <a href="{% url 'manage_club' %}">Club</a>
+                                {% endif %}
+                            {% endif %}
+                        {% endwith %}
+                    </li>
                     {% if request.user.is_superuser %}
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                Superuser Management
-                                <span class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a href="{% url 'manage_league' %}">Leagues</a></li>
-                                <li><a href="{% url 'manage_clubs' %}">Clubs</a></li>
-                                <li><a href="{% url 'manage_season' %}">Saison</a></li>
-{#                                <li role="separator" class="divider"></li>#}
-{#                                <li><a href="#">Separated link</a></li>#}
-{#                                <li role="separator" class="divider"></li>#}
-{#                                <li><a href="#">One more separated link</a></li>#}
-                            </ul>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            Superuser Management
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'manage_league' %}">Leagues</a></li>
+                            <li><a href="{% url 'manage_clubs' %}">Clubs</a></li>
+                            <li><a href="{% url 'manage_season' %}">Saison</a></li>
+                        </ul>
                         </li>
                     {% endif %}
-                    <li class="dropdown pull-right">
-                        <ul>{{ request.user }}</ul>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+                           role="button" aria-haspopup="true" aria-expanded="false">{{ request.user }} <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Liga</a></li>
+                            <li><a href="#">Account</a></li>
+                            <li><a href="#"></a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#">Logout</a></li>
+                        </ul>
                     </li>
                 </ul>
+
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>

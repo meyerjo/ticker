@@ -1,12 +1,14 @@
 from django import template
 import json
 
+from django.contrib.auth.models import User
 from django.db.models import QuerySet
 
 import math
 
 from ticker.models import FieldAllocation
 from ticker.models import Match
+from ticker.models import Profile
 
 register = template.Library()
 
@@ -114,10 +116,26 @@ def field_active(field, game):
     fa = FieldAllocation.objects.filter(field=field, game=game, is_active=True)
     return 'active' if fa.exists() else ''
 
+
 @register.filter
 def finished_set(set, match):
     return set.is_finished(match.rule)
 
+
 @register.filter
 def get_range(count, min=0):
     return range(min, count)
+
+
+@register.filter
+def get_club(user):
+    """
+    returns the associated club of the given user
+    :param user:
+    :return:
+    """
+    assert(isinstance(user, User))
+    p = Profile.objects.filter(user=user).first()
+    if p is None:
+        return None
+    return p.associated_club

@@ -2,6 +2,17 @@
 
 {% block content %}
     <div class="container">
+        {% if messages %}
+            <div class="row-fluid">
+                <div class="col-sm-12">
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
         {% for match in matches %}
             <a href="{% url 'manage_ticker_interface' match.id %}">
                 <div class="row">

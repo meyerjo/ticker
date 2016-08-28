@@ -2,32 +2,46 @@
 {% load custom_tags %}
 {% block content %}
     <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                {% if messages %}
+        {% if messages %}
+            <div class="row-fluid">
+                <div class="col-sm-12">
                     <ul class="messages">
                         {% for message in messages %}
-                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                                {{ message }}
-                            </li>
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
                         {% endfor %}
                     </ul>
-                {% endif %}
+                </div>
             </div>
+        {% endif %}
+        <div class="row">
             <div class="col-sm-12">
                 <h1>TODO fields for club {{ club.get_name }}</h1>
                 <table class="table table-striped table-bordered">
                     <tr>
-                        <th></th>
-                        <th></th>
-                        <th></th>
+                        <th>ID</th>
+                        <th>Fieldname</th>
+                        <th>Teams</th>
                         <th></th>
                     </tr>
                     {% for field in club.get_fields %}
-                        <td colspan="4">
-                            TODO {{ field }}
-                        </td>
+                        <tr>
+                        <td>{{ field.id }}</td>
+                        <td>{{ field.get_name }}</td>
+                        <td></td>
+                        <td></td>
+                        </tr>
                     {% endfor %}
+                    <tr>
+                        <td></td>
+                        <td><input name="add_fieldname" title="Neuer Feldname"/></td>
+                        <td>
+                            <select title="Assoziiertes Team">
+                                {% for team in teams %}
+                                    <select value="{{ team.id }}">{{ team.name }}</select>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>

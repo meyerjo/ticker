@@ -26,6 +26,17 @@ $(document).ready(function () {
 
 {% block content %}
     <div class="container">
+        {% if messages %}
+            <div class="row-fluid">
+                <div class="col-sm-12">
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
         <div class="row">
             <div class="col-sm-12">
                 <h1>Season</h1>

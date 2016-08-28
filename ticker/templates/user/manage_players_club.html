@@ -62,20 +62,22 @@
 
 {% block content %}
     <div class="container">
+        {% if messages %}
+            <div class="row-fluid">
+                <div class="col-sm-12">
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
         <div class="row">
             <div class="col-sm-12">
                 <h1>Manage players for club {{ club.get_name }} (<a href="{% url 'manage_club_details' club.id %}"><i class="fa fa-link"></i></a>)</h1>
                 <form method="post" action="">
                     {% csrf_token %}
-                    {% if messages %}
-                        <ul class="messages">
-                            {% for message in messages %}
-                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                                    {{ message }}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
                     <table class="table table-bordered table-striped">
                         <tr>
                             <th>Spieler</th>
