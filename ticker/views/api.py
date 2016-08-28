@@ -4,6 +4,7 @@ import datetime
 import re
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse, reverse_lazy, resolve
 from django.db import transaction
 from django.http import HttpResponse
@@ -19,7 +20,8 @@ from ticker.models import Match
 from ticker.models import Player
 from ticker.models import TeamPlayerAssociation
 
-
+@login_required
+@permission_required('ticker.add_club')
 def add_club(request):
     club, created = Club.objects.get_or_create(
         club_name=request.POST['clubname']
@@ -30,7 +32,7 @@ def add_club(request):
         messages.warning(request, 'Club already existed')
     return HttpResponseRedirect(reverse_lazy('manage_club_details', args=[club.id]))
 
-
+@login_required
 def add_team(request, clubid):
     clubid = int(clubid)
     club = Club.objects.get(id=clubid)
@@ -45,7 +47,7 @@ def add_team(request, clubid):
         messages.warning(request, 'Already exists')
     return HttpResponseRedirect(reverse_lazy('manage_club_details', args=[club.id]))
 
-
+@login_required
 def edit_club(request):
     clubid = int(request.POST['clubid'])
     club = Club.objects.get(id=clubid)
@@ -53,7 +55,7 @@ def edit_club(request):
     club.save()
     return HttpResponseRedirect(reverse_lazy('manage_club_details', args=[club.id]))
 
-
+@login_required
 def add_player(request):
     clubid = int(request.POST['club_id'])
     teamid = int(request.POST['team_id'])
@@ -93,21 +95,11 @@ def add_player(request):
                 t.players.add(p)
                 t.save()
                 now_date = datetime.date.today()
-                start_date = datetime.date(year=now_date.year,
-                                           month=8,
-                                           day=1
-                                           )
-                end_date = datetime.date(year=now_date.year+1,
-                                         month=7,
-                                         day=31
-                                         )
+                start_date = datetime.date(year=now_date.year, month=8, day=1)
+                end_date = datetime.date(year=now_date.year+1, month=7, day=31)
 
-                team_assoc = TeamPlayerAssociation(
-                    team=t,
-                    player=p,
-                    start_association=start_date,
-                    end_association=end_date
-                )
+                team_assoc = TeamPlayerAssociation(team=t, player=p, start_association=start_date,
+                                                   end_association=end_date)
                 team_assoc.save()
                 responses.append('CREATED')
             else:
@@ -118,7 +110,7 @@ def add_player(request):
             return HttpResponse(json.dumps(responses))
     return HttpResponseRedirect(reverse_lazy('manage_teams_details', args=[teamid]))
 
-
+@login_required
 def player_dynamic(request):
     """
     Parses the dynamic content field and returns the parsed result
@@ -176,6 +168,8 @@ def add_season(request):
     return HttpResponseRedirect(reverse('manage_season'))
 
 
+@login_required
+@permission_required('ticker.add_league')
 def add_league(request):
     dic = request.POST
     with transaction.atomic():
@@ -196,6 +190,8 @@ def add_league(request):
     return HttpResponseRedirect(reverse('manage_league'))
 
 
+@login_required
+@permission_required('ticker.edit_league')
 def edit_league(request, league_id):
     dic = request.POST
     with transaction.atomic():
@@ -216,6 +212,7 @@ def edit_league(request, league_id):
     return HttpResponseRedirect(reverse_lazy('manage_league_details', args=[league_id]))
 
 
+@login_required
 def dynamic_matchplan(request):
     content = request.GET['dynamic_content']
     lines = content.split('\n')
@@ -237,6 +234,7 @@ def dynamic_matchplan(request):
             ))
     return HttpResponse(json.dumps(result))
 
+@login_required
 def exists_team(request):
     def levenshteinDistance(s1, s2):
         if len(s1) > len(s2):
@@ -283,6 +281,7 @@ def exists_team(request):
     return HttpResponse('OK')
 
 
+@login_required
 def add_team_club(request):
     print(request.GET)
 
@@ -325,6 +324,7 @@ def add_team_club(request):
             return HttpResponse('OK')
 
 
+@login_required
 def add_match(request, league_id, response_type=None):
     print(request.GET)
     date = request.GET['match_date']
@@ -361,9 +361,11 @@ def add_match(request, league_id, response_type=None):
         m.save()
     return HttpResponse('OK')
 
+@login_required
 def add_matches(request, league_id, response_type):
     return not_yet_implemented(request, [league_id, response_type])
 
+@login_required
 def save_lineup(request, matchid, response_type):
     match = Match.objects.get(id=matchid)
     response_type = None if response_type == '/' or response_type == '' else response_type
@@ -445,8 +447,9 @@ def save_lineup(request, matchid, response_type):
 
     return HttpResponse('OK')
 
-
+@login_required
 def add_field(request):
+    # TODO Implement this properly
     c = Club.objects.get(club_name='1. BC Beuel')
     t = Team.objects.get(team_name='1. BC Beuel 1')
 
@@ -460,6 +463,9 @@ def add_field(request):
         return HttpResponse('OK')
     return HttpResponse('ALREADYEXISTED')
 
+
+@login_required
+@permission_required('ticker.add_fieldallocation')
 def assign_game_to_field(request, game_id, field_id, response_type):
     response_type = None if response_type == '/' or response_type == '' else response_type
     m = Match.objects.filter(games__id=game_id).first()
@@ -489,6 +495,8 @@ def assign_game_to_field(request, game_id, field_id, response_type):
     return HttpResponse('OK')
 
 
+@login_required
+@permission_required('ticker.change_fieldallocation')
 def remove_game_from_field(request, gameid, fieldid, response_type):
     response_type = None if response_type == '/' or response_type == '' else response_type
     game = Game.objects.get(id=gameid)
@@ -509,6 +517,9 @@ def remove_game_from_field(request, gameid, fieldid, response_type):
     return HttpResponse('ALLOCATION NOT EXIST')
 
 
+@login_required
+@permission_required('ticker.add_point')
+@permission_required('ticker.change_point')
 def update_score_field(request, field_id, response_type):
     """
     Updates the score for the game on the given field id. Responses either in a json fashion or with an redirect
@@ -524,16 +535,17 @@ def update_score_field(request, field_id, response_type):
         if response_type is None:
             messages.error(request, 'Could not find Field allocation for given field')
             return HttpResponseRedirect(reverse('manage_dashboard'))
-        return HttpResponse('OK')
+        return HttpResponse('FAIL')
     game = fa.game
     m = Match.objects.filter(games__id=game.id).first()
     if m is None:
         if response_type is None:
             messages.error(request, 'Could not find match for the given game')
             return HttpResponseRedirect(reverse('manage_dashboard'))
-        return HttpResponse('OK')
+        return HttpResponse('FAIL')
 
     # TODO: check if the requesting user is having the responsibility for the match
+
 
     set = game.get_current_set()
     if 'team_a' in request.POST:
@@ -564,6 +576,7 @@ def update_score_field(request, field_id, response_type):
 
     if response_type is None:
         return HttpResponseRedirect(reverse('manage_ticker_interface', args=[m.id]))
+    # TODO: return json of change set
     return HttpResponse('OK')
 
 

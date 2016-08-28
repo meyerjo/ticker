@@ -7,6 +7,7 @@ from ticker.models import Game
 from ticker.models import Match
 from ticker.models import Player
 from ticker.models import PlayingField
+from ticker.models import Profile
 from ticker.models import Rules
 from ticker.models import Set
 from ticker.models import Team
@@ -58,3 +59,7 @@ admin.site.register(PlayingField, PlayingFieldAdmin)
 class FieldAllocationAdmin(admin.ModelAdmin):
     list_display = ['id', 'game', 'field']
 admin.site.register(FieldAllocation, FieldAllocationAdmin)
+
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'associated_club']
+admin.site.register(Profile, ProfileAdmin)

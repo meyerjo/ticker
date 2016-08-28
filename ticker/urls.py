@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^manage/ticker/([0-9]+)/?', manage_ticker_interface, name='manage_ticker_interface'),
     url(r'^manage/?$', manage_dashboard, name='manage_dashboard'),
 
-    url('^match/([0-9]+)(/?|/json/?)$', match_ticker, name='match_ticker'),
+    url(r'^match/([0-9]+)(/?|/json/?)$', match_ticker, name='match_ticker'),
+    url(r'^login/?$', login, name='login'),
     url('', start_page),
 ]

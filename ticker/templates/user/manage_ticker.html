@@ -14,5 +14,8 @@
                 </div>
             </a>
         {% endfor %}
+        {% if matches|length_is:0 %}
+            <h1>No matches available</h1>
+        {% endif %}
     </div>
 {% endblock %}
