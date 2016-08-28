@@ -22,6 +22,9 @@ class Rules(models.Model):
     def get_number_games(self):
         return 7
 
+    def get_number_of_sets(self):
+        return 5
+
     def validate(self, set_score_team_a, set_score_team_b):
         """
         Checks whether the score is valid
@@ -206,7 +209,7 @@ class Match(models.Model):
     rule = models.ForeignKey(Rules)
     team_a = models.ForeignKey(Team, related_name='team_a')
     team_b = models.ForeignKey(Team, related_name='team_b')
-    games = ManyToManyField(Game, blank=True, null=True)
+    games = ManyToManyField(Game, blank=True)
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):

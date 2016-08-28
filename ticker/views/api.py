@@ -150,7 +150,8 @@ def player_dynamic(request):
 
     return HttpResponse(json.dumps(persons))
 
-
+@login_required
+@permission_required('ticker.add_season')
 def add_season(request):
     dic = request.POST
     with transaction.atomic():
@@ -546,7 +547,7 @@ def update_score_field(request, field_id, response_type):
 
     # TODO: check if the requesting user is having the responsibility for the match
 
-
+    updated_information = dict()
     set = game.get_current_set()
     if 'team_a' in request.POST:
         value = request.POST['team_a']
@@ -554,12 +555,20 @@ def update_score_field(request, field_id, response_type):
             set.add_point_team_a(m.rule)
         elif value == '-':
             set.remove_point_team_a(m.rule)
+        updated_information['type'] = 'score-update'
+        updated_information['game_id'] = game.id
+        updated_information['set_id'] = set.id
+        updated_information['set_number'] = set.get_score()
     elif 'team_b' in request.POST:
         value = request.POST['team_b']
         if value == '+':
             set.add_point_team_b(m.rule)
         elif value == '-':
             set.remove_point_team_b(m.rule)
+        updated_information['type'] = 'score-update'
+        updated_information['game_id'] = game.id
+        updated_information['set_id'] = set.id
+        updated_information['set_number'] = set.get_score()
     elif 'switch_set' in request.POST:
         if game.is_won(m.rule):
             messages.info(request, 'Game is won. Removed it from the field')
@@ -568,16 +577,29 @@ def update_score_field(request, field_id, response_type):
                 is_active=False,
                 end_allocation=timezone.now()
             )
+            updated_information['type'] = 'clear-field'
+            updated_information['field_id'] = field_id
         elif game.get_current_set().is_finished(m.rule):
             game.current_set += 1
             game.save()
+
+            set = game.get_current_set()
+            updated_information['type'] = 'update-current-set'
+            updated_information['field_id'] = field_id
+            updated_information['set_index'] = game.current_set - 1
+            updated_information['set_label'] = 'Satz {0}'.format(set.set_number)
+            updated_information['set_score'] = set.get_score()
         else:
-            messages.error(request,'Can not switch sets at this stage')
+            if response_type is None:
+                messages.error(request,'Can not switch sets at this stage')
+            updated_information = dict(error='Cannot switch sets at this stage')
+    if 'error' not in updated_information:
+        updated_information['error'] = None
 
     if response_type is None:
         return HttpResponseRedirect(reverse('manage_ticker_interface', args=[m.id]))
     # TODO: return json of change set
-    return HttpResponse('OK')
+    return HttpResponse(json.dumps(updated_information))
 
 
 def not_yet_implemented(request, *args):

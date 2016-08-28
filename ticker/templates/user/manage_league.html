@@ -190,7 +190,11 @@
                                 </select>
                             </td>
                             <td></td>
-                            <td><button class="btn btn-success" type="submit">Add</button></td>
+                            <td>
+                                {% if perms.ticker.add_league %}
+                                <button class="btn btn-success" type="submit">Add</button>
+                                {% endif %}
+                            </td>
                         </tr>
                     </table>
                 </form>

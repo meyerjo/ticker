@@ -57,24 +57,14 @@
 {% endblock %}
 
 {% block extrajs %}
-    {#    <script type="text/javascript">#}
-    {#        $(document).ready(function () {#}
-    {#            $('button.lineup').on('click', function () {#}
-    {#                event.preventDefault();#}
-    {#                var data = $('form').serializeArray();#}
-    {#                console.log('Test')#}
-    {#                console.log(data);#}
-    {#                $.ajax({#}
-    {#                    url: '{% url 'match_lineup_save' match.id %}',#}
-    {#                    method: 'get',#}
-    {#                    data: {'data':data}#}
-    {#                }).done(function(data) {#}
-    {#                            console.log(data)#}
-    {#                        }#}
-    {#                )#}
-    {#            })#}
-    {#        })#}
-    {#    </script>#}
+        <script type="text/javascript">
+            $(document).ready(function () {
+{#                $('form[name^="field_"]').on('submit', function () {#}
+{#                    event.preventDefault();#}
+{#                    #}
+{#                })#}
+            })
+        </script>
 {% endblock %}
 
 
@@ -102,7 +92,7 @@
             {% with fields=match.get_fields %}
                 {% with fieldamount=fields|length %}
                     {% for field in fields %}
-                        <form method="post" action="{% url 'update_score_field' field.id '' %}">
+                        <form method="post" action="{% url 'update_score_field' field.id '' %}" name="field_{{ field.id }}">
                             {% csrf_token %}
                             <div class="col-sm-{{ 12|get_field_width:fieldamount }}">
                                 <div class="row-fluid">

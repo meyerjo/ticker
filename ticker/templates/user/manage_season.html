@@ -58,9 +58,14 @@ $(document).ready(function () {
                             <td>{{ season.start_date|date:'d.m.Y' }}</td>
                             <td>{{ season.end_date|date:'d.m.Y' }}</td>
                             <td>{{ season.get_leagues|length }}</td>
-                            <td><a href="{% url 'manage_season' season.id %}">Edit</a></td>
+                            <td>
+                                {% if perms.ticker.edit_season %}
+                                    <a href="{% url 'manage_season' season.id %}">Edit</a>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
+                            {% if perms.ticker.add_season %}
                     <tr>
                         <td></td>
                         <td>
@@ -80,9 +85,10 @@ $(document).ready(function () {
                     </tr>
                     <tr>
                         <td colspan="6" >
-                            <button class="btn btn-success" type="submit" style="float:right">Hinzufuegen</button>
+                                <button class="btn btn-success" type="submit" style="float:right">Hinzufuegen</button>
                         </td>
                     </tr>
+                            {% endif %}
                 </table>
                 </form>
             </div>

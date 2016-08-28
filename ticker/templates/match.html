@@ -57,34 +57,107 @@
     </style>
 {% endblock %}
 
+{% block extrajs %}
+<script type="text/javascript">
+
+    function update_ticker() {
+        $.ajax({
+            url: '{% url 'match_ticker' match.id '/json' %}',
+            method: 'get'
+        }).done(function(data) {
+            var obj = $.parseJSON(data);
+            $('#team_a').html(obj['team_a']);
+            $('#team_b').html(obj['team_b']);
+            $('#score').html(obj['score']);
+
+            var inp_values = $('input[name^="field_"]');
+            var field_used = {};
+            $.each(inp_values, function (i, elm) {
+               field_used[elm.value] = false;
+            });
+
+            for (var i = 0; i < obj['games'].length; i++) {
+                // update the fields
+                $('#' + obj['games'][i]['id'] + '_name').html(obj['games'][i]['name']);
+                $('#' + obj['games'][i]['id'] + '_player_a').html(obj['games'][i]['player_a']);
+                $('#' + obj['games'][i]['id'] + '_player_b').html(obj['games'][i]['player_b']);
+                // update the sets
+                var game = obj['games'][i];
+
+                if (game['field'] != -1) {
+                    $('#' + game['field'] + '_name').html(game['name']);
+                    $('#' + game['field'] + '_player_a').html(game['player_a']);
+                    $('#' + game['field'] + '_player_b').html(game['player_b']);
+                    field_used[game['field']] = true;
+                }
+
+                for (var j = 0; j < game['sets'].length; j++) {
+                    $('#set_' + game['sets'][j][0]).html(
+                            game['sets'][j][2][0] + ':' + game['sets'][j][2][1]
+                    );
+                    if (game['field'] != -1) {
+                        $('#' + game['field'] + '_' + j + '_team_a').html(game['sets'][j][2][0]);
+                        $('#' + game['field'] + '_' + j + '_team_b').html(game['sets'][j][2][1]);
+                    }
+                }
+            }
+            // empty ununsed fields
+            $.each(field_used, function (fieldid, elm) {
+                console.log(fieldid, elm);
+                if (elm == false) {
+                    $('#' + fieldid + '_name').html('');
+                    $('#' + fieldid + '_player_a').html('');
+                    $('#' + fieldid + '_player_b').html('');
+                    for (var i = 0; i < 5; i++) {
+                        $('#' + fieldid + '_' + i + '_team_a').html('');
+                        $('#' + fieldid + '_' + i + '_team_b').html('');
+                    }
+                }
+            })
+        })
+    }
+
+    setInterval(update_ticker, 20000);
+</script>
+{% endblock %}
+
 {% load custom_tags %}
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col-sm-4 team">{{ match.team_a.get_name }}</div>
-            <div class="col-sm-4 score">{{ match.get_score.0 }}:{{ match.get_score.1 }}</div>
-            <div class="col-sm-4 team">{{ match.team_b.get_name }}</div>
+            <div class="col-sm-4 team" id="team_a">{{ match.team_a.get_name }}</div>
+            <div class="col-sm-4 score" id="score">{{ match.get_score.0 }}:{{ match.get_score.1 }}</div>
+            <div class="col-sm-4 team" id="team_b">{{ match.team_b.get_name }}</div>
         </div>
         <div class="row">
             {% for field in match.get_fields %}
+                <input type="hidden" name="field_{{ forloop.counter0 }}" value="{{ field.id }}"/>
                 <div class="col-sm-6 field">
                     <div class="row">
-                        <div class="col-sm-12 fieldname">
+                        <div class="col-sm-12 fieldname" id="field_{{ field.id }}_name">
                             {{ field.get_name }}
                         </div>
                         {% with game=field.get_game %}
+                                <div class="col-sm-6 player" id="{{ field.id }}_player_a">
+                                    {% if game %}{{ game.player_a|format_players|safe }}{% endif %}
+                                </div>
+                                <div class="col-sm-6 player" id="{{ field.id }}_player_b">
+                                    {% if game %}{{ game.player_b|format_players|safe }}{% endif %}
+                                </div>
                             {% if game %}
-                                <div class="col-sm-6 player">
-                                    {{ game.player_a|format_players|safe }}
-                                </div>
-                                <div class="col-sm-6 player">
-                                    {{ game.player_b|format_players|safe }}
-                                </div>
                                 {% for set in game.get_set_objects %}
                                     <div class="row">
-                                        <div class="col-xs-4">{{ set.get_score.0 }}</div>
+                                        <div class="col-xs-4" id="{{ field.id }}_{{ forloop.counter0 }}_team_a">{{ set.get_score.0 }}</div>
                                         <div class="col-xs-4">Satz {{ set.set_number }}</div>
-                                        <div class="col-xs-4">{{ set.get_score.1 }}</div>
+                                        <div class="col-xs-4" id="{{ field.id }}_{{ forloop.counter0 }}_team_b">{{ set.get_score.1 }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                {% for i in match.rule.get_number_of_sets|get_range:0 %}
+                                    <div class="row">
+                                        <div class="col-xs-4" id="{{ field.id }}_{{ i }}_team_a"></div>
+                                        <div class="col-xs-4">Satz {{ forloop.counter }}</div>
+                                        <div class="col-xs-4" id="{{ field.id }}_{{ i }}_team_b"></div>
                                     </div>
                                 {% endfor %}
                             {% endif %}
