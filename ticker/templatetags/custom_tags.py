@@ -7,6 +7,7 @@ from django.db.models import QuerySet
 import math
 
 from ticker.models import FieldAllocation
+from ticker.models import League
 from ticker.models import Match
 from ticker.models import Profile
 
@@ -139,3 +140,9 @@ def get_club(user):
     if p is None:
         return None
     return p.associated_club
+
+@register.filter
+def get_leagues_club(user):
+    club = get_club(user)
+    leagues = League.objects.filter(teams__parent_club=club)
+    return leagues

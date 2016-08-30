@@ -546,7 +546,8 @@ def update_score_field(request, field_id, response_type):
         return HttpResponse('FAIL')
 
     # TODO: check if the requesting user is having the responsibility for the match
-
+    print(request.POST)
+    print(request.GET)
     updated_information = dict()
     set = game.get_current_set()
     if 'team_a' in request.POST:
@@ -558,7 +559,11 @@ def update_score_field(request, field_id, response_type):
         updated_information['type'] = 'score-update'
         updated_information['game_id'] = game.id
         updated_information['set_id'] = set.id
-        updated_information['set_number'] = set.get_score()
+        updated_information['field_id'] = field_id
+        updated_information['set_number'] = set.set_number
+        updated_information['set_score'] = set.get_score()
+        updated_information['game_score'] = game.get_sets()
+        updated_information['set_finished'] = set.is_finished(m.rule)
     elif 'team_b' in request.POST:
         value = request.POST['team_b']
         if value == '+':
@@ -568,7 +573,11 @@ def update_score_field(request, field_id, response_type):
         updated_information['type'] = 'score-update'
         updated_information['game_id'] = game.id
         updated_information['set_id'] = set.id
-        updated_information['set_number'] = set.get_score()
+        updated_information['field_id'] = field_id
+        updated_information['set_number'] = set.set_number
+        updated_information['set_score'] = set.get_score()
+        updated_information['game_score'] = game.get_sets()
+        updated_information['set_finished'] = set.is_finished(m.rule)
     elif 'switch_set' in request.POST:
         if game.is_won(m.rule):
             messages.info(request, 'Game is won. Removed it from the field')
@@ -579,6 +588,9 @@ def update_score_field(request, field_id, response_type):
             )
             updated_information['type'] = 'clear-field'
             updated_information['field_id'] = field_id
+            updated_information['game_field_link'] = reverse_lazy('remove_game_to_field', args=[game.id, field.id])
+            updated_information['game_name'] = game.name
+            updated_information['game_id'] = game.id
         elif game.get_current_set().is_finished(m.rule):
             game.current_set += 1
             game.save()
@@ -586,7 +598,7 @@ def update_score_field(request, field_id, response_type):
             set = game.get_current_set()
             updated_information['type'] = 'update-current-set'
             updated_information['field_id'] = field_id
-            updated_information['set_index'] = game.current_set - 1
+            updated_information['set_number'] = game.current_set
             updated_information['set_label'] = 'Satz {0}'.format(set.set_number)
             updated_information['set_score'] = set.get_score()
         else:
@@ -598,7 +610,6 @@ def update_score_field(request, field_id, response_type):
 
     if response_type is None:
         return HttpResponseRedirect(reverse('manage_ticker_interface', args=[m.id]))
-    # TODO: return json of change set
     return HttpResponse(json.dumps(updated_information))
 
 

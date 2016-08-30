@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from ticker.models import Club, Team, Player, Season, League
+from ticker.models import Game
 from ticker.models import Match
 from ticker.models import Profile
 
@@ -35,8 +36,7 @@ def manage_players_club(request, clubid):
     return render(request, 'user/manage_players_club.html', dict(club=club))
 
 
-
-
+@login_required
 def manage_fields(request, clubid):
     club = Club.objects.get(id=int(clubid))
     return render(request, 'user/manage_fields.html', dict(club=club))
@@ -85,6 +85,12 @@ def manage_ticker(request):
             matches = Match.objects.filter(team_a__parent_club=p.associated_club) | \
                       Match.objects.filter(team_b__parent_club=p.associated_club)
     return render(request, 'user/manage_ticker.html', dict(matches=matches))
+
+
+def simple_ticker_interface(request, game_id, randtoken):
+    game = Game.objects.filter(id=game_id).first()
+    return render(request, 'user/simple_ticker_interface.html', dict(game=game))
+
 
 
 def login(request):

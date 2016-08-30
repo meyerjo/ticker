@@ -1,0 +1,54 @@
+.hidden {
+            display:none ;
+        }
+
+        .teamname {
+            font-size: 2em;
+            text-align:center;
+            display:block;
+        }
+
+        .score {
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .lineup {
+            width: 100%;
+        }
+
+        .fieldtitle {
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .player {
+            text-align: center;
+        }
+
+        .fieldname {
+            border-radius: 100%;
+            display:inline-block;
+            border: 1px solid blue;
+            width: 32px;
+            height: 32px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .fieldname.active {
+            background: lightblue;
+        }
+
+        .fields .set {
+            text-align: center;
+        }
+
+        .fields .set.active {
+            font-weight: bold;
+        }
+
+        .fields .player {
+            height: 50px;
+        }

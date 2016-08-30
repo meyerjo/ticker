@@ -1,0 +1,25 @@
+div {
+    text-align: center;
+}
+
+.gamename {
+    font-size: 2em;
+}
+
+.players {
+    font-size: 1.2em;
+}
+
+.current_set {
+    vertical-align: middle;
+}
+
+.score_current_set {
+    font-size: 3em;
+}
+
+.set_number {
+    font-size: 2em;
+}
+
+

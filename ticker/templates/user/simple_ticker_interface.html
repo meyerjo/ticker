@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+{% load custom_tags %}
+{% block extracss %}
+<link href="{% static 'css/ticker_interface_simple.css' %}" rel="stylesheet"/>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+        {% if game %}
+            <div class="row gamename">
+                <div class="col-xs-12">TODO fieldname</div>
+            </div>
+            <div class="row gamename">
+                <div class="col-xs-12">{{ game.name }}</div>
+            </div>
+            <div class="row players">
+                <div class="col-xs-6">
+                    {{ game.player_a|format_players }}
+                </div>
+                <div class="col-xs-6">
+                    {{ game.player_b|format_players }}
+                </div>
+            </div>
+            <div class="row current_set">
+                {% with current_set=game.get_current_set %}
+                    <div class="col-xs-2">
+                        <button class="btn btn-primary">+</button>
+                        <button class="btn btn-primary">-</button>
+                    </div>
+                    <div class="col-xs-3 score_current_set" id="current_set_team_a">
+                        {{ current_set.get_score.0 }}
+                    </div>
+                    <div class="col-xs-2 set_number">
+                        {{ game.current_set }}
+                    </div>
+                    <div class="col-xs-3 score_current_set" id="current_set_team_b">
+                        {{ current_set.get_score.1 }}
+                    </div>
+                    <div class="col-xs-2">
+                        <button class="btn btn-primary">+</button>
+                        <button class="btn btn-primary">-</button>
+                    </div>
+                {% endwith %}
+            </div>
+            <hr style="margin-top: 100px"/>
+            <table class="table table-bordered">
+            <tr>
+                <th>Heim</th>
+                <th>Satz</th>
+                <th>Gast</th>
+            </tr>
+            {% for set in game.get_set_objects %}
+                <tr>
+                    <td class="col-xs-5" id="set_score_{{ set.id }}_team_a">
+                        {{ set.get_score.0 }}
+                    </td>
+                    <td class="col-xs-2">
+                        {{ set.set_number }}
+                    </td>
+                    <td class="col-xs-5" id="set_score_{{ set.id }}_team_b">
+                        {{ set.get_score.1 }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </table>
+            <div class="row">
+
+
+            </div>
+        {% else %}
+            <div class="row"><h1>No game available</h1></div>
+        {% endif %}
+    </div>
+{% endblock %}

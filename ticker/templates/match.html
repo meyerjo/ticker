@@ -68,7 +68,7 @@
             var obj = $.parseJSON(data);
             $('#team_a').html(obj['team_a']);
             $('#team_b').html(obj['team_b']);
-            $('#score').html(obj['score']);
+            $('#score').html(obj['result'][0]+ ':' + obj['result'][1]);
 
             var inp_values = $('input[name^="field_"]');
             var field_used = {};
@@ -83,7 +83,7 @@
                 $('#' + obj['games'][i]['id'] + '_player_b').html(obj['games'][i]['player_b']);
                 // update the sets
                 var game = obj['games'][i];
-
+                // if the game is associated to a field we update that as well
                 if (game['field'] != -1) {
                     $('#' + game['field'] + '_name').html(game['name']);
                     $('#' + game['field'] + '_player_a').html(game['player_a']);
@@ -117,7 +117,7 @@
         })
     }
 
-    setInterval(update_ticker, 20000);
+    setInterval(update_ticker, 5000);
 </script>
 {% endblock %}
 

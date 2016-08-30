@@ -36,17 +36,28 @@
                             {% endif %}
                         {% endwith %}
                     </li>
-                    {% if request.user.is_superuser %}
-                        <li class="dropdown">
+                    <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            Superuser Management
+                            Leagues
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="{% url 'manage_league' %}">Leagues</a></li>
-                            <li><a href="{% url 'manage_clubs' %}">Clubs</a></li>
-                            <li><a href="{% url 'manage_season' %}">Saison</a></li>
+                            {% for league in request.user|get_leagues_club %}
+                                <li><a href="{% url 'manage_league_details' league.id %}">{{ league.get_name }}</a></li>
+                            {% endfor %}
                         </ul>
+                    </li>
+                    {% if request.user.is_superuser %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                Superuser Management
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'manage_league' %}">Leagues</a></li>
+                                <li><a href="{% url 'manage_clubs' %}">Clubs</a></li>
+                                <li><a href="{% url 'manage_season' %}">Saison</a></li>
+                            </ul>
                         </li>
                     {% endif %}
                 </ul>

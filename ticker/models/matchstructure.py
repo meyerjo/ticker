@@ -160,7 +160,7 @@ class Game(models.Model):
     def is_finished(self, rule):
         return self.is_won(rule)
 
-    def is_won(self, rule):
+    def get_set_score(self, rule):
         won_team_a = 0
         won_team_b = 0
         for set in self.sets.all():
@@ -168,9 +168,19 @@ class Game(models.Model):
                 won_team_a += 1
             if set.set_won_by_team_b(rule):
                 won_team_b += 1
+        return [won_team_a, won_team_b]
+
+    def is_won(self, rule):
+        won_team_a, won_team_b = self.get_set_score(rule)
         if won_team_a == 3 or won_team_b == 3:
             return True
         return False
+
+    def is_won_by(self, rule):
+        won_team_a, won_team_b = self.get_set_score(rule)
+        if won_team_a == 3 or won_team_b == 3:
+            return 'team_a' if won_team_a == 3 else 'team_b'
+        return None
 
     def get_sets(self):
         sets = self.sets.all()
@@ -259,9 +269,12 @@ class Match(models.Model):
         for game in games:
             if not game.is_finished(self.rule):
                 continue
-            if game.is_won(self.rule):
+            res = game.is_won_by(self.rule)
+            if res is None:
+                continue
+            if res == 'team_a':
                 score_team_a +=1
-            else:
+            elif res == 'team_b':
                 score_team_b +=1
         return [score_team_a, score_team_b]
 
