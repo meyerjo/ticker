@@ -1,15 +1,16 @@
-from django import template
-import json
+import math
 
+from django import template
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
 
-import math
-
 from ticker.models import FieldAllocation
+from ticker.models import Game
 from ticker.models import League
 from ticker.models import Match
 from ticker.models import Profile
+from ticker.models import Set
+
 
 register = template.Library()
 
@@ -26,6 +27,7 @@ def check_if_in_responsible_profiles(obj, user):
         if elm.user.id == user.id:
             return True
     return False
+
 
 @register.filter
 def get_field_width(width, col):
@@ -48,6 +50,7 @@ def player_in_team_icon(teamobj, playerobj):
 def is_current_season_class(obj):
     return 'currentseason' if obj.season_is_on else ''
 
+
 @register.filter
 def is_selected(obj):
     return 'selected' if obj else ''
@@ -57,6 +60,7 @@ def is_selected(obj):
 def get_date_string(obj):
     print(obj)
     return obj.strftime('%d.%m.%Y')
+
 
 @register.filter
 def get_players(game, args):
@@ -74,7 +78,6 @@ def get_players(game, args):
         else:
             selected_player = selected_player[1]
 
-
     ret_list = []
     if 'single' in game.game_type and split_args[0] == '2':
             return []
@@ -88,7 +91,6 @@ def get_players(game, args):
         if isinstance(selected_player, QuerySet):
             selected_player = selected_player[0]
 
-
         if 'woman' in game.game_type or 'women' in game.game_type:
             players = team.get_players().filter(sex='female')
         else:
@@ -99,18 +101,22 @@ def get_players(game, args):
             ret_list.append((player.id, player.get_name(), selected))
         return ret_list
 
+
 @register.filter
-def is_in(str, search):
-    return search in str
+def is_in(content_str, search):
+    return search in content_str
+
 
 @register.filter
 def format_players(obj):
     names = [p.get_name() for p in obj.all()]
     return '<br/>'.join(names)
 
+
 @register.filter
 def is_current_set(obj, game):
     return 'setactive' if obj.set_number == game.current_set and game.in_progress() else ''
+
 
 @register.filter
 def field_active(field, game):
@@ -119,13 +125,22 @@ def field_active(field, game):
 
 
 @register.filter
-def finished_set(set, match):
-    return set.is_finished(match.rule)
+def get_fieldname(game):
+    assert(isinstance(game, Game))
+    fa = FieldAllocation.objects.filter(game=game, is_active=True).first()
+    return fa.field.name if fa else 'No field assigned?'
 
 
 @register.filter
-def get_range(count, min=0):
-    return range(min, count)
+def finished_set(set_obj, match):
+    assert(isinstance(set_obj, Set))
+    assert(isinstance(match, Match))
+    return set_obj.is_finished(match.rule)
+
+
+@register.filter
+def get_range(count, min_value=0):
+    return range(min_value, count)
 
 
 @register.filter
@@ -140,6 +155,7 @@ def get_club(user):
     if p is None:
         return None
     return p.associated_club
+
 
 @register.filter
 def get_leagues_club(user):

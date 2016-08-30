@@ -3,13 +3,37 @@
 {% load staticfiles %}
 {% load custom_tags %}
 {% block extracss %}
-<link href="{% static 'css/ticker_interface_simple.css' %}" rel="stylesheet"/>
+    <link href="{% static 'css/ticker_interface_simple.css' %}" rel="stylesheet"/>
+{% endblock %}
+{% block navigation %}
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{% url 'manage_dashboard' %}">Ticker</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">Test</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 {% endblock %}
 {% block content %}
     <div class="container-fluid">
         {% if game %}
             <div class="row gamename">
-                <div class="col-xs-12">TODO fieldname</div>
+                <div class="col-xs-12">{{ game|get_fieldname }}</div>
             </div>
             <div class="row gamename">
                 <div class="col-xs-12">{{ game.name }}</div>
@@ -43,26 +67,48 @@
                     </div>
                 {% endwith %}
             </div>
+            <div class="row switchsetrow">
+                <div class="col-sm-12">
+                    <button name="switch_set" value="True" class="btn btn-primary">Satz wechseln</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <button name="pause" value="on" class="btn btn-primary">Pause</button>
+                </div>
+            </div>
+
+            {# TODO: introduce panels #}
+            <div class="row">
+                <div class="col-xs-4">
+                    <button class="btn btn-warning">Aufgabe Team A</button>
+                </div>
+                <div class="col-xs-4"></div>
+                <div class="col-xs-4">
+                    <button class="btn btn-warning">Aufgabe Team B</button>
+                </div>
+            </div>
+
             <hr style="margin-top: 100px"/>
-            <table class="table table-bordered">
-            <tr>
-                <th>Heim</th>
-                <th>Satz</th>
-                <th>Gast</th>
-            </tr>
-            {% for set in game.get_set_objects %}
+            <table class="table table-striped table-bordered">
                 <tr>
-                    <td class="col-xs-5" id="set_score_{{ set.id }}_team_a">
-                        {{ set.get_score.0 }}
-                    </td>
-                    <td class="col-xs-2">
-                        {{ set.set_number }}
-                    </td>
-                    <td class="col-xs-5" id="set_score_{{ set.id }}_team_b">
-                        {{ set.get_score.1 }}
-                    </td>
+                    <th>Heim</th>
+                    <th>Satz</th>
+                    <th>Gast</th>
                 </tr>
-            {% endfor %}
+                {% for set in game.get_set_objects %}
+                    <tr>
+                        <td class="col-xs-5" id="set_score_{{ set.id }}_team_a">
+                            {{ set.get_score.0 }}
+                        </td>
+                        <td class="col-xs-2">
+                            {{ set.set_number }}
+                        </td>
+                        <td class="col-xs-5" id="set_score_{{ set.id }}_team_b">
+                            {{ set.get_score.1 }}
+                        </td>
+                    </tr>
+                {% endfor %}
             </table>
             <div class="row">
 

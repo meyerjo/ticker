@@ -14,6 +14,11 @@ div {
     vertical-align: middle;
 }
 
+th {
+    text-align: center;
+}
+
+
 .score_current_set {
     font-size: 3em;
 }
