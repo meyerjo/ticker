@@ -84,7 +84,29 @@
         <div class="row">
             <div class="col-sm-12">
                 <h1>Team-Details: {{ team.get_name }}</h1>
-                <a href="{% url 'manage_club_details' team.parent_club.id %}">Edit parent club</a>
+            </div>
+            <div class="col-sm-12">
+                <a href="{% url 'manage_club_details' team.parent_club.id %}">
+                    <i class="fa fa-edit"></i>Edit parent club
+                </a>
+                <br/>
+
+                <form method="post" action="{% url 'edit_parent_club' team.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" value="{{ team.id }}" name="team_id"/>
+                    <input type="hidden" value="{{ team.parent_club.id }}" name="old_parent_club"/>
+                    <label for="edit_parent_club">
+                        Parent Club:
+                        <select id="edit_parent_club" name="parent_club">
+                            {% for club in clubs %}
+                                <option value="{{ club.id }}" {% if club.id == team.parent_club.id %} selected {% endif %}>
+                                    {{ club.get_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <button class="btn btn-primary">Change parent club</button>
+                </form>
             </div>
             <div class="col-sm-9">
                 <form action="{% url 'player_add' %}" method="post">
@@ -146,9 +168,8 @@
                     <label for="field_{{ field.0 }}">
                         {{ field.1 }}
                     </label>
-                    <input id="field_{{ field.0 }}" name="field_{{ field.0 }}" value="{{ field.2 }}"/>
+                    <input type="checkbox" id="field_{{ field.0 }}" name="field_{{ field.0 }}" value="{{ field.2 }}"/>
                 {% endfor %}
-                TODO
             </div>
         </div>
         <hr/>

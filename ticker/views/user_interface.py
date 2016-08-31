@@ -27,7 +27,10 @@ def manage_club_details(request, clubid):
 @login_required
 def manage_team_details(request, teamid):
     teams = Team.objects.filter(id=int(teamid)).first()
-    return render(request, 'user/manage_teams.html', dict(team=teams, possible_sex=Player.possible_sex))
+    clubs = Club.objects.all()
+    return render(request, 'user/manage_teams.html', dict(team=teams,
+                                                          possible_sex=Player.possible_sex,
+                                                          clubs=clubs))
 
 
 @login_required

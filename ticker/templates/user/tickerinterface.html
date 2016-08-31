@@ -189,6 +189,7 @@
                         <th>Saetze</th>
                         <th>Feld</th>
                         <th>Editieren</th>
+                        <th><a href="{% url 'export_match' match.id %}" target="_blank">Export</a></th>
                     </tr>
                     {% for game in match.get_all_games %}
                         <tr id="row_{{ game.id }}">
@@ -239,6 +240,9 @@
                             </td>
                             <td>
                                 <a href="#EDIT">Edit</a>
+                            </td>
+                            <td>
+                                <a target="_blank" href="{% url 'export_game' game.id %}">Export Game</a>
                             </td>
                         </tr>
                     {% endfor %}

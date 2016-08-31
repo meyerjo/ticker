@@ -18,6 +18,7 @@ from ticker.models import PlayingField
 from ticker.models import Game
 from ticker.models import Match
 from ticker.models import Player
+from ticker.models import Profile
 from ticker.models import TeamPlayerAssociation
 
 @login_required
@@ -611,6 +612,27 @@ def update_score_field(request, field_id, response_type):
     if response_type is None:
         return HttpResponseRedirect(reverse('manage_ticker_interface', args=[m.id]))
     return HttpResponse(json.dumps(updated_information))
+
+
+@login_required
+def edit_parent_club(request, team_id):
+    old_parent_club = request.POST['old_parent_club']
+    new_club_id = request.POST['parent_club']
+
+    team = Team.objects.get(id=team_id)
+    profile = Profile.objects.filter(user=request.user).first()
+    if profile is None and not request.user.is_superuser:
+        messages.error(request, 'Your account is not associated to any club')
+        return HttpResponseRedirect(reverse_lazy('manage_team_details', args=[team_id]))
+    if profile.associated_club.id != team.parent_club.id and not request.user.is_superuser:
+        messages.error(request, 'Your account is not associated to this club')
+        return HttpResponseRedirect(reverse_lazy('manage_team_details', args=[team_id]))
+
+    # change team
+    team.parent_club = Club.objects.filter(id=new_club_id).first()
+    team.save()
+
+    return HttpResponseRedirect(reverse_lazy('manage_teams_details', args=[team_id]))
 
 
 def not_yet_implemented(request, *args):

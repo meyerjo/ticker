@@ -31,6 +31,10 @@ ALLOWED_HOSTS = []
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
+LOGIN_REDIRECT_URL = '/ticker/manage'
+LOGIN_URL = '/ticker/login'
+PDFTK_BIN = r'C:\"Program Files (x86)"\"PDFtk Server"\bin\pdftk.exe'
+
 MESSAGE_TAGS = {
     messages.DEBUG: 'debug',
     messages.INFO: 'info',
@@ -77,6 +81,10 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
         },
+    },
+    {
+        'BACKEND': 'ticker.pdf.PdftkEngine',
+        'APP_DIRS': True,
     },
 ]
 

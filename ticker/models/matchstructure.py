@@ -201,6 +201,15 @@ class Game(models.Model):
         set = self.sets.filter(set_number=current_set).first()
         return set
 
+    def get_points(self):
+        sets = self.sets.all()
+        points_team_a = 0
+        points_team_b = 0
+        for set in sets:
+            points_team_a += set.get_score()[0]
+            points_team_b += set.get_score()[1]
+        return [points_team_a, points_team_b]
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         super(Game, self).save(force_insert, force_update, using, update_fields)
@@ -278,10 +287,25 @@ class Match(models.Model):
                 score_team_b +=1
         return [score_team_a, score_team_b]
 
+
     def get_fields(self):
         if self.team_a is None:
             return []
         return self.team_a.get_fields()
 
+    def get_point_score(self):
+        games = self.get_all_games()
+        score = [0, 0]
+        for game in games:
+            score[0] += game.get_points()[0]
+            score[1] += game.get_points()[1]
+            print(game.get_points(), score)
+        return score
 
-
+    def get_set_score(self):
+        games = self.get_all_games()
+        score = [0, 0]
+        for game in games:
+            score[0] += game.get_set_score(self.rule)[0]
+            score[1] += game.get_set_score(self.rule)[1]
+        return score

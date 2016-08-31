@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
 from ticker.views.api import not_yet_implemented
+from ticker.views.export import export_match, export_game
 from ticker.views.match import match_ticker
 from ticker.views.startpage import start_page
 from ticker.views.user_interface import *
@@ -29,6 +30,9 @@ urlpatterns = [
     url(r'^manage/?$', manage_dashboard, name='manage_dashboard'),
 
     url(r'^match/([0-9]+)(/?|/json/?)$', match_ticker, name='match_ticker'),
+
+    url(r'export/match/([0-9]+)/?$', export_match,  name='export_match'),
+    url(r'export/game/([0-9]+)/?$', export_game,  name='export_game'),
     url(r'^login/?$', login, name='login'),
     url('', start_page),
 ]

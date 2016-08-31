@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^club/([0-9]+)/addteam/?$', add_team, name='team_add'),
     url(r'^team/exists/?$', exists_team, name='exists_team' ),
     url(r'^team/add/json/?', add_team_club, name='add_team_club_json'),
+    url(r'^team/edit/parentclub/([0-9]+)/?$', edit_parent_club, name='edit_parent_club' ),
     url(r'^club/edit/?$', edit_club, name='club_edit'),
 
     url(r'^field/test/$', add_field, name='fields_add'),
