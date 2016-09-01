@@ -9,15 +9,15 @@ from ticker.models import Match
 from ticker.templatetags.custom_tags import format_players
 
 
-def presentation_view(request, presentation_id, match_id):
+def presentation_view(request, presentation_id, match_id, response_type):
     m = Match.objects.get(id=match_id)
+    response_type = None if response_type == '/' or response_type == '' else response_type
     #    p = Presentation.objects.get
     return render(request, 'presentation/general_presentation.html', dict(match=m))
 
 
 def display_dashboard(request):
     clubs = Club.objects.all().order_by('club_name')
-
     return render(request, 'presentation/score_dashboard.html', dict(clubs=clubs))
 
 
