@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block extracss %}
+    <style>
+        .playernames {
+            font-size: 30vh;
+        }
+
+        #container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            padding-left: 50px;
+        }
+
+        .team_a {
+            background-color: indianred;
+            text-align:left;
+        }
+
+        .team_b {
+            background-color: greenyellow;
+            text-align:left;
+            vertical-align: middle;
+            border-top: 5px solid black;
+        }
+
+        .set.active {
+            background-color: white;
+        }
+
+
+        #top_div {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 50%;
+        }
+
+
+
+        #bottom_div {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            left: 0;
+            bottom: 0;
+        }
+
+        .set  {
+            width: 20%;
+            float: left;
+            text-align: center;
+            border-left: 5px solid black;
+            height: 100%;
+        }
+
+        #top_div .set.active {
+            background-color: darkred;
+            color: white;
+        }
+
+
+        #bottom_div .set.active {
+            background-color: darkgreen;
+            color: white;
+        }
+    </style>
+{% endblock %}
+
+{% block extrajs %}
+    <script type="text/javascript">
+        setInterval(function() {updateScore()}, 10000);
+
+        function updateScore() {
+            $.ajax({
+                url: '{% url 'score_display' field_id '/json' %}',
+                method: 'get'
+            }).done(function(data) {
+                var obj = $.parseJSON(data);
+                $.each(obj, function(key, val) {
+                   $('div[data-setnumber="' + key + '"][data-team="a"]').html(val[0]);
+                   $('div[data-setnumber="' + key + '"][data-team="b"]').html(val[1]);
+                });
+            });
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div id="container">
+        <div id="top_div" class="playernames team_a">
+            {% for set in game.sets.all %}
+                <div data-setnumber="{{ set.set_number }}" data-team="a" class="set {% if set.set_number == game.current_set %} active {% endif %} ">{{ set.get_score.0 }}</div>
+            {% endfor %}
+        </div>
+        <div id="bottom_div" class="playernames team_b">
+            {% for set in game.sets.all %}
+                <div data-setnumber="{{ set.set_number }}" data-team="b" class="set {% if set.set_number == game.current_set %} active {% endif %} ">{{ set.get_score.1 }}</div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

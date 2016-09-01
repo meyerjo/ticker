@@ -3,6 +3,7 @@ from django.conf.urls import url
 from ticker.views.api import not_yet_implemented
 from ticker.views.export import export_match, export_game
 from ticker.views.match import match_ticker
+from ticker.views.presentation import presentation_view, score_display, team_display, display_dashboard
 from ticker.views.startpage import start_page
 from ticker.views.user_interface import *
 
@@ -33,6 +34,14 @@ urlpatterns = [
 
     url(r'export/match/([0-9]+)/?$', export_match,  name='export_match'),
     url(r'export/game/([0-9]+)/?$', export_game,  name='export_game'),
+
+
+    url(r'^presentation/([0-9]+)/match/([0-9]+)/?', presentation_view, name='presentation_view'),
+    url(r'^presentation/score/field/([0-9]+)(/?|/json/?)$', score_display, name='score_display'),
+    url(r'^presentation/team/field/([0-9]+)(/?|/json/?)$', team_display, name='team_display'),
+    url(r'^presentation/field/dashboard/?$', display_dashboard, name='display_dashboard'),
+
+
     url(r'^login/?$', login, name='login'),
     url('', start_page),
 ]

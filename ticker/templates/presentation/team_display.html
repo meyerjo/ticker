@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block extracss %}
+    <style>
+        .playernames {
+            font-size: 17vh;
+        }
+
+        #container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            padding-left: 50px;
+        }
+
+        #top_div {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 50%;
+            background-color: indianred;
+            text-align:left;
+        }
+
+        #bottom_div {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            background-color: greenyellow;
+            text-align:left;
+            vertical-align: middle;
+        }
+    </style>
+{% endblock %}
+{% load custom_tags %}
+
+{% block extrajs %}
+    <script type="text/javascript">
+        setInterval(function() {updateTeam()}, 10000);
+
+        function updateTeam() {
+            $.ajax({
+                url: '{% url 'team_display' field_id '/json' %}',
+                method: 'get'
+            }).done(function(data) {
+                var obj = $.parseJSON(data);
+                $.each(obj, function(key, val) {
+                   $('div[data-team"' + key +  '"]').html(val);
+                });
+            });
+        }
+    </script>
+{% endblock %}
+{% block content %}
+    <div id="container">
+        <div data-team="team_a" id="top_div" class="playernames">
+            {{ game.player_a|format_players }}
+        </div>
+        <div data-team="team_b" id="bottom_div" class="playernames">
+            {{ game.player_b|format_players }}
+        </div>
+    </div>
+{% endblock %}

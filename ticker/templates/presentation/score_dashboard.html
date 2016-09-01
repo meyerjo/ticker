@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <ul class="list-group">
+                    {% for club in clubs %}
+                        <li class="list-group-item">{{ club.get_name }}</li>
+                        <ul class="list-group">
+                        {% for field in club.fields.all %}
+                            <li class="list-group-item">
+                                {{ field.get_name }}
+                                <a href="{% url 'score_display' field.id '' %}">Spielstand</a>
+                                <a href="{% url 'team_display' field.id '' %}">Team</a>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

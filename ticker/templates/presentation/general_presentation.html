@@ -1,0 +1,33 @@
+{% extends 'presentation/base.html' %}
+
+{% block carousel_definition %}
+    //setInterval(function () { carousel(slideshow) }, 8000);
+{% endblock %}
+
+{% block extracss %}
+    <style>
+.score {
+    font-size: 3em;
+    left: 33%;
+    }
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    <div class="score">0-0</div>
+    # Herzlich willkommen!
+    ### zum Spiel
+    ## {{ match.team_a.get_name|default_if_none:'Team A' }}
+    ### gegen
+    ## {{ match.team_b.get_name|default_if_none:'Team B' }}
+
+
+    ---
+    <div class="score">0-0</div>
+
+    ---
+
+
+
+{% endblock %}
