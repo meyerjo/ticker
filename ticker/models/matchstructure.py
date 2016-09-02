@@ -185,7 +185,7 @@ class Game(models.Model):
     def get_sets(self):
         sets = self.sets.all()
         if len(sets) != 5:
-            return 'error'
+            return 'Sets missing'
         all_sets = []
         for set in sets:
             tmp_score = set.get_score()

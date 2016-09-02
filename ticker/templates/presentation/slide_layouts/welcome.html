@@ -1,6 +1,7 @@
-    <div class="score">0-0</div>
-    # Herzlich willkommen!
-    ### zum Spiel
-    ## {{ match.team_a.get_name|default_if_none:'Team A' }}
-    ### gegen
-    ## {{ match.team_b.get_name|default_if_none:'Team B' }}
+<section>
+    <h1>Herzlich willkommen</h1>
+    <h3>zum Bundesliga Spiel</h3>
+    <h1>{{ game.team_a.get_name }}</h1>
+    <h3>gegen</h3>
+    <h1>{{ game.team_b.get_name }}</h1>
+</section>

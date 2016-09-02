@@ -1,5 +1,6 @@
 {% extends 'user/manage_base.html' %}
 
+{% load custom_tags %}
 {% block content %}
     <div class="container">
         <div class="row">
@@ -12,13 +13,35 @@
                     </ul>
                 {% endif %}
             </div>
-            <div class="col-sm-12">
-                <ul>
-                    <li><a href="{% url 'manage_clubs' %}">Manage Clubs</a></li>
-                    <li><a href="{% url 'manage_season' %}">Manage Season</a></li>
-                    <li><a href="{% url 'manage_league' %}">Manage League</a></li>
-                </ul>
+        </div>
+        {% with associated_club=request.user|get_club %}
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Club
+                    </div>
+                    {% if associated_club %}
+                        <a href="{% url 'manage_club_details' associated_club.id %}"><i class="fa fa-edit"></i>{{ associated_club.get_name }} bearbeiten</a>
+                    {% else %}
+                        <a href="{% url 'manage_clubs' %}"><i class="fa fa-edit"></i> Club bearbeiten</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Ligen</div>
+                    <ul class="list-group">
+                    {% for league in request.user|get_leagues_club %}
+                        <li class="list-group-item"><a href="{% url 'manage_league_details' league.id %}">{{ league.get_name }}</a></li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="col-sm-9">
+
             </div>
         </div>
+        {% endwith %}
     </div>
 {% endblock %}

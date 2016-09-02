@@ -1,10 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% load custom_tags %}
+<section>
+    <h2>Ergebnisse</h2>
+    <table style="width: 100%" class="resulttable">
+        <thead>
+        <tr>
+            <th>Spieltyp</th>
+            <th>{{ match.team_a.get_name }}</th>
+            <th>{{ match.team_b.get_name }}</th>
+            <th>Saetze</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for game in match.get_all_games %}
+        <tr>
+            <td>{{ game.name }}</td>
+            <td>{{ game.player_a|format_players }}</td>
+            <td>{{ game.player_b|format_players }}</td>
+            <td>{{ game.get_sets }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>

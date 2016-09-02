@@ -1,10 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% load custom_tags %}
+<section>
+    <h1>Feld: <span class="field_name">{{ field.name }}</span></h1>
+    <h2 data-team="a">{{ field.game.player_a|format_players }}</h2>
+    <hr/>
+    <h2 data-team="b">{{ field.game.player_b|format_players }}</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>1</th>
+            <th>2</th>
+            <th>3</th>
+            <th>4</th>
+            <th>5</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            {% for set in field.game.get_set_objects %}
+            <td>{{ set.get_score.0 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            {% for set in field.game.get_set_objects %}
+            <td>{{ set.get_score.1 }}</td>
+            {% endfor %}
+        </tr>
+        </tbody>
+    </table>
+</section>

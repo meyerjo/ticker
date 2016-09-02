@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+{% load custom_tags %}
+{% block extracss %}
+    <link href="{% static 'css/ticker_interface_simple.css' %}" rel="stylesheet"/>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+       <div class="row">
+           <div class="col-sm-12">
+               <h1>Login with token</h1>
+           </div>
+           <div class="col-sm-12">
+               <input type="text" placeholder="token" name="token"/>
+           </div>
+           <div clss="col-sm-12">
+               <button class="btn btn-primary">Login</button>
+           </div>
+       </div>
+    </div>
+{% endblock %}

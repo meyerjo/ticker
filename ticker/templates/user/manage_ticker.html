@@ -20,7 +20,7 @@
                         {{ match.match_time|date:"d.m.Y G:i" }}
                     </div>
                     <div class="col-sm-4">{{ match.team_a.get_name }}</div>
-                    <div class="col-sm-4">{{ match.get_score.0 }}::{{ match.get_score.1 }}</div>
+                    <div class="col-sm-4">{{ match.get_score.0 }}:{{ match.get_score.1 }}</div>
                     <div class="col-sm-4">{{ match.team_b.get_name }}</div>
                 </div>
             </a>

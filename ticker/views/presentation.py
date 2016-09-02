@@ -24,7 +24,6 @@ def display_dashboard(request):
 def score_display(request, field_id, response_type):
     fa = FieldAllocation.objects.filter(field_id=field_id, is_active=True).first()
     game = fa.game if fa else None
-    print(response_type)
     response_type = None if response_type == '/' or response_type=='' else response_type
     if response_type is not None:
         resp = {
