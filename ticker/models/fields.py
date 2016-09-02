@@ -1,8 +1,8 @@
-from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import CASCADE
 
-from ticker.models import Match, Game
+from ticker.models import Game
 
 
 class PlayingField(models.Model):
@@ -19,6 +19,20 @@ class PlayingField(models.Model):
             return field_allocations[0].game
         return None
 
+    def has_token(self):
+        tokens = PresentationToken.objects.filter(
+            field=self,
+            is_used=False,
+        )
+        return tokens.count() != 0
+
+    def get_token(self):
+        tokens = PresentationToken.objects.filter(
+            field=self,
+            is_used=False,
+        )
+        return tokens.first()
+
 class FieldAllocation(models.Model):
     field = models.ForeignKey(PlayingField, CASCADE)
     game = models.ForeignKey(Game, CASCADE)
@@ -32,3 +46,31 @@ class FieldAllocation(models.Model):
             self.field.field_name,
             ' is active' if self.is_active else ' is outdated'
         )
+
+
+class PresentationToken(models.Model):
+    user = models.ForeignKey(User)
+    field = models.ForeignKey(PlayingField)
+    token = models.CharField(max_length=32)
+
+    is_used = models.BooleanField(default=False)
+
+    create_time = models.DateTimeField(auto_now_add=True)
+
+    usage_time = models.DateTimeField(null=True, blank=True)
+
+    last_action = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return '<Token: {0} ({1})>'.format(
+            self.token,
+            'used' if self.is_used else 'unused'
+        )
+
+    @staticmethod
+    def is_valid(token):
+        t = PresentationToken.objects.filter(
+            token=token,
+            is_used=False
+        )
+        return True if t.first() is not None else False

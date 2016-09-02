@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse, reverse_lazy, resolve
 from django.db import transaction
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.utils import timezone
 
 from ticker.models import Club, Team, Season, League
@@ -18,6 +19,7 @@ from ticker.models import PlayingField
 from ticker.models import Game
 from ticker.models import Match
 from ticker.models import Player
+from ticker.models import PresentationToken
 from ticker.models import Profile
 from ticker.models import TeamPlayerAssociation
 
@@ -642,3 +644,53 @@ def not_yet_implemented(request, *args):
         resolve(request.path_info).url_name,
         json.dumps(args)
     ))
+
+
+def validate_token(request):
+    submitted_token = request.POST['token']
+
+    token = PresentationToken.objects.filter(
+        token=submitted_token,
+    ).first()
+    if token is None:
+        messages.error(request, 'Invalid Token')
+        return HttpResponseRedirect(reverse('simple_ticker_login'))
+
+    if token.is_used:
+        messages.error(request, 'Token is outdated')
+        return HttpResponseRedirect(reverse('simple_ticker_login'))
+    request.session['token'] = submitted_token
+    return HttpResponseRedirect(reverse('ticker_interface_simple', args=[token.field.id]))
+
+
+@login_required()
+def api_new_token(request, field_id):
+    pf = PlayingField.objects.filter(id=field_id).first()
+    print(pf)
+
+    # TODO: validate if the user has permission to generate a token for this match
+    current_tokens = PresentationToken.objects.filter(
+        field_id=field_id,
+        is_used=False
+    ).first()
+    if current_tokens is not None:
+        print(current_tokens.token)
+        messages.error(request, 'Another token already exists')
+        return redirect(request.META.get('HTTP_REFERER'))
+    with transaction.atomic():
+        import time, hashlib
+        t_str = str(time.time())
+        t_str = hashlib.md5(t_str.encode('utf-8')).hexdigest().upper()[:6]
+        token = PresentationToken(field=pf, user=request.user, token=t_str)
+        token.save()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+@login_required
+def invalidate_token(request, token_id):
+    t = PresentationToken.objects.get(id=token_id)
+
+    if request.user.is_superuser or t.user == request.user:
+        t.is_used = True
+        t.save()
+    return redirect(request.META.get('HTTP_REFERER'))
+

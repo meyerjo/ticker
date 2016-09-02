@@ -128,7 +128,7 @@ def field_active(field, game):
 def get_fieldname(game):
     assert(isinstance(game, Game))
     fa = FieldAllocation.objects.filter(game=game, is_active=True).first()
-    return fa.field.name if fa else 'No field assigned?'
+    return fa.field.field_name if fa else 'No field assigned?'
 
 
 @register.filter

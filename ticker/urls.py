@@ -4,6 +4,8 @@ from ticker.views.api import not_yet_implemented
 from ticker.views.export import export_match, export_game
 from ticker.views.match import match_ticker
 from ticker.views.presentation import presentation_view, score_display, team_display, display_dashboard
+from ticker.views.simple_ticker import simple_ticker_interface
+from ticker.views.simple_ticker import simple_ticker_login
 from ticker.views.startpage import start_page
 from ticker.views.user_interface import *
 
@@ -27,7 +29,9 @@ urlpatterns = [
     url(r'^manage/season/([0-9]+)/?$', manage_season, name='manage_season'),
     url(r'^manage/ticker/?$', manage_ticker, name='manage_ticker'),
     url(r'^manage/ticker/([0-9]+)/?', manage_ticker_interface, name='manage_ticker_interface'),
-    url(r'^manage/ticker/simple/([0-9]+)/([A-z0-9]?)/?', simple_ticker_interface, name='ticker_interface_simple'),
+
+    url(r'^manage/ticker/simple/login/?', simple_ticker_login, name='ticker_interface_login'),
+    url(r'^manage/ticker/simple/([0-9]+)/?', simple_ticker_interface, name='ticker_interface_simple'),
     url(r'^manage/?$', manage_dashboard, name='manage_dashboard'),
 
     url(r'^match/([0-9]+)(/?|/json/?)$', match_ticker, name='match_ticker'),
