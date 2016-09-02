@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load custom_tags %}
 {% block extracss %}
     <style>
         .playernames {
@@ -15,15 +15,16 @@
             padding-left: 50px;
         }
 
+        {% with team_a=game.get_match.team_a %}
         .team_a {
-            background-color: indianred;
-            color: black;
+            background-color: {{team_a|get_color:'score_display_top'|default:'indianred' }} ;
+            color: {{ team_a|get_color:'score_display_top_font'|default:'black' }};
             text-align:left;
         }
 
         .team_b {
-            background-color: greenyellow;
-            color: black;
+            background-color: {{ team_a|get_color:'score_display_bottom'|default:'greenyellow' }};
+            color: {{ team_a|get_color:'score_display_bottom_font'|default:'black' }};
             text-align:left;
             vertical-align: middle;
             border-top: 5px solid black;
@@ -31,14 +32,14 @@
 
 
         #top_div .set.active {
-            background-color: darkred;
-            color: white;
+            background-color: {{ team_a|get_color:'score_active_set_top'|default:'darkred' }};
+            color: {{ team_a|get_color:'score_active_set_top_font'|default:'white' }};
         }
 
 
         #bottom_div .set.active {
-            background-color: darkgreen;
-            color: white;
+            background-color: {{ team_a|get_color:'score_active_set_bottom'|default:'darkgreen' }};
+            color: {{ team_a|get_color:'score_active_set_bottom_font'|default:'white' }};
         }
 
 
@@ -74,7 +75,7 @@
             height: 100%;
         }
 
-
+        {% endwith %}
     </style>
 {% endblock %}
 

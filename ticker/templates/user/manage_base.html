@@ -32,7 +32,7 @@
                                 <a href="{% url 'manage_club_details' responsible_club.id %}">Club</a>
                             {% else %}
                                 {% if request.user.is_superuser %}
-                                    <a href="{% url 'manage_club' %}">Club</a>
+                                    <a href="{% url 'manage_clubs' %}">Club</a>
                                 {% endif %}
                             {% endif %}
                         {% endwith %}

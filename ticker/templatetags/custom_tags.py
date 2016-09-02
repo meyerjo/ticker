@@ -4,7 +4,7 @@ from django import template
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
 
-from ticker.models import FieldAllocation
+from ticker.models import FieldAllocation, ColorDefinition
 from ticker.models import Game
 from ticker.models import League
 from ticker.models import Match
@@ -162,3 +162,12 @@ def get_leagues_club(user):
     club = get_club(user)
     leagues = League.objects.filter(teams__parent_club=club)
     return leagues
+
+
+@register.filter
+def get_color(team, color_label):
+    cd =  ColorDefinition.objects.filter(
+        club__team=team,
+        color_definition__name=color_label
+    ).first()
+    return cd.color_hexcode if cd else None

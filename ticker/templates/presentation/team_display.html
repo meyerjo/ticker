@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load custom_tags %}
 {% block extracss %}
     <style>
         .playernames {
@@ -16,9 +16,10 @@
             padding-left: 50px;
         }
 
+        {% with team_a=game.get_match.team_a %}
         #top_div {
-            background-color: indianred;
-            color: black;
+            background-color: {{team_a|get_color:'score_display_top'|default:'indianred' }} ;
+            color: {{ team_a|get_color:'score_display_top_font'|default:'black' }};
             position: absolute;
             top: 0;
             right: 0;
@@ -29,8 +30,8 @@
         }
 
         #bottom_div {
-            background-color: greenyellow;
-            color: black;
+            background-color: {{ team_a|get_color:'score_display_bottom'|default:'greenyellow' }};
+            color: {{ team_a|get_color:'score_display_bottom_font'|default:'black' }};
             position: absolute;
             top: 50%;
             right: 0;
@@ -40,6 +41,7 @@
             vertical-align: middle;
             overflow:hidden;
         }
+        {% endwith %}
     </style>
 {% endblock %}
 {% load custom_tags %}

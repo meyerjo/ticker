@@ -111,3 +111,26 @@ class Profile(models.Model):
 
     def __str__(self):
         return '{0} {1}'.format(self.user.get_full_name(), str(self.associated_club))
+
+
+class DefinableColor(models.Model):
+    name = models.CharField(max_length=64)
+
+    def __str__(self):
+        return 'Color-Definition: {0}'.format(self.name)
+
+
+class ColorDefinition(models.Model):
+    club = models.ForeignKey(Club, CASCADE)
+    color_definition = models.ForeignKey(DefinableColor)
+    color_hexcode = models.CharField(max_length=32)
+
+    def __str__(self):
+        return '{0} has {1} filled with {2}'.format(
+            self.club.get_name(),
+            self.color_definition.name,
+            self.color_hexcode
+        )
+
+    class Meta:
+        unique_together = ('club', 'color_definition')

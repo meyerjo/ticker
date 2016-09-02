@@ -210,6 +210,9 @@ class Game(models.Model):
             points_team_b += set.get_score()[1]
         return [points_team_a, points_team_b]
 
+    def get_match(self):
+        return Match.objects.filter(games__id=self.id).first()
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         super(Game, self).save(force_insert, force_update, using, update_fields)
