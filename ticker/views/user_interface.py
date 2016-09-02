@@ -36,6 +36,7 @@ def manage_team_details(request, teamid):
 @login_required
 def manage_players_club(request, clubid):
     club = Club.objects.get(id=int(clubid))
+    request.user.is_authenticated()
     return render(request, 'user/manage_players_club.html', dict(club=club))
 
 
@@ -65,7 +66,6 @@ def manage_league(request, league_id=None):
                    )
     return render(request, 'user/manage_league.html', context)
 
-
 @login_required
 def manage_dashboard(request):
     context = dict()
@@ -93,7 +93,6 @@ def manage_ticker(request):
 def simple_ticker_interface(request, game_id, randtoken):
     game = Game.objects.filter(id=game_id).first()
     return render(request, 'user/simple_ticker_interface.html', dict(game=game))
-
 
 
 def login(request):

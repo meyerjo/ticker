@@ -1,3 +1,4 @@
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -58,3 +59,6 @@ class PresentationSlideTeam(models.Model):
 
     slide_number = models.IntegerField()
     create_time = models.DateTimeField(auto_now_add=True)
+
+
+

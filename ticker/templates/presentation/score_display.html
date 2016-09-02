@@ -17,15 +17,30 @@
 
         .team_a {
             background-color: indianred;
+            color: black;
             text-align:left;
         }
 
         .team_b {
             background-color: greenyellow;
+            color: black;
             text-align:left;
             vertical-align: middle;
             border-top: 5px solid black;
         }
+
+
+        #top_div .set.active {
+            background-color: darkred;
+            color: white;
+        }
+
+
+        #bottom_div .set.active {
+            background-color: darkgreen;
+            color: white;
+        }
+
 
         .set.active {
             background-color: white;
@@ -40,7 +55,6 @@
             bottom: 50%;
             overflow:hidden;
         }
-
 
 
         #bottom_div {
@@ -60,16 +74,7 @@
             height: 100%;
         }
 
-        #top_div .set.active {
-            background-color: darkred;
-            color: white;
-        }
 
-
-        #bottom_div .set.active {
-            background-color: darkgreen;
-            color: white;
-        }
     </style>
 {% endblock %}
 

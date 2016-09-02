@@ -4,6 +4,7 @@
     <style>
         .playernames {
             font-size: 17vh;
+            padding-left: 5%;
         }
 
         #container {
@@ -16,23 +17,25 @@
         }
 
         #top_div {
+            background-color: indianred;
+            color: black;
             position: absolute;
             top: 0;
             right: 0;
             left: 0;
             bottom: 50%;
-            background-color: indianred;
             text-align:left;
             overflow:hidden;
         }
 
         #bottom_div {
+            background-color: greenyellow;
+            color: black;
             position: absolute;
             top: 50%;
             right: 0;
             left: 0;
             bottom: 0;
-            background-color: greenyellow;
             text-align:left;
             vertical-align: middle;
             overflow:hidden;
@@ -52,7 +55,7 @@
             }).done(function(data) {
                 var obj = $.parseJSON(data);
                 $.each(obj, function(key, val) {
-                   $('div[data-team"' + key +  '"]').html(val);
+                   $('div[data-team="' + key +  '"]').html(val);
                 });
             });
         }
