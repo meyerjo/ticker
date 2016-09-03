@@ -64,8 +64,12 @@ def get_date_string(obj):
 
 @register.filter
 def get_players(game, args):
-    match = Match.objects.get(games__id=game.id)
+    match = Match.objects.filter(games__id=game.id).first()
+    if match is None:
+        return []
     split_args = args.split(',')
+    if len(split_args) != 2:
+        return []
 
     team = match.team_a if split_args[1] == 'a' else match.team_b
     if split_args[1] == 'a':
@@ -88,7 +92,7 @@ def get_players(game, args):
             ret_list.append((player.id, player.get_name(), selected))
         return ret_list
     else:
-        if isinstance(selected_player, QuerySet):
+        if isinstance(selected_player, QuerySet) and selected_player.count() > 0:
             selected_player = selected_player[0]
 
         if 'woman' in game.game_type or 'women' in game.game_type:
@@ -97,7 +101,7 @@ def get_players(game, args):
             players = team.get_players().filter(sex='male')
 
         for player in players:
-            selected = selected_player.id == player.id
+            selected = selected_player.id == player.id if selected_player else False
             ret_list.append((player.id, player.get_name(), selected))
         return ret_list
 

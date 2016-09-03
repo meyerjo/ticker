@@ -7,5 +7,7 @@ from ticker.models import Match
 
 def start_page(request):
     league = League.objects.filter(name='Bundesliga').first()
-    context = dict(matches=Match.all_matches(), league=league)
+    matches = Match.all_matches()
+    print(League.get_league_of_match(matches.first()))
+    context = dict(matches=matches, league=league)
     return render(request, 'index.html', context)

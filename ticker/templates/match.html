@@ -4,6 +4,7 @@
     <style>
         body {
             background-color: {{ match.team_a|get_color:'ticker_background'|default:'darkgray' }};
+            font-family: Consolas, sans-serif
         }
 
         .team, .score {
@@ -125,9 +126,9 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col-sm-4 team" id="team_a">{{ match.team_a.get_name }}</div>
-            <div class="col-sm-4 score" id="score">{{ match.get_score.0 }}:{{ match.get_score.1 }}</div>
-            <div class="col-sm-4 team" id="team_b">{{ match.team_b.get_name }}</div>
+            <div class="col-sm-5 team" id="team_a">{{ match.team_a.get_name }}</div>
+            <div class="col-sm-2 score" id="score">{{ match.get_score.0 }}:{{ match.get_score.1 }}</div>
+            <div class="col-sm-5 team" id="team_b">{{ match.team_b.get_name }}</div>
         </div>
         <div class="row">
             {% for field in match.get_fields %}

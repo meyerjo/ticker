@@ -2,6 +2,7 @@ from django import views
 from django.conf.urls import url
 
 from ticker.views.api import *
+from ticker.views.simple_ticker import api_simple_ticker
 
 urlpatterns = [
     url(r'^club/add/?$', add_club, name='club_add'),
@@ -34,9 +35,13 @@ urlpatterns = [
 
     url(r'^match/([0-9]+)/lineup/save(/?|/json/?)$', save_lineup, name='match_lineup_save'),
     url(r'^match/assign/game/([0-9]+)/to/field/([0-9]+)(/?|/json/?)$', assign_game_to_field, name='assign_game_to_field'),
-    url(r'^match/remove/game/([0-9]+)/from/field/([0-9]+)(/?|/json/?)$', remove_game_from_field, name='remove_game_to_field'),
+    url(r'^match/remove/game/([0-9]+)/from/field/([0-9]+)(/?|/json/?)$',
+        remove_game_from_field, name='remove_game_to_field'),
     url(r'^match/ticker/simple/new/token/([0-9]+)?$', api_new_token, name='api_new_token'),
     url(r'^match/ticker/validate/token/?$', validate_token, name='api_validate_token'),
     url(r'^match/ticker/invalidate/token/([0-9]+)/?$', invalidate_token, name='api_invalidate_token'),
-    url(r'^update/score/field/([0-9]+)(/?|/json/?)$', update_score_field, name='update_score_field')
+    url(r'^update/score/field/([0-9]+)(/?|/json/?)$', update_score_field, name='update_score_field'),
+    url(r'^update/score/field/simple/([0-9]+)(/?|/json/?)$', api_simple_ticker, name='update_score_field_simple')
+
+
 ]

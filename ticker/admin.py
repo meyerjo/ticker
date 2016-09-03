@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from ticker.models import Club, ColorDefinition, DefinableColor
+from ticker.models import Club, ColorDefinition, DefinableColor, League
 from ticker.models import FieldAllocation
 from ticker.models import Game
 from ticker.models import Match
@@ -98,3 +98,10 @@ class ColorDefinitionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ColorDefinition, ColorDefinitionAdmin)
+
+
+class LeagueAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'associated_season', 'get_number_of_teams']
+    list_display_links = ['id', 'name']
+
+admin.site.register(League, LeagueAdmin)

@@ -8,6 +8,9 @@ from ticker.models import Game
 class PlayingField(models.Model):
     field_name = models.CharField(max_length=255)
 
+    def __str__(self):
+        return 'ID: {0} Name: {1}'.format(self.id, self.field_name)
+
     def get_name(self):
         return self.field_name
 
@@ -62,8 +65,9 @@ class PresentationToken(models.Model):
     last_action = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return '<Token: {0} ({1})>'.format(
+        return '<Token: {0} for field {1} ({2})>'.format(
             self.token,
+            self.field,
             'used' if self.is_used else 'unused'
         )
 

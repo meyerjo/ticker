@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils import timezone
 
-from ticker.models import Club, Team, Season, League
+from ticker.models import Club, Team, Season, League, Rules
 from django.http import HttpResponseRedirect
 
 from ticker.models import FieldAllocation
@@ -331,43 +331,79 @@ def add_team_club(request):
 @login_required
 def add_match(request, league_id, response_type=None):
     print(request.GET)
-    date = request.GET['match_date']
-    time = request.GET['match_time']
-    team_a = request.GET['team_a']
-    team_b = request.GET['team_b']
+    date = request.GET.getlist('match_date')
+    time = request.GET.getlist('match_time')
+    team_a = request.GET.getlist('team_a')
+    team_b = request.GET.getlist('team_b')
     submit_button = None
     response_type = None if response_type == '/' or response_type == '' else response_type
 
-    try:
-        dt = datetime.datetime.strptime('{0} {1}'.format(date, time), '%d.%m.%Y %H:%M')
-    except BaseException as be:
-        messages.error(request, 'Could not parse the given datetime')
-        return HttpResponse('DATEFORMAT')
-    team_a = Team.objects.filter(team_name=team_a).first()
-    team_b = Team.objects.filter(team_name=team_b).first()
-    if team_a is None or team_b is None:
-        messages.error(request, 'One of the requested teams did not exist')
-        return HttpResponse('TEAMEXISTENCE')
-    league = League.objects.filter(id=league_id).first()
-    if league is None:
-        messages.error(request, 'Requested league does not eist')
-        return HttpResponse('LEAGUEEXISTENCE')
+    json_responses = []
+    for i, match_time in enumerate(time):
+        if match_time == '':
+            continue
 
-    if league.teams.filter(id__in=[team_a.id, team_b.id]).count() != 2:
-        messages.warning(request, 'Did not find both teams in the league.')
-        return HttpResponse('LEAGUEASSOCIATION')
+        date_str = '{0} {1}'.format(date[i], time[i])
+        try:
+            dt = datetime.datetime.strptime(date_str, '%d.%m.%Y %H:%M')
+        except BaseException as be:
+            if response_type is None:
+                messages.error(request, 'Could not parse the given datetime')
+            else:
+                json_responses.append(
+                    'DATEFORMAT-ERROR: {0}'.format(date_str)
+                )
+            continue
 
-    print(dt, team_a.get_name(), team_b.get_name(), league.get_name())
-    with transaction.atomic():
-        m = Match(match_date=dt,
-                  team_a=team_a,
-                  team_b=team_b)
-        m.save()
-    return HttpResponse('OK')
+        tmp_team_a = Team.objects.filter(team_name=team_a[i]).first()
+        tmp_team_b = Team.objects.filter(team_name=team_b[i]).first()
+        if tmp_team_a is None or tmp_team_b is None:
+            if response_type is None:
+                messages.error(request, 'One of the requested teams did not exist')
+            else:
+                json_responses.append(
+                    'TEAMEXISTENCE {0}:{1}, {2}:{3}'.format(
+                        tmp_team_a, tmp_team_a is not None,
+                        tmp_team_b, tmp_team_b is not None
+                    )
+                )
+            continue
+
+        league = League.objects.filter(id=league_id).first()
+        if league is None:
+            if response_type is None:
+                messages.error(request, 'Requested league does not exist')
+            else:
+                json_responses.append('LEAGUEEXISTENCE')
+            continue
+
+        if league.teams.filter(id__in=[tmp_team_a.id, tmp_team_b.id]).count() != 2:
+            if response_type is None:
+                messages.warning(request, 'Did not find both teams in the league.')
+            else:
+                json_responses.append('TEAM NOT IN LEAGUE')
+            continue
+
+        rules = Rules.objects.all().first()
+        print(dt, tmp_team_a.get_name(), tmp_team_b.get_name(), league.get_name())
+        with transaction.atomic():
+            m = Match(match_time=dt,
+                      team_a=tmp_team_a,
+                      team_b=tmp_team_b,
+                      rule=rules)
+            m.save()
+            league.matches.add(m)
+        json_responses.append('OK')
+
+    if response_type is not None:
+        return HttpResponse(json.dumps(json_responses))
+    return HttpResponseRedirect(reverse_lazy('manage_league_details', args=[league_id]))
+
 
 @login_required
 def add_matches(request, league_id, response_type):
     return not_yet_implemented(request, [league_id, response_type])
+
 
 @login_required
 def save_lineup(request, matchid, response_type):
@@ -453,6 +489,7 @@ def save_lineup(request, matchid, response_type):
 
 @login_required
 def add_field(request):
+    return HttpResponse('implement this')
     # TODO Implement this properly
     c = Club.objects.get(club_name='1. BC Beuel')
     t = Team.objects.get(team_name='1. BC Beuel 1')
@@ -549,8 +586,6 @@ def update_score_field(request, field_id, response_type):
         return HttpResponse('FAIL')
 
     # TODO: check if the requesting user is having the responsibility for the match
-    print(request.POST)
-    print(request.GET)
     updated_information = dict()
     set = game.get_current_set()
     if 'team_a' in request.POST:
@@ -591,7 +626,7 @@ def update_score_field(request, field_id, response_type):
             )
             updated_information['type'] = 'clear-field'
             updated_information['field_id'] = field_id
-            updated_information['game_field_link'] = reverse_lazy('remove_game_to_field', args=[game.id, field.id])
+            updated_information['game_field_link'] = reverse_lazy('remove_game_to_field', args=[game.id, field_id])
             updated_information['game_name'] = game.name
             updated_information['game_id'] = game.id
         elif game.get_current_set().is_finished(m.rule):
@@ -684,6 +719,7 @@ def api_new_token(request, field_id):
         token = PresentationToken(field=pf, user=request.user, token=t_str)
         token.save()
     return redirect(request.META.get('HTTP_REFERER'))
+
 
 @login_required
 def invalidate_token(request, token_id):

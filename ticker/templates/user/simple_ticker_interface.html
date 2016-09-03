@@ -5,6 +5,11 @@
 {% block extracss %}
     <link href="{% static 'css/ticker_interface_simple.css' %}" rel="stylesheet"/>
 {% endblock %}
+
+{% block extrajs %}
+
+{% endblock %}
+
 {% block navigation %}
     <nav class="navbar navbar-default">
         <div class="container-fluid">
@@ -31,7 +36,20 @@
 {% endblock %}
 {% block content %}
     <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12">
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
         {% if game %}
+        <form action="{% url 'update_score_field_simple' field.id ''%}" method="post">
+            {% csrf_token %}
             <div class="row gamename">
                 <div class="col-xs-12">{{ game|get_fieldname }}</div>
             </div>
@@ -40,17 +58,17 @@
             </div>
             <div class="row players">
                 <div class="col-xs-6">
-                    {{ game.player_a|format_players }}
+                    {{ game.player_a|format_players|safe }}
                 </div>
                 <div class="col-xs-6">
-                    {{ game.player_b|format_players }}
+                    {{ game.player_b|format_players|safe }}
                 </div>
             </div>
             <div class="row current_set">
                 {% with current_set=game.get_current_set %}
                     <div class="col-xs-2">
-                        <button class="btn btn-primary">+</button>
-                        <button class="btn btn-primary">-</button>
+                        <button class="btn btn-primary" name="team_a" value="+">+</button>
+                        <button class="btn btn-primary" name="team_a" value="-">-</button>
                     </div>
                     <div class="col-xs-3 score_current_set" id="current_set_team_a">
                         {{ current_set.get_score.0 }}
@@ -62,8 +80,8 @@
                         {{ current_set.get_score.1 }}
                     </div>
                     <div class="col-xs-2">
-                        <button class="btn btn-primary">+</button>
-                        <button class="btn btn-primary">-</button>
+                        <button class="btn btn-primary" name="team_b" value="+">+</button>
+                        <button class="btn btn-primary" name="team_b" value="-">-</button>
                     </div>
                 {% endwith %}
             </div>
@@ -72,22 +90,23 @@
                     <button name="switch_set" value="True" class="btn btn-primary">Satz wechseln</button>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <button name="pause" value="on" class="btn btn-primary">Pause</button>
-                </div>
-            </div>
+{#            <div class="row">#}
+{#                <div class="col-xs-12">#}
+{#                    <button name="pause" value="on" class="btn btn-primary">Pause</button>#}
+{#                </div>#}
+{#            </div>#}
 
             {# TODO: introduce panels #}
             <div class="row">
                 <div class="col-xs-4">
-                    <button class="btn btn-warning">Aufgabe Team A</button>
+                    <button class="btn btn-warning" name="retire" value="team_a">Aufgabe Team A</button>
                 </div>
                 <div class="col-xs-4"></div>
                 <div class="col-xs-4">
-                    <button class="btn btn-warning">Aufgabe Team B</button>
+                    <button class="btn btn-warning" name="retire" value="team_b">Aufgabe Team B</button>
                 </div>
             </div>
+
 
             <hr style="margin-top: 100px"/>
             <table class="table table-striped table-bordered">
@@ -114,6 +133,7 @@
 
 
             </div>
+            </form>
         {% else %}
             <div class="row"><h1>No game available</h1></div>
         {% endif %}

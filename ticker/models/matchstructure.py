@@ -290,7 +290,6 @@ class Match(models.Model):
                 score_team_b +=1
         return [score_team_a, score_team_b]
 
-
     def get_fields(self):
         if self.team_a is None:
             return []
@@ -312,3 +311,18 @@ class Match(models.Model):
             score[0] += game.get_set_score(self.rule)[0]
             score[1] += game.get_set_score(self.rule)[1]
         return score
+
+    def has_lineup(self):
+        for game in self.games.all():
+            if game.player_a.count() == 0:
+                return False
+        return True
+
+    def __str__(self):
+        return 'Match {0}: {1}:{2} Result: {3}:{4}'.format(
+            self.match_time.strftime('%d.%m.%Y %H:%M'),
+            self.team_a.get_name(),
+            self.team_b.get_name(),
+            self.get_score()[0],
+            self.get_score()[1]
+        )

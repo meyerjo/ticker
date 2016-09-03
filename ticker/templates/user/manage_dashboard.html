@@ -32,9 +32,13 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">Ligen</div>
                     <ul class="list-group">
+                    {% if user.is_authenticated %}
+                        <li class="list-group-item">TODO</li>
+                    {% else %}
                     {% for league in request.user|get_leagues_club %}
                         <li class="list-group-item"><a href="{% url 'manage_league_details' league.id %}">{{ league.get_name }}</a></li>
                     {% endfor %}
+                    {% endif %}
                     </ul>
                 </div>
             </div>

@@ -41,6 +41,9 @@ class League(models.Model):
     def get_teams_in_league(self):
         return self.teams.all()
 
+    def get_number_of_teams(self):
+        return self.teams.all().count()
+
     def get_matches_in_league(self):
         return self.matches.filter(canceled=False)
 
@@ -56,6 +59,12 @@ class League(models.Model):
                 (team.id, team.get_name(), False)
             )
         return result
+
+    @staticmethod
+    def get_league_of_match(match):
+        if match.canceled:
+            return None
+        return League.objects.filter(matches=match).first()
 
 
 class Season(models.Model):
@@ -79,3 +88,10 @@ class Season(models.Model):
 
     def get_leagues(self):
         return League.objects.filter(associated_season=self)
+
+    def __str__(self):
+        return 'Season from {0} to {1} ({2})'.format(
+            self.start_date.strftime('%d.%m.%Y'),
+            self.end_date.strftime('%d.%m.%Y'),
+            'active' if self.active else 'in-active'
+        )

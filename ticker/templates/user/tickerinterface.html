@@ -199,13 +199,13 @@
                                 <td>{{ game.id }} <input type="hidden" name="game_id" value="{{ game.id }}"/> </td>
                                 <td>{{ game.name }}</td>
                                 <td>
-                                    <select name="player_a_one_{{ game.id }}">
+                                    <select name="player_a_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
                                         {% for player in game|get_players:"1,a" %}
                                             <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
                                         {% endfor %}
                                     </select>
                                     {% if game.game_type|is_in:"single" == 0 %}
-                                        <select name="player_a_two_{{ game.id }}">
+                                        <select name="player_a_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
                                             {% for player in game|get_players:"2,a" %}
                                                 <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
                                             {% endfor %}
@@ -214,13 +214,13 @@
                                 </td>
                                 <td>
                                     {% load custom_tags %}
-                                    <select name="player_b_one_{{ game.id }}">
+                                    <select name="player_b_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
                                         {% for player in game|get_players:"1,b" %}
                                             <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
                                         {% endfor %}
                                     </select>
                                     {% if game.game_type|is_in:"single" == 0 %}
-                                        <select name="player_b_two_{{ game.id }}">
+                                        <select name="player_b_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
                                             {% for player in game|get_players:"2,b" %}
                                                 <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
                                             {% endfor %}
@@ -252,6 +252,12 @@
                         <tr>
                             <td colspan="2"></td>
                             <td colspan="2">
+                                {% if match.has_lineup %}
+                                    <label for="unlock_lineup" style="margin-bottom: 20px;">
+                                        Aufstellung editieren
+                                        <input type="checkbox" id="unlock_lineup" name="unlock_field" value="True"/>
+                                    </label>
+                                {% endif %}
                                 <button class="btn btn-success lineup" value="lineup">Speichern</button>
                             </td>
                             <td colspan="2"></td>

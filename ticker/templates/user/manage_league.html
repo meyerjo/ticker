@@ -163,7 +163,7 @@
                                     {{ league.get_season.get_name }}
                                 </td>
                                 <td>
-                                    {{ league.get_matches_in_league|length }}
+                                    {{ league.get_matches_in_league }}
                                 </td>
                                 <td>
                                     <a href="{% url 'manage_league_details' league.id %}">Edit</a>
