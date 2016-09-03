@@ -44,7 +44,6 @@ def simple_ticker_login(request):
 @has_valid_token
 def simple_ticker_interface(request, field_id):
     fa = FieldAllocation.objects.filter(field_id=field_id, is_active=True).first()
-    print(fa)
     game = fa.game if fa else None
     field = fa.field if fa else None
     return render(request, 'user/simple_ticker_interface.html', dict(game=game, field=field))
@@ -68,7 +67,6 @@ def api_simple_ticker(request, field_id, response_type):
         messages.error(request, 'Match does not exist')
         return HttpResponseRedirect(reverse_lazy('ticker_interface_simple', args=[field.id]))
 
-    print(request.POST)
     updated_information = dict()
     set = game.get_current_set()
     if 'team_a' in request.POST:

@@ -1,6 +1,6 @@
 from django.db import models
 from django.db import transaction
-from django.db.models import ManyToManyField
+from django.db.models import ManyToManyField, CharField
 from django.utils import timezone
 
 from ticker.models.player_clubs import Player, Team
@@ -200,6 +200,36 @@ class Game(models.Model):
         current_set = self.current_set
         set = self.sets.filter(set_number=current_set).first()
         return set
+
+    def get_point_history(self):
+        """
+        Provides a history of
+        :return:
+        """
+        set = self.get_current_set()
+        from django.db.models.functions import Length, Upper, Value
+        points_team_a = Point.objects.filter(
+            canceled=False, points_team_a__game=self, points_team_a__set_number=set.set_number
+        ).annotate(team=Value('a', CharField())).\
+            order_by('-create_time').values('id', 'create_time', 'team')
+        points_team_b = Point.objects.filter(
+            canceled=False, points_team_b__game=self, points_team_b__set_number=set.set_number
+        ).annotate(team=Value('b', CharField())).\
+            order_by('-create_time').values('id', 'create_time', 'team')
+
+        merged = list(points_team_a) + list(points_team_b)
+        merged = sorted(merged, key=lambda x: x['id'], reverse=True)
+
+        for i, point in enumerate(merged):
+            score = [0, 0]
+            for tmp in merged[i:]:
+                if tmp['team'] == 'a':
+                    score[0] += 1
+                elif tmp['team'] == 'b':
+                    score[1] += 1
+            merged[i]['score'] = score
+
+        return merged
 
     def get_points(self):
         sets = self.sets.all()
