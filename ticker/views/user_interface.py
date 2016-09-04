@@ -2,10 +2,14 @@ from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.db.models import CharField
+from django.db.models import Value
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from ticker.models import Club, Team, Player, Season, League
+from ticker.models import ColorDefinition
+from ticker.models import DefinableColor
 from ticker.models import FieldAllocation
 from ticker.models import Game
 from ticker.models import Match
@@ -89,6 +93,23 @@ def manage_ticker(request):
             matches = Match.objects.filter(team_a__parent_club=p.associated_club) | \
                       Match.objects.filter(team_b__parent_club=p.associated_club)
     return render(request, 'user/manage_ticker.html', dict(matches=matches))
+
+
+@login_required
+def manage_colors(request):
+    possible_definitions = DefinableColor.objects.all().annotate(color=Value(None, CharField())).values('id', 'name', 'color')
+    p = Profile.objects.filter(user=request.user).first()
+    if p is not None:
+        cd = ColorDefinition.objects.filter(club=p.associated_club)
+        for color_definition in cd:
+            for i, elm in enumerate(possible_definitions):
+                if possible_definitions[i]['name'] == color_definition.color_definition.name:
+                    possible_definitions[i]['color'] = color_definition.color_hexcode
+                    continue
+        colors = possible_definitions
+    else:
+        colors = None
+    return render(request, 'user/manage_colors.html', dict(colors=colors))
 
 
 def login(request):

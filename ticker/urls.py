@@ -45,6 +45,8 @@ urlpatterns = [
     url(r'^presentation/team/field/([0-9]+)(/?|/json/?)$', team_display, name='team_display'),
     url(r'^presentation/field/dashboard/?$', display_dashboard, name='display_dashboard'),
 
+    url(r'^settings/color/scheme/?$', manage_colors, name='manage_color_scheme'),
+
 
     url(r'^login/?$', login, name='login'),
     url('', start_page),

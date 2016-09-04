@@ -41,7 +41,9 @@ urlpatterns = [
     url(r'^match/ticker/validate/token/?$', validate_token, name='api_validate_token'),
     url(r'^match/ticker/invalidate/token/([0-9]+)/?$', invalidate_token, name='api_invalidate_token'),
     url(r'^update/score/field/([0-9]+)(/?|/json/?)$', update_score_field, name='update_score_field'),
-    url(r'^update/score/field/simple/([0-9]+)(/?|/json/?)$', api_simple_ticker, name='update_score_field_simple')
+    url(r'^update/score/field/simple/([0-9]+)(/?|/json/?)$', api_simple_ticker, name='update_score_field_simple'),
+
+    url(r'^change/color/?', api_change_color, name='api_change_color')
 
 
 ]

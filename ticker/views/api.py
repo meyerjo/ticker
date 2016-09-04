@@ -14,6 +14,8 @@ from django.utils import timezone
 from ticker.models import Club, Team, Season, League, Rules
 from django.http import HttpResponseRedirect
 
+from ticker.models import ColorDefinition
+from ticker.models import DefinableColor
 from ticker.models import FieldAllocation
 from ticker.models import PlayingField
 from ticker.models import Game
@@ -729,4 +731,29 @@ def invalidate_token(request, token_id):
         t.is_used = True
         t.save()
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required
+def api_change_color(request):
+    p = Profile.objects.filter(user=request.user).first()
+    if p is None:
+        return HttpResponseRedirect(reverse('manage_color_scheme'))
+    definable_colors = DefinableColor.objects.all()
+    club = p.associated_club
+    for color in definable_colors:
+        print(request.POST)
+        if 'colorcode_{0}'.format(color.id) not in request.POST:
+            continue
+
+        tmp_color = request.POST['colorcode_{0}'.format(color.id)]
+
+        definition = ColorDefinition.objects.filter(club=club, color_definition=color).first()
+        if definition is None:
+            cd = ColorDefinition(club=club, color_definition=color, color_hexcode=tmp_color)
+            cd.save()
+        else:
+            definition.color_hexcode = tmp_color
+            definition.save()
+
+    return HttpResponseRedirect(reverse('manage_color_scheme'))
 
