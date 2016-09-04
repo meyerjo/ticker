@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.core.urlresolvers import reverse
+from django.views.generic import RedirectView
 
 import ticker
 from ticker.views.startpage import start_page
@@ -23,5 +25,6 @@ urlpatterns = [
     url(r'^admin/?', admin.site.urls),
     url(r'^ticker/', include('ticker.urls')),
     url(r'^api/v1/json/', include('ticker.urls_api')),
+    url(r'^simple/?$', RedirectView.as_view(url='/ticker/manage/ticker/simple/login/', permanent=True)),
     url(r'^$', start_page),
 ]

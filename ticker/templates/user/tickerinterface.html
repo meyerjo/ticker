@@ -8,84 +8,7 @@
 
 {% block extrajs %}
     <script type="text/javascript" src="{% static 'js/django_csrf_post.js' %}"></script>
-    <script type="text/javascript">
-
-        $(document).ready(function () {
-            $('form[name^="field_"]').find(':button').on('click', function () {
-                event.preventDefault();
-                var calling_button = this.name;
-                var calling_value = this.value;
-                var action = $(this).closest('form').attr('action');
-                var csrftoken = $(this).closest('form').find('input[name="csrfmiddlewaretoken"]').val();
-
-                $.ajaxSetup({
-                    beforeSend: function(xhr, settings) {
-                        if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
-                            // Send the token to same-origin, relative URLs only.
-                            // Send the token only if the method warrants CSRF protection
-                            // Using the CSRFToken value acquired earlier
-                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                        }
-                    }
-                });
-                var obj = {};
-                obj[calling_button] = calling_value;
-                $.ajax({
-                    url: action + '/json',
-                    method: 'post',
-                    data: obj
-                }).done(function(data) {
-                    var result_obj = $.parseJSON(data);
-                    if (result_obj['type'] == 'score-update') {
-                        var field_id = result_obj['field_id'];
-                        var set_id = result_obj['set_id'];
-                        var game_id = result_obj['game_id'];
-                        var set_score = result_obj['set_score'];
-                        var set_number = result_obj['set_number'];
-
-                        $('#field_' + field_id + '_current_set_team_a').html(set_score[0]);
-                        $('#field_' + field_id + '_current_set_label').html('Satz ' + set_number);
-                        $('#field_' + field_id + '_current_set_team_b').html(set_score[1]);
-                        $('#field_' + field_id +'_set_' + set_number +'_team_a').html(set_score[0]);
-                        $('#field_' + field_id +'_set_' + set_number +'_team_b').html(set_score[1]);
-                        $('#score_game_' + game_id).html(result_obj['game_score']);
-                        if (result_obj['set_finished']) {
-                            $('#field_' + field_id + '_next_set').removeClass('hidden');
-                        } else {
-                            $('#field_' + field_id + '_next_set').addClass('hidden');
-                        }
-                    } else if (result_obj['type'] == 'clear-field') {
-                        var field_id = result_obj['field_id'];
-                        var game_name = result_obj['game_name'];
-                        var game_id = result_obj['game_id'];
-
-                        var selector_form = 'form[name="field_' + field_id + '"]';
-                        $(selector_form).find('div.player').html('');
-                        $(selector_form).find('div.setscore').html('');
-                        $('#field' + field_id + '_current_set_label').html('');
-                        $('#field_' + field_id + '_next_set').addClass('hidden');
-
-                        // change the link and style of the field in the name
-                        // TODO: reset the link properly
-                        $('#row_' + game_id).find('a.fieldname.active').attr('href', '#TODO');
-                        $('#row_' + game_id).find('.fieldname').removeClass('active');
-                    } else if (result_obj['type'] == 'update-current-set') {
-                        var field_id = result_obj['field_id'];
-                        var selector_form = 'form[name="field_' + field_id + '"]';
-                        var set_score = result_obj['set_score'];
-                        var set_number = result_obj['set_number'];
-
-                        $('#field_' + field_id + '_current_set_team_a').html(set_score[0]);
-                        $('#field_' + field_id + '_current_set_team_b').html(set_score[1]);
-                        $('#field_' + field_id + '_current_set_label').html('Satz ' + set_number);
-                        $('#field_' + field_id + '_next_set').addClass('hidden');
-                    } else {
-                        console.log('Unknown content type: ' +  data)
-                    }
-                })
-            })
-        })
-    </script>
+    <script type="text/javascript" src="{% static 'js/tickerinterface.js' %}"></script>
 {% endblock %}
 
 
@@ -113,11 +36,11 @@
             {% with fields=match.get_fields %}
                 {% with fieldamount=fields|length %}
                     {% for field in fields %}
-                            <div class="col-sm-{{ 12|get_field_width:fieldamount }}">
-                                <div class="row-fluid">
-                                    <div class="col-sm-12 fieldtitle">{{ field.field_name }}</div>
-                                    <form method="post" action="{% url 'update_score_field' field.id '' %}" name="field_{{ field.id }}">
-                                        {% csrf_token %}
+                        <div class="col-sm-{{ 12|get_field_width:fieldamount }}">
+                            <div class="row-fluid">
+                                <div class="col-sm-12 fieldtitle">{{ field.field_name }}</div>
+                                <form method="post" action="{% url 'update_score_field' field.id '' %}" name="field_{{ field.id }}">
+                                    {% csrf_token %}
                                     {% if field.get_game %}
                                         {% with game=field.get_game %}
                                             <div class="col-sm-6 player">
@@ -145,7 +68,8 @@
                                                     <button type="submit" class="btn btn-primary" name="team_b" value="-">-</button>
                                                 </div>
                                             </div>
-                                            <div {% if game.get_current_set|finished_set:match %}class="row"{% else %}class="row hidden"{% endif %} id="field_{{ field.id }}_next_set">
+                                            <div {% if game.get_current_set|finished_set:match %}class="row"
+                                                 {% else %}class="row hidden"{% endif %} id="field_{{ field.id }}_next_set">
                                                 <div class="col-sm-12" style="text-align: center">
                                                     <button type="submit" class="btn btn-primary" name="switch_set" value="True">
                                                         Naechster Satz
@@ -163,18 +87,28 @@
                                             {% endfor %}
                                         {% endwith %}
                                     {% endif %}
-                        </form>
+                                </form>
+                                <div class="col-sm-12">
                                     {% if field.has_token %}
-                                        Token {{ field.get_token.token }} is valid.
-                                        <a href="{% url 'api_invalidate_token' field.get_token.id %}">Token ungueltig machen</a>
+                                        {% with token=field.get_token %}
+                                        Token <b>{{ token.token }}</b>
+                                        <a href="{% url 'api_invalidate_token' token.id %}">
+                                            <i class="fa fa-minus"></i>Token loeschen
+                                        </a>
+                                        <button type="button" class="btn btn-default" data-container="body" data-toggle="popover"
+                                                data-placement="top" data-content="Auf https://shuttlecock-live.com/simple den Token {{ token.token }} verwenden">
+                                            <i class="fa fa-info-circle"></i>Hilfe
+                                        </button>
+                                        {% endwith %}
                                     {% else %}
                                         <form action="{% url 'api_new_token' field.id %}" method="post">
                                             {% csrf_token %}
-                                            <button class="btn btn-primary">New token</button>
+                                            <button class="btn btn-primary">Neuen Eingabetoken generieren</button>
                                         </form>
                                     {% endif %}
                                 </div>
                             </div>
+                        </div>
                     {% endfor %}
                 {% endwith %}
             {% endwith %}
@@ -199,13 +133,13 @@
                                 <td>{{ game.id }} <input type="hidden" name="game_id" value="{{ game.id }}"/> </td>
                                 <td>{{ game.name }}</td>
                                 <td>
-                                    <select name="player_a_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
+                                    <select title="Erster Spieler" name="player_a_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
                                         {% for player in game|get_players:"1,a" %}
                                             <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
                                         {% endfor %}
                                     </select>
                                     {% if game.game_type|is_in:"single" == 0 %}
-                                        <select name="player_a_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
+                                        <select title="Zweiter Spieler" name="player_a_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
                                             {% for player in game|get_players:"2,a" %}
                                                 <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
                                             {% endfor %}
@@ -213,14 +147,13 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% load custom_tags %}
-                                    <select name="player_b_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
+                                    <select title="Erster Spieler" name="player_b_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
                                         {% for player in game|get_players:"1,b" %}
                                             <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
                                         {% endfor %}
                                     </select>
                                     {% if game.game_type|is_in:"single" == 0 %}
-                                        <select name="player_b_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
+                                        <select title="Zweiter Spieler" name="player_b_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
                                             {% for player in game|get_players:"2,b" %}
                                                 <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
                                             {% endfor %}
@@ -242,7 +175,7 @@
                                     {% endfor %}
                                 </td>
                                 <td>
-                                    <a href="#EDIT">Edit</a>
+                                    <a href="#EDIT">Edit (TODO)</a>
                                 </td>
                                 <td>
                                     <a target="_blank" href="{% url 'export_game' game.id %}">Export Game</a>
