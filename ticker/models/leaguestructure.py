@@ -62,6 +62,8 @@ class League(models.Model):
 
     @staticmethod
     def get_league_of_match(match):
+        if match is None:
+            return []
         if match.canceled:
             return None
         return League.objects.filter(matches=match).first()
