@@ -7,6 +7,9 @@
 {% endblock %}
 
 {% block extrajs %}
+    <script type="text/javascript">
+        var TICKER_UPDATE_URL = '{% url 'match_ticker' match.id '/json' %}';
+    </script>
     <script type="text/javascript" src="{% static 'js/django_csrf_post.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/tickerinterface.js' %}"></script>
 {% endblock %}
@@ -51,27 +54,45 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-sm-4">
-                                                    <button type="submit" class="btn btn-primary" name="team_a" value="+">+</button>
-                                                    <button type="submit" class="btn btn-primary" name="team_a" value="-">-</button>
+                                                    <button type="submit" class="btn btn-primary" name="team_a" value="+"
+                                                    {% if field.has_token %} disabled {% endif %}>
+                                                        +</button>
+                                                    <button type="submit" class="btn btn-primary" name="team_a" value="-"
+                                                    {% if field.has_token %} disabled {% endif %}>
+                                                        -</button>
                                                 </div>
                                                 <div class="col-sm-1 setscore" id="field_{{ field.id }}_current_set_team_a">
                                                     {{ game.get_current_set.get_score.0 }}
                                                 </div>
                                                 <div class="col-sm-2" id="field_{{ field.id }}_current_set_label">
                                                     Satz {{ game.get_current_set.set_number }}
+                                                    {% if field.has_token %}
+                                                        <button type="button" class="btn btn-default" data-container="body" data-toggle="popover"
+                                                data-placement="top" data-content="Der aktuelle Satz wird nicht aktualisiert, solange der Token aktiv ist. Die Ergebnisse unten sind stets aktuell.">
+                                            <i class="fa fa-info-circle"></i>
+                                        </button>
+                                                    {% endif %}
                                                 </div>
                                                 <div class="col-sm-1 setscore" id="field_{{ field.id }}_current_set_team_b">
                                                     {{ game.get_current_set.get_score.1 }}
                                                 </div>
                                                 <div class="col-sm-4">
-                                                    <button type="submit" class="btn btn-primary" name="team_b" value="+">+</button>
-                                                    <button type="submit" class="btn btn-primary" name="team_b" value="-">-</button>
+                                                    <button type="submit" class="btn btn-primary" name="team_b" value="+"
+                                                        {% if field.has_token %} disabled {% endif %}>
+                                                        +
+                                                    </button>
+                                                    <button type="submit" class="btn btn-primary" name="team_b" value="-"
+                                                        {% if field.has_token %} disabled {% endif %}>
+                                                        -
+                                                    </button>
                                                 </div>
                                             </div>
                                             <div {% if game.get_current_set|finished_set:match %}class="row"
                                                  {% else %}class="row hidden"{% endif %} id="field_{{ field.id }}_next_set">
                                                 <div class="col-sm-12" style="text-align: center">
-                                                    <button type="submit" class="btn btn-primary" name="switch_set" value="True">
+                                                    <button type="submit" class="btn btn-primary"
+                                                            name="switch_set" value="True"
+                                                    {% if field.has_token %} disabled {% endif %}>
                                                         Naechster Satz
                                                     </button>
                                                 </div>
@@ -89,6 +110,7 @@
                                     {% endif %}
                                 </form>
                                 <div class="col-sm-12">
+                                    <input type="hidden" name="has_token_{{ field.id }}" value="{{ field.has_token }}"/>
                                     {% if field.has_token %}
                                         {% with token=field.get_token %}
                                         Token <b>{{ token.token }}</b>
@@ -175,7 +197,7 @@
                                     {% endfor %}
                                 </td>
                                 <td>
-                                    <a href="#EDIT">Edit (TODO)</a>
+                                    <a href="{% url 'manage_game' game.id %}">Edit</a>
                                 </td>
                                 <td>
                                     <a target="_blank" href="{% url 'export_game' game.id %}">Export Game</a>

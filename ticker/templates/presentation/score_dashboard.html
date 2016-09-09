@@ -23,8 +23,8 @@
                         {% for field in club.fields.all %}
                             <li class="list-group-item">
                                 {{ field.get_name }}
-                                <a href="{% url 'score_display' field.id '' %}">Spielstand</a>
                                 <a href="{% url 'team_display' field.id '' %}">Team</a>
+                                <a href="{% url 'score_display' field.id '' %}">Spielstand</a>
                             </li>
                         {% endfor %}
                         </ul>
