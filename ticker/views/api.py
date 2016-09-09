@@ -691,11 +691,11 @@ def validate_token(request):
     ).first()
     if token is None:
         messages.error(request, 'Invalid Token')
-        return HttpResponseRedirect(reverse('simple_ticker_login'))
+        return HttpResponseRedirect(reverse('ticker_interface_login'))
 
     if token.is_used:
         messages.error(request, 'Token is outdated')
-        return HttpResponseRedirect(reverse('simple_ticker_login'))
+        return HttpResponseRedirect(reverse('ticker_interface_login'))
     request.session['token'] = submitted_token
     return HttpResponseRedirect(reverse('ticker_interface_simple', args=[token.field.id]))
 
@@ -703,8 +703,6 @@ def validate_token(request):
 @login_required()
 def api_new_token(request, field_id):
     pf = PlayingField.objects.filter(id=field_id).first()
-    print(pf)
-
     # TODO: validate if the user has permission to generate a token for this match
     current_tokens = PresentationToken.objects.filter(
         field_id=field_id,
