@@ -128,3 +128,11 @@ def login(request):
     else:
         messages.error(request, 'Login didnot match')
         return render(request, 'user/login.html', dict())
+
+
+@login_required
+def manage_game(request, game_id):
+    game = Game.objects.get(id=game_id)
+
+    return render(request, 'user/manage_game.html', dict(game=game))
+

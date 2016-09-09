@@ -2,19 +2,14 @@ import json
 
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.utils import timezone
 
 from ticker.models import Club
 from ticker.models import FieldAllocation
 from ticker.models import Match
+from ticker.models import PlayingField
 from ticker.models.presentation import Presentation, PresentationSlideTeam
 from ticker.templatetags.custom_tags import format_players
-
-
-def presentation_view(request, presentation_id, match_id, response_type):
-    m = Match.objects.get(id=match_id)
-    response_type = None if response_type == '/' or response_type == '' else response_type
-    #    p = Presentation.objects.get
-    return render(request, 'presentation/general_presentation.html', dict(match=m))
 
 
 def display_dashboard(request):
@@ -59,13 +54,19 @@ def team_display(request, field_id, response_type):
     return render(request, 'presentation/team_display.html', dict(game=game, field_id=field_id))
 
 
-def presentation_view(request, match_id):
+def presentation_view(request, presentation_id, match_id):
     match = Match.objects.get(id=match_id)
-    fields = FieldAllocation.objects.filter(is_active=True, game__in=match.games)
+    #fields = FieldAllocation.objects.filter(is_active=True, game__in=match.games)
+    team_fields = PlayingField.objects.filter(team=match.team_a)
 
     team_a = match.team_a
-    presentation = Presentation.objects.filter(team=team_a).first()
-    slides = PresentationSlideTeam.objects.filter(presentation=presentation).\
-        order_by('slide_number').values_list('slide', flat=True)
-
-    return render(request, 'presentation/general_presentation_reveal.html', dict(slides=slides))
+    #presentation = Presentation.objects.filter(team=team_a).first()
+    #slides = PresentationSlideTeam.objects.filter(presentation=presentation).\
+    #    order_by('slide_number').values_list('slide', flat=True)
+    slides = []
+    next_home_games = Match.objects.filter(match_time__gte=timezone.now(),
+                                           team_a=match.team_a)
+    return render(request, 'presentation/general_presentation_reveal.html', dict(slides=slides,
+                                                                                 match=match,
+                                                                                 fields=team_fields,
+                                                                                 next_home_games=next_home_games))

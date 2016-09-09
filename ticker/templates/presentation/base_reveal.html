@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+{% load staticfiles %}
+	<head>
+		<meta charset="utf-8">
+
+		<title>Presentation</title>
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <script src="//code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+
+		<link rel="stylesheet" href="{% static 'ext/reveal.js/css/reveal.css' %}">
+		<link rel="stylesheet" href="{% static 'ext/reveal.js/css/theme/white.css' %}" id="theme">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="{% static 'ext/reveal.js/lib/css/zenburn.css' %}">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? '{% static 'ext/reveal.js/css/print/pdf.css' %}' : '{% static 'ext/reveal.js/css/print/paper.css' %}';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+        <script type="text/javascript">
+            var TICKER_UPDATE_URL = '{% url 'match_ticker' match.id '/json' %}';
+        </script>
+        <script type="text/javascript" src="{% static 'js/general_presentation_update.js' %}"></script>
+        <style>
+            body {
+                font-family: Consolas, sans-serif !important;
+            }
+
+            #score {
+                position: absolute;
+                left: 1%;
+                top: 85%;
+                font-size: 3em;
+                background-color: #fce405;
+                border-radius: 0 100px 0 0;
+                -moz-border-radius: 0 100px 0 0;
+                -webkit-border-radius: 0 100px 0 0;
+                width: 300px;
+                height: 300px;
+            }
+
+            .reveal h1 {
+                font-size: 12vh;
+            }
+
+            .reveal h2 {
+                font-size: 7vh;
+            }
+
+            .slides {
+                top: 5%;
+            }
+
+
+            .resulttable tr td,th {
+                font-size: 3vh !important;
+            }
+
+            .reveal section img { background:none; border:none; box-shadow:none; }
+
+            img.advertisement_photo {
+                max-width: 80%;
+                max-height: 80%;
+                height: auto;
+                width: auto;
+                border:0;
+            }
+
+            .playback {
+                display: none;
+            }
+
+
+
+        </style>
+		<!--[if lt IE 9]>
+		<script src="{% static 'ext/reveal.js/lib/js/html5shiv.js' %}"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+            <div id="score">
+                {{ match.get_score.0 }}-{{ match.get_score.1 }}
+            </div>
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides" id="slide_container">
+                {% block content %}{% endblock %}
+			</div>
+		</div>
+
+		<script src="{% static 'ext/reveal.js/lib/js/head.min.js' %}"></script>
+		<script src="{% static 'ext/reveal.js/js/reveal.js' %}"></script>
+
+		<script>
+
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: false,
+				history: true,
+				center: true,
+                loop: true,
+                autoSlide: 10000,
+
+				transition: 'None', // none/fade/slide/convex/concave/zoom
+
+                theme: 'White',
+                width: '100%',
+                height: '100%',
+                margin: 0.05,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: '{% static 'ext/reveal.js/lib/js/classList.js' %}', condition: function() { return !document.body.classList; } },
+					{ src: '{% static 'ext/reveal.js/plugin/markdown/marked.js' %}', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '{% static 'ext/reveal.js/plugin/markdown/markdown.js' %}', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '{% static 'ext/reveal.js/plugin/highlight/highlight.js' %}', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: '{% static 'ext/reveal.js/plugin/zoom-js/zoom.js' %}', async: true },
+					{ src: '{% static 'ext/reveal.js/plugin/notes/notes.js' %}', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

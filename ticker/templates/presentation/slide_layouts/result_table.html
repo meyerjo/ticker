@@ -12,12 +12,12 @@
         </thead>
         <tbody>
         {% for game in match.get_all_games %}
-        <tr>
-            <td>{{ game.name }}</td>
-            <td>{{ game.player_a|format_players }}</td>
-            <td>{{ game.player_b|format_players }}</td>
-            <td>{{ game.get_sets }}</td>
-        </tr>
+            <tr>
+                <td>{{ game.name }}</td>
+                <td class="game_{{ game.id }}_team_a">{{ game.player_a|format_players|safe }}</td>
+                <td class="game_{{ game.id }}_team_b">{{ game.player_b|format_players|safe }}</td>
+                <td class="game_sets_{{ game.id }}">{{ game.get_sets }}</td>
+            </tr>
         {% endfor %}
         </tbody>
     </table>

@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^manage/ticker/?$', manage_ticker, name='manage_ticker'),
     url(r'^manage/ticker/([0-9]+)/?', manage_ticker_interface, name='manage_ticker_interface'),
 
+    url(r'^manage/game/([0-9]+)/?$', manage_game, name='manage_game'),
     url(r'^manage/ticker/simple/login/?', simple_ticker_login, name='ticker_interface_login'),
     url(r'^manage/ticker/simple/([0-9]+)/?', simple_ticker_interface, name='ticker_interface_simple'),
     url(r'^manage/?$', manage_dashboard, name='manage_dashboard'),

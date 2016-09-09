@@ -1,0 +1,66 @@
+{% extends 'user/manage_base.html' %}
+
+{% load custom_tags %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <td>Spieltyp</td>
+                    <td>Team A</td>
+                    <td>Team B</td>
+                    {% for i in 6|get_range:1 %}
+                        <td>
+                            Satz {{ i }}
+                            <input type="checkbox" name="current_set" value="{{ i }}" {% if i == game.current_set %} checked {% endif %}/>
+                        </td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <td>{{ game.name }}</td>
+                    <td>
+                        <select title="Erster Spieler" name="player_a_one_{{ game.id }}" disabled>
+                            {% for player in game|get_players:"1,a" %}
+                                <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if game.game_type|is_in:"single" == 0 %}
+                            <select title="Zweiter Spieler" name="player_a_two_{{ game.id }}" disabled>
+                                {% for player in game|get_players:"2,a" %}
+                                    <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <select title="Erster Spieler" name="player_b_one_{{ game.id }}"  disabled>
+                            {% for player in game|get_players:"1,b" %}
+                                <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if game.game_type|is_in:"single" == 0 %}
+                            <select title="Zweiter Spieler" name="player_b_two_{{ game.id }}" disabled>
+                                {% for player in game|get_players:"2,b" %}
+                                    <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+                    </td>
+                    {% for set in game.get_set_objects %}
+                        <td>
+                            <input class="input-sm" type="text" name="set_team_a_{{ set.id }}" value="{{ set.get_score.0 }}"/>
+                            <span>:</span>
+                            <input class="input-sm" type="text" name="set_team_b_{{ set.id }}" value="{{ set.get_score.1 }}"/>
+                        </td>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="3"></td>
+                        <td colspan="5">
+                            <button type="submit">Aendern</button>
+                        </td>
+                    </tr>
+                </tr>
+            </table>
+        </div>
+    </div>
+{% endblock %}

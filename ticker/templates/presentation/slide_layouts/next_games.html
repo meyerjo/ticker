@@ -1,19 +1,17 @@
 <section>
-    <h2>Naechsten Heimspiele</h2>
+    <h2>{{ title }}</h2>
     <table>
         <tbody>
+        {% if games %}
+        {% for match in games %}
         <tr>
-            <td style="font-weight: bold">12.08.2016</td>
-            <td>1. FC Koeln</td>
+            <td style="font-weight: bold">{{ match.match_time|date:'d.m.Y' }}</td>
+            <td>{{ match.team_b.get_name }}</td>
         </tr>
-        <tr>
-            <td style="font-weight: bold">12.08.2016</td>
-            <td>1. FC Koeln</td>
-        </tr>
-        <tr>
-            <td style="font-weight: bold">12.08.2016</td>
-            <td>1. FC Koeln</td>
-        </tr>
+        {% endfor %}
+        {% else %}
+            <tr><td colspan="2">Keine Heimspiele mehr</td></tr>
+        {% endif %}
         </tbody>
     </table>
 </section>

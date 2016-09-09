@@ -1,9 +1,10 @@
 {% load custom_tags %}
-<section>
-    <h1>Feld: <span class="field_name">{{ field.name }}</span></h1>
-    <h2 data-team="a">{{ field.game.player_a|format_players }}</h2>
+{# TODO: fix this #}
+<section data-field="{{ field.id }}">
+    <h1>Feld: <span class="field_name">{{ field.get_name }}</span></h1>
+    <h2 data-team="a">Spieler</h2>
     <hr/>
-    <h2 data-team="b">{{ field.game.player_b|format_players }}</h2>
+    <h2 data-team="b">Spieler</h2>
     <table>
         <thead>
         <tr>
@@ -16,13 +17,13 @@
         </thead>
         <tbody>
         <tr>
-            {% for set in field.game.get_set_objects %}
-            <td>{{ set.get_score.0 }}</td>
+            {% for set_nr in 6|get_range:1 %}
+                <td data-setnr="{{ set_nr }}" data-team="a">0</td>
             {% endfor %}
         </tr>
         <tr>
-            {% for set in field.game.get_set_objects %}
-            <td>{{ set.get_score.1 }}</td>
+            {% for set_nr in 6|get_range:1 %}
+                <td data-setnr="{{ set_nr }}" data-team="b">0</td>
             {% endfor %}
         </tr>
         </tbody>
