@@ -7,7 +7,6 @@ from ticker.models import PlayingField
 from ticker.models import Team
 
 
-
 class Slide(models.Model):
 
     club = models.ForeignKey(Club)
@@ -30,6 +29,15 @@ class Slide(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return 'Slide {0} - {1} - {2} - {3} (Club: {4})'.format(
+            self.title,
+            self.content_type,
+            self.is_visible,
+            self.is_deleted,
+            self.club.get_name
+        )
+
 
 class Presentation(models.Model):
     team = models.ForeignKey(Team)
@@ -45,7 +53,7 @@ class Presentation(models.Model):
             str(self.team)
         )
 
-    def get_all_slides(self):
+    def get_all_slides_of_club(self):
         return Slide.objects.filter(club=self.team.parent_club)
 
     def get_fields(self):
@@ -58,7 +66,12 @@ class PresentationSlideTeam(models.Model):
     slide = models.ForeignKey(Slide)
 
     slide_number = models.IntegerField()
+    slide_visible = models.BooleanField(default=True)
     create_time = models.DateTimeField(auto_now_add=True)
+
+
+    def get_slides(self):
+        pass
 
 
 

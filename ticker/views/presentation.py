@@ -6,6 +6,7 @@ from django.shortcuts import render
 from ticker.models import Club
 from ticker.models import FieldAllocation
 from ticker.models import Match
+from ticker.models.presentation import Presentation, PresentationSlideTeam
 from ticker.templatetags.custom_tags import format_players
 
 
@@ -56,3 +57,15 @@ def team_display(request, field_id, response_type):
         return HttpResponse(json.dumps(resp))
 
     return render(request, 'presentation/team_display.html', dict(game=game, field_id=field_id))
+
+
+def presentation_view(request, match_id):
+    match = Match.objects.get(id=match_id)
+    fields = FieldAllocation.objects.filter(is_active=True, game__in=match.games)
+
+    team_a = match.team_a
+    presentation = Presentation.objects.filter(team=team_a).first()
+    slides = PresentationSlideTeam.objects.filter(presentation=presentation).\
+        order_by('slide_number').values_list('slide', flat=True)
+
+    return render(request, 'presentation/general_presentation_reveal.html', dict(slides=slides))

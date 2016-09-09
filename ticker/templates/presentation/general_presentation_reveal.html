@@ -29,6 +29,10 @@
 			document.getElementsByTagName( 'head' )[0].appendChild( link );
 		</script>
 
+        <script>
+            var SCORE_UPDATE_URL = {{ score_update_url }};
+        </script>
+
         <style>
             body {
                 font-family: Consolas, sans-serif !important;
@@ -82,7 +86,13 @@
 		<div class="reveal">
             <div id="score">0-0</div>
 			<!-- Any section element inside of this container is displayed as a slide -->
-			<div class="slides">
+			<div class="slides" id="slide_container">
+
+                {% for slide in slides %}
+                    {{ slide.html_content|safe }}
+                {% endfor %}
+
+
 				<section>
 					<h1>Herzlich willkommen</h1>
 					<h3>zum Bundesliga Spiel</h3>
