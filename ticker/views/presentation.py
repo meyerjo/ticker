@@ -8,6 +8,7 @@ from ticker.models import Club
 from ticker.models import FieldAllocation
 from ticker.models import Match
 from ticker.models import PlayingField
+from ticker.models import Team
 from ticker.models.presentation import Presentation, PresentationSlideTeam
 from ticker.templatetags.custom_tags import format_players
 
@@ -36,7 +37,8 @@ def score_display(request, field_id, response_type):
             resp[set.set_number] = set.get_score()
         return HttpResponse(json.dumps(resp))
 
-    return render(request, 'presentation/score_display.html', dict(game=game, field_id=field_id))
+    team_a = Team.objects.filter(fields__id=field_id).first()
+    return render(request, 'presentation/score_display.html', dict(game=game, field_id=field_id, team_a=team_a))
 
 
 def team_display(request, field_id, response_type):
@@ -51,7 +53,8 @@ def team_display(request, field_id, response_type):
         resp['team_b'] = format_players(game.player_b.all())
         return HttpResponse(json.dumps(resp))
 
-    return render(request, 'presentation/team_display.html', dict(game=game, field_id=field_id))
+    team_a = Team.objects.filter(fields__id=field_id).first()
+    return render(request, 'presentation/team_display.html', dict(game=game, field_id=field_id, team_a=team_a))
 
 
 def presentation_view(request, presentation_id, match_id):

@@ -16,7 +16,6 @@
             padding-left: 50px;
         }
 
-        {% with team_a=game.get_match.team_a %}
         #top_div {
             background-color: {{team_a|get_color:'score_display_top'|default:'indianred' }} ;
             color: {{ team_a|get_color:'score_display_top_font'|default:'black' }};
@@ -41,7 +40,6 @@
             vertical-align: middle;
             overflow:hidden;
         }
-        {% endwith %}
     </style>
 {% endblock %}
 {% load custom_tags %}
@@ -66,10 +64,18 @@
 {% block content %}
     <div id="container">
         <div data-team="team_a" id="top_div" class="playernames">
+            {% if game != None %}
             {{ game.player_a|format_players }}
+            {% else %}
+                Kein Spiel
+            {% endif %}
         </div>
         <div data-team="team_b" id="bottom_div" class="playernames">
-            {{ game.player_b|format_players }}
+            {% if game != None %}
+                {{ game.player_b|format_players }}
+            {% else %}
+                Kein Spiel
+            {% endif %}
         </div>
     </div>
 {% endblock %}

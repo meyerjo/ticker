@@ -58,7 +58,8 @@ def is_selected(obj):
 
 @register.filter
 def get_date_string(obj):
-    print(obj)
+    if obj is None:
+        return ''
     return obj.strftime('%d.%m.%Y')
 
 
@@ -113,6 +114,8 @@ def is_in(content_str, search):
 
 @register.filter
 def format_players(obj):
+    if obj is '' or obj is None:
+        return ''
     names = [p.get_name() for p in obj.all()]
     return '<br/>'.join(names)
 
@@ -170,8 +173,12 @@ def get_leagues_club(user):
 
 @register.filter
 def get_color(team, color_label):
+    if team is None:
+        return None
     cd =  ColorDefinition.objects.filter(
         club__team=team,
         color_definition__name=color_label
     ).first()
+    if cd is None:
+        return None
     return cd.color_hexcode if cd else None

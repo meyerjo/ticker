@@ -15,7 +15,6 @@
             padding-left: 50px;
         }
 
-        {% with team_a=game.get_match.team_a %}
         .team_a {
             background-color: {{team_a|get_color:'score_display_top'|default:'indianred' }} ;
             color: {{ team_a|get_color:'score_display_top_font'|default:'black' }};
@@ -75,7 +74,6 @@
             height: 100%;
         }
 
-        {% endwith %}
     </style>
 {% endblock %}
 
@@ -101,14 +99,28 @@
 {% block content %}
     <div id="container">
         <div id="top_div" class="playernames team_a">
+            {% if game == None %}
+                {% for setnr in 6|get_range:1 %}
+                <div data-setnumber="{{ setnr }}" data-team="a" class="set  ">0</div>
+                {% endfor %}
+            {% else %}
             {% for set in game.sets.all %}
-                <div data-setnumber="{{ set.set_number }}" data-team="a" class="set {% if set.set_number == game.current_set %} active {% endif %} ">{{ set.get_score.0 }}</div>
+                <div data-setnumber="{{ set.set_number }}" data-team="a"
+                     class="set {% if set.set_number == game.current_set %} active {% endif %} ">{{ set.get_score.0 }}</div>
             {% endfor %}
+            {% endif %}
         </div>
         <div id="bottom_div" class="playernames team_b">
+            {% if game == None %}
+                {% for setnr in 6|get_range:1 %}
+                <div data-setnumber="{{ setnr }}" data-team="a" class="set  ">0</div>
+                {% endfor %}
+        {% else %}
             {% for set in game.sets.all %}
-                <div data-setnumber="{{ set.set_number }}" data-team="b" class="set {% if set.set_number == game.current_set %} active {% endif %} ">{{ set.get_score.1 }}</div>
+                <div data-setnumber="{{ set.set_number }}" data-team="b"
+                     class="set {% if set.set_number == game.current_set %} active {% endif %} ">{{ set.get_score.1 }}</div>
             {% endfor %}
+        {% endif %}
         </div>
     </div>
 {% endblock %}

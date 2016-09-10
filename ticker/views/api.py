@@ -578,14 +578,14 @@ def update_score_field(request, field_id, response_type):
         if response_type is None:
             messages.error(request, 'Could not find Field allocation for given field')
             return HttpResponseRedirect(reverse('manage_dashboard'))
-        return HttpResponse('FAIL')
+        return HttpResponse('FAIL-MISSING FIELD ALLOCATION')
     game = fa.game
     m = Match.objects.filter(games__id=game.id).first()
     if m is None:
         if response_type is None:
             messages.error(request, 'Could not find match for the given game')
             return HttpResponseRedirect(reverse('manage_dashboard'))
-        return HttpResponse('FAIL')
+        return HttpResponse('FAIL-UNKNOWN MATCH')
 
     # TODO: check if the requesting user is having the responsibility for the match
     updated_information = dict()
@@ -628,7 +628,7 @@ def update_score_field(request, field_id, response_type):
             )
             updated_information['type'] = 'clear-field'
             updated_information['field_id'] = field_id
-            updated_information['game_field_link'] = reverse_lazy('remove_game_to_field', args=[game.id, field_id])
+            updated_information['game_field_link'] = str(reverse_lazy('remove_game_to_field', args=[game.id, field_id, '/']))
             updated_information['game_name'] = game.name
             updated_information['game_id'] = game.id
         elif game.get_current_set().is_finished(m.rule):
@@ -647,6 +647,8 @@ def update_score_field(request, field_id, response_type):
             updated_information = dict(error='Cannot switch sets at this stage')
     if 'error' not in updated_information:
         updated_information['error'] = None
+
+    print(updated_information)
 
     if response_type is None:
         return HttpResponseRedirect(reverse('manage_ticker_interface', args=[m.id]))
