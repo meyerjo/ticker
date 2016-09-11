@@ -1,5 +1,7 @@
+from datetime import timedelta
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.utils.datetime_safe import datetime
 
 from ticker.models import League
 from ticker.models import Match
@@ -7,7 +9,9 @@ from ticker.models import Match
 
 def start_page(request):
     league = League.objects.filter(name='Bundesliga').first()
-    matches = Match.all_matches()
-    print(League.get_league_of_match(matches.first()))
+    from datetime import timedelta
+    from django.utils import timezone
+    last_week = timezone.now() - timedelta(days=7)
+    matches = Match.objects.filter(match_time__gte=last_week)
     context = dict(matches=matches, league=league)
     return render(request, 'index.html', context)

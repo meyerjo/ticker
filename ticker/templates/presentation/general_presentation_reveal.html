@@ -9,40 +9,6 @@
         {% include 'presentation/slide_layouts/result_fields.html' %}
     {% endfor %}
 
-    <section>
-        <h1>Feld: Wind Immobilien</h1>
-        <h2>Andreas Kruse<br/>Max Schneider</h2>
-        <hr/>
-        <h2>Andreas Kruse<br/>Max Schneider</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>1</th>
-                <th>2</th>
-                <th>3</th>
-                <th>4</th>
-                <th>5</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>11</td>
-                <td>11</td>
-                <td>11</td>
-                <td>11</td>
-                <td>11</td>
-            </tr>
-            <tr>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-            </tr>
-            </tbody>
-        </table>
-    </section>
-
     {% with games=next_home_games title='Heimspiele' %}
         {% include 'presentation/slide_layouts/next_games.html' %}
     {% endwith %}
@@ -71,4 +37,64 @@
     {% include 'presentation/slide_layouts/advertisement_photo.html' %}
 
 
+    {% static 'advertisement/1/maritim.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+
+    {% static 'advertisement/1/mietstudio.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+
+    {% static 'advertisement/1/praxis_malz.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+
+    {% static 'advertisement/1/queen_games.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+
+    {% static 'advertisement/1/riverlounge.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+
+    {% include 'presentation/slide_layouts/welcome.html' %}
+
+    {% include 'presentation/slide_layouts/result_table.html' %}
+
+    {% static 'advertisement/1/ser.jpg' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+
+    {% static 'advertisement/1/sparkasse.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+
+    {% static 'advertisement/1/sportfabrik.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+    {% static 'advertisement/1/sportpartner.jpg' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+    {% static 'advertisement/1/swb.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+    {% static 'advertisement/1/Tacos.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+
+    {% include 'presentation/slide_layouts/welcome.html' %}
+
+    {% include 'presentation/slide_layouts/result_table.html' %}
+
+    {% static 'advertisement/1/topwash.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+    {% static 'advertisement/1/victor_logo.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+
+    {% static 'advertisement/1/vobaworld.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
+
+    {% static 'advertisement/1/voegeli.png' as source %}
+    {% include 'presentation/slide_layouts/advertisement_photo.html' %}
 {% endblock %}
