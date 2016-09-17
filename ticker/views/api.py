@@ -112,7 +112,7 @@ def add_player(request):
     print(responses)
     if 'response_type' in request.POST:
         if request.POST['response_type'] == 'json':
-            return HttpResponse(json.dumps(responses))
+            return HttpResponse(json.dumps(responses), content_type='application/json')
     return HttpResponseRedirect(reverse_lazy('manage_teams_details', args=[teamid]))
 
 @login_required
@@ -153,7 +153,7 @@ def player_dynamic(request):
                                 sex=tmp_sex)
                            )
 
-    return HttpResponse(json.dumps(persons))
+    return HttpResponse(json.dumps(persons), content_type='application/json')
 
 @login_required
 @permission_required('ticker.add_season')
@@ -238,7 +238,7 @@ def dynamic_matchplan(request):
                 team_a=matches.group(2),
                 team_b=matches.group(3)
             ))
-    return HttpResponse(json.dumps(result))
+    return HttpResponse(json.dumps(result), content_type='application/json')
 
 @login_required
 def exists_team(request):
@@ -398,7 +398,7 @@ def add_match(request, league_id, response_type=None):
         json_responses.append('OK')
 
     if response_type is not None:
-        return HttpResponse(json.dumps(json_responses))
+        return HttpResponse(json.dumps(json_responses), content_type='application/json')
     return HttpResponseRedirect(reverse_lazy('manage_league_details', args=[league_id]))
 
 
@@ -450,7 +450,7 @@ def save_lineup(request, matchid, response_type):
             messages.error(request, 'Players: {0} have too many games'.format(p))
             return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[matchid]))
         else:
-            return HttpResponse('TOOMANYGAMES')
+            return HttpResponse('TOOMANYGAMES', content_type='text/plain')
 
     player_twice_in_same_game_type = []
     gametype_player_counter = dict()
@@ -471,7 +471,7 @@ def save_lineup(request, matchid, response_type):
             p = Player.objects.filter(id__in=player_twice_in_same_game_type)
             messages.error(request, 'Players {0} are used twice in the same game type'.format(p))
             return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[matchid]))
-        return HttpResponse('TWICE-IN-SAME-GAME-TYPE')
+        return HttpResponse('TWICE-IN-SAME-GAME-TYPE', content_type='text/plain')
 
     with transaction.atomic():
         for gameid, players in data_dict.items():
@@ -491,7 +491,7 @@ def save_lineup(request, matchid, response_type):
 
 @login_required
 def add_field(request):
-    return HttpResponse('implement this')
+    return HttpResponse('implement this', content_type='text/plain')
     # TODO Implement this properly
     c = Club.objects.get(club_name='1. BC Beuel')
     t = Team.objects.get(team_name='1. BC Beuel 1')
@@ -503,8 +503,8 @@ def add_field(request):
     if c.fields.count() == 0:
         c.fields.add(*[f1, f2])
         t.fields.add(*(f1, f2))
-        return HttpResponse('OK')
-    return HttpResponse('ALREADYEXISTED')
+        return HttpResponse('OK', content_type='text/plain')
+    return HttpResponse('ALREADYEXISTED', content_type='text/plain')
 
 
 @login_required
@@ -535,7 +535,7 @@ def assign_game_to_field(request, game_id, field_id, response_type):
 
     if response_type is None:
         return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[m.id]))
-    return HttpResponse('OK')
+    return HttpResponse('OK', content_type='text/plain')
 
 
 @login_required
@@ -546,7 +546,7 @@ def remove_game_from_field(request, gameid, fieldid, response_type):
     field = PlayingField.objects.get(id=fieldid)
     m = Match.objects.filter(games__id=gameid).first()
     if m is None:
-        return HttpResponse('MATCH NOT FOUND')
+        return HttpResponse('MATCH NOT FOUND', content_type='text/plain')
 
     fa = FieldAllocation.objects.filter(is_active=True, game=game, field=field)
     if fa.exists():
@@ -557,7 +557,7 @@ def remove_game_from_field(request, gameid, fieldid, response_type):
     if response_type is None:
         messages.error(request, 'Field allocation does not exists')
         return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[m.id]))
-    return HttpResponse('ALLOCATION NOT EXIST')
+    return HttpResponse('ALLOCATION NOT EXIST', content_type='text/plain')
 
 
 @login_required
@@ -578,14 +578,14 @@ def update_score_field(request, field_id, response_type):
         if response_type is None:
             messages.error(request, 'Could not find Field allocation for given field')
             return HttpResponseRedirect(reverse('manage_dashboard'))
-        return HttpResponse('FAIL-MISSING FIELD ALLOCATION')
+        return HttpResponse('FAIL-MISSING FIELD ALLOCATION', content_type='text/plain')
     game = fa.game
     m = Match.objects.filter(games__id=game.id).first()
     if m is None:
         if response_type is None:
             messages.error(request, 'Could not find match for the given game')
             return HttpResponseRedirect(reverse('manage_dashboard'))
-        return HttpResponse('FAIL-UNKNOWN MATCH')
+        return HttpResponse('FAIL-UNKNOWN MATCH', content_type='text/plain')
 
     # TODO: check if the requesting user is having the responsibility for the match
     updated_information = dict()
@@ -652,7 +652,7 @@ def update_score_field(request, field_id, response_type):
 
     if response_type is None:
         return HttpResponseRedirect(reverse('manage_ticker_interface', args=[m.id]))
-    return HttpResponse(json.dumps(updated_information))
+    return HttpResponse(json.dumps(updated_information), content_type='application/json')
 
 
 @login_required
@@ -711,7 +711,6 @@ def api_new_token(request, field_id):
         is_used=False
     ).first()
     if current_tokens is not None:
-        print(current_tokens.token)
         messages.error(request, 'Another token already exists')
         return redirect(request.META.get('HTTP_REFERER'))
     with transaction.atomic():
