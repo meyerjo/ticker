@@ -21,20 +21,22 @@ def display_dashboard(request):
 def score_display(request, field_id, response_type):
     fa = FieldAllocation.objects.filter(field_id=field_id, is_active=True).first()
     game = fa.game if fa else None
-    response_type = None if response_type == '/' or response_type=='' else response_type
+    response_type = None if response_type == '/' or response_type == '' else response_type
     if response_type is not None:
         resp = {
-                   1: [0,0],
-                   2: [0,0],
-                   3: [0,0],
-                   4: [0,0],
-                   5: [0,0]
+            1: [0,0],
+            2: [0,0],
+            3: [0,0],
+            4: [0,0],
+            5: [0,0],
+            'active_set': 1
         }
         if game is None:
             return HttpResponse(json.dumps(resp))
 
         for set in game.sets.all():
             resp[set.set_number] = set.get_score()
+        resp['active_set'] = game.active_set
         return HttpResponse(json.dumps(resp))
 
     team_a = Team.objects.filter(fields__id=field_id).first()
@@ -58,6 +60,7 @@ def team_display(request, field_id, response_type):
 
 
 def presentation_view(request, presentation_id, match_id):
+    # TODO: Implement this
     match = Match.objects.get(id=match_id)
     #fields = FieldAllocation.objects.filter(is_active=True, game__in=match.games)
     team_fields = PlayingField.objects.filter(team=match.team_a)
