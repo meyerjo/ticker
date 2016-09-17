@@ -139,8 +139,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = None
 
 try:
     from .local_settings import *
 except ImportError as e:
     pass
+
+if DEBUG and STATIC_ROOT is None:
+    STATIC_ROOT = './ticker/static/'
+elif not DEBUG and STATIC_ROOT is None:
+    print('You should set static root')

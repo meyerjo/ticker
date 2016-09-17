@@ -25,95 +25,6 @@ from ticker.models import PresentationToken
 from ticker.models import Profile
 from ticker.models import TeamPlayerAssociation
 
-@login_required
-@permission_required('ticker.add_club')
-def add_club(request):
-    club, created = Club.objects.get_or_create(
-        club_name=request.POST['clubname']
-    )
-    if created:
-        messages.info(request, 'User created')
-    else:
-        messages.warning(request, 'Club already existed')
-    return HttpResponseRedirect(reverse_lazy('manage_club_details', args=[club.id]))
-
-@login_required
-def add_team(request, clubid):
-    clubid = int(clubid)
-    club = Club.objects.get(id=clubid)
-    team_name = request.POST['team_name']
-    team, created = Team.objects.get_or_create(
-        parent_club=club,
-        team_name=team_name
-    )
-    if created:
-        messages.info(request, 'New Team created')
-    else:
-        messages.warning(request, 'Already exists')
-    return HttpResponseRedirect(reverse_lazy('manage_club_details', args=[club.id]))
-
-@login_required
-def edit_club(request):
-    clubid = int(request.POST['clubid'])
-    club = Club.objects.get(id=clubid)
-    club.club_name=request.POST['clubname']
-    club.save()
-    return HttpResponseRedirect(reverse_lazy('manage_club_details', args=[club.id]))
-
-@login_required
-def add_player(request):
-    clubid = int(request.POST['club_id'])
-    teamid = int(request.POST['team_id'])
-    c = Club.objects.get(id=int(clubid))
-    t = Team.objects.get(id=int(teamid))
-    if t.parent_club.id != c.id:
-        return HttpResponse('FAIL')
-
-    player_sex = request.POST.getlist('sex')
-    player_prename = request.POST.getlist('prename')
-    player_lastname = request.POST.getlist('lastname')
-
-    if not (len(player_sex) == len(player_prename) == len(player_lastname)):
-        return HttpResponse('FAIL')
-
-    responses = []
-    with transaction.atomic():
-        for i, elm in enumerate(player_prename):
-            prename = elm
-            lastname = player_lastname[i]
-            sex = player_sex[i]
-            if prename == '' or lastname == '':
-                continue
-
-            # get the sex id
-            sex_id = [i for i,v in enumerate(Player.possible_sex) if v[0] == sex]
-            if len(sex_id) == 0:
-                continue
-
-            p, created = Player.objects.get_or_create(
-                prename=prename,
-                lastname=lastname,
-                sex=sex
-            )
-            if created:
-                p.save()
-                t.players.add(p)
-                t.save()
-                now_date = datetime.date.today()
-                start_date = datetime.date(year=now_date.year, month=8, day=1)
-                end_date = datetime.date(year=now_date.year+1, month=7, day=31)
-
-                team_assoc = TeamPlayerAssociation(team=t, player=p, start_association=start_date,
-                                                   end_association=end_date)
-                team_assoc.save()
-                responses.append('CREATED')
-            else:
-                responses.append('EXISTED')
-    print(responses)
-    if 'response_type' in request.POST:
-        if request.POST['response_type'] == 'json':
-            return HttpResponse(json.dumps(responses), content_type='application/json')
-    return HttpResponseRedirect(reverse_lazy('manage_teams_details', args=[teamid]))
 
 @login_required
 def player_dynamic(request):
@@ -154,6 +65,124 @@ def player_dynamic(request):
                            )
 
     return HttpResponse(json.dumps(persons), content_type='application/json')
+
+
+@login_required
+def dynamic_matchplan(request):
+    content = request.GET['dynamic_content']
+    lines = content.split('\n')
+    result = []
+    format_1_regex = re.compile(r'^.*([0-9]{2}.[0-9]{2}.[0-9]{4} [0-9]{2}:[0-9]{2})'
+                                r'\t.*\t.*\t.*\t(.*)\t-\t([^\t]*)\t*.*')
+
+    for line in lines:
+        if format_1_regex.match(line):
+            matches = format_1_regex.match(line)
+            tmp_dt = matches.group(1)
+            tmp_d = re.match(r'[0-9]{2}.[0-9]{2}.[0-9]{4}', tmp_dt).group(0)
+            tmp_t = re.match('^.*(\d{2}:\d{2}).*$', tmp_dt).group(1)
+            result.append(dict(
+                date=tmp_d,
+                time=tmp_t,
+                team_a=matches.group(2),
+                team_b=matches.group(3)
+            ))
+    return HttpResponse(json.dumps(result), content_type='application/json')
+
+
+@login_required
+@permission_required('ticker.add_club')
+def add_club(request):
+    club, created = Club.objects.get_or_create(
+        club_name=request.POST['clubname']
+    )
+    if created:
+        messages.info(request, 'User created')
+    else:
+        messages.warning(request, 'Club already existed')
+    return HttpResponseRedirect(reverse_lazy('manage_club_details', args=[club.id]))
+
+
+@login_required
+def add_team(request, clubid):
+    clubid = int(clubid)
+    club = Club.objects.get(id=clubid)
+    team_name = request.POST['team_name']
+    team, created = Team.objects.get_or_create(
+        parent_club=club,
+        team_name=team_name
+    )
+    if created:
+        messages.info(request, 'New Team created')
+    else:
+        messages.warning(request, 'Already exists')
+    return HttpResponseRedirect(reverse_lazy('manage_club_details', args=[club.id]))
+
+
+@login_required
+def edit_club(request):
+    clubid = int(request.POST['clubid'])
+    club = Club.objects.get(id=clubid)
+    club.club_name = request.POST['clubname']
+    club.save()
+    return HttpResponseRedirect(reverse_lazy('manage_club_details', args=[club.id]))
+
+
+@login_required
+def add_player(request):
+    clubid = int(request.POST['club_id'])
+    teamid = int(request.POST['team_id'])
+    c = Club.objects.get(id=int(clubid))
+    t = Team.objects.get(id=int(teamid))
+    if t.parent_club.id != c.id:
+        return HttpResponse('FAIL')
+
+    player_sex = request.POST.getlist('sex')
+    player_prename = request.POST.getlist('prename')
+    player_lastname = request.POST.getlist('lastname')
+
+    if not (len(player_sex) == len(player_prename) == len(player_lastname)):
+        return HttpResponse('FAIL')
+
+    responses = []
+    with transaction.atomic():
+        for i, elm in enumerate(player_prename):
+            prename = elm
+            lastname = player_lastname[i]
+            sex = player_sex[i]
+            if prename == '' or lastname == '':
+                continue
+
+            # get the sex id
+            sex_id = [i for i, v in enumerate(Player.possible_sex) if v[0] == sex]
+            if len(sex_id) == 0:
+                continue
+
+            p, created = Player.objects.get_or_create(
+                prename=prename,
+                lastname=lastname,
+                sex=sex
+            )
+            if created:
+                p.save()
+                t.players.add(p)
+                t.save()
+                now_date = datetime.date.today()
+                start_date = datetime.date(year=now_date.year, month=8, day=1)
+                end_date = datetime.date(year=now_date.year + 1, month=7, day=31)
+
+                team_assoc = TeamPlayerAssociation(team=t, player=p, start_association=start_date,
+                                                   end_association=end_date)
+                team_assoc.save()
+                responses.append('CREATED')
+            else:
+                responses.append('EXISTED')
+    print(responses)
+    if 'response_type' in request.POST:
+        if request.POST['response_type'] == 'json':
+            return HttpResponse(json.dumps(responses), content_type='application/json')
+    return HttpResponseRedirect(reverse_lazy('manage_teams_details', args=[teamid]))
+
 
 @login_required
 @permission_required('ticker.add_season')
@@ -219,28 +248,6 @@ def edit_league(request, league_id):
 
 
 @login_required
-def dynamic_matchplan(request):
-    content = request.GET['dynamic_content']
-    lines = content.split('\n')
-    result = []
-    format_1_regex = re.compile(r'^.*([0-9]{2}.[0-9]{2}.[0-9]{4} [0-9]{2}:[0-9]{2})'
-                                r'\t.*\t.*\t.*\t(.*)\t-\t([^\t]*)\t*.*')
-
-    for line in lines:
-        if format_1_regex.match(line):
-            matches = format_1_regex.match(line)
-            tmp_dt = matches.group(1)
-            tmp_d = re.match(r'[0-9]{2}.[0-9]{2}.[0-9]{4}', tmp_dt).group(0)
-            tmp_t = re.match('^.*(\d{2}:\d{2}).*$', tmp_dt).group(1)
-            result.append(dict(
-                date=tmp_d,
-                time=tmp_t,
-                team_a=matches.group(2),
-                team_b=matches.group(3)
-            ))
-    return HttpResponse(json.dumps(result), content_type='application/json')
-
-@login_required
 def exists_team(request):
     def levenshteinDistance(s1, s2):
         if len(s1) > len(s2):
@@ -269,16 +276,15 @@ def exists_team(request):
         if dist == 0:
             return HttpResponse('OK')
         if dist <= best_dist:
-            best_dist =dist
+            best_dist = dist
             best_non_threshold_candidate = tmp_name
-        if dist <=5:
+        if dist <= 5:
             candidates.append(tmp_name)
     if len(candidates) == 0:
         # if less than half of the words has to be rewritten
         if best_dist < len(requested_name) / 2:
             candidates.append(best_non_threshold_candidate)
             return HttpResponse('BESTFIT {0}'.format(candidates))
-
 
     if len(candidates) == 0:
         return HttpResponse('NONE')
@@ -409,11 +415,17 @@ def add_matches(request, league_id, response_type):
 
 @login_required
 def save_lineup(request, matchid, response_type):
+    """
+    Validates the line up and saves it to the database
+    :param request:
+    :param matchid:
+    :param response_type:
+    :return:
+    """
+    # TODO: refactor this
     match = Match.objects.get(id=matchid)
     response_type = None if response_type == '/' or response_type == '' else response_type
     req_dict = request.GET
-    print(req_dict)
-    print(request.POST)
 
     data_dict = dict()
     player_game_counter = dict()
@@ -483,11 +495,11 @@ def save_lineup(request, matchid, response_type):
             g.player_b.clear()
             g.player_b.add(*player_team_b)
 
-
     if response_type is None:
         return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[matchid]))
 
-    return HttpResponse('OK')
+    return HttpResponse('OK', content_type='text')
+
 
 @login_required
 def add_field(request):
@@ -513,14 +525,12 @@ def assign_game_to_field(request, game_id, field_id, response_type):
     response_type = None if response_type == '/' or response_type == '' else response_type
     m = Match.objects.filter(games__id=game_id).first()
     if m is None:
-        return HttpResponse('MATCH NOT FOUND')
+        return HttpResponse('MATCH NOT FOUND', content_type='text/plain')
 
     currentallocations = FieldAllocation.objects.filter(is_active=True, field__id=field_id)
-    print(currentallocations)
     with transaction.atomic():
         if currentallocations.exists():
             old_count = currentallocations.count()
-            print(old_count)
             currentallocations = currentallocations.filter(game__id=game_id)
             print(currentallocations.count())
 
@@ -528,7 +538,7 @@ def assign_game_to_field(request, game_id, field_id, response_type):
                 if response_type is None:
                     messages.error(request, 'Field/Game assignment already in place')
                     return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[m.id]))
-                return HttpResponse('FAIL')
+                return HttpResponse('FAIL', content_type='text/plain')
         else:
             fa = FieldAllocation(field=PlayingField.objects.get(id=field_id), game=Game.objects.get(id=game_id))
             fa.save()
@@ -553,7 +563,7 @@ def remove_game_from_field(request, gameid, fieldid, response_type):
         fa.update(is_active=False, end_allocation=timezone.now())
         if response_type is None:
             return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[m.id]))
-        return HttpResponse('OK')
+        return HttpResponse('OK', content_type='text/plain')
     if response_type is None:
         messages.error(request, 'Field allocation does not exists')
         return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[m.id]))
@@ -563,6 +573,7 @@ def remove_game_from_field(request, gameid, fieldid, response_type):
 @login_required
 @permission_required('ticker.add_point')
 @permission_required('ticker.change_point')
+@permission_required('ticker.change_game')
 def update_score_field(request, field_id, response_type):
     """
     Updates the score for the game on the given field id. Responses either in a json fashion or with an redirect
@@ -589,35 +600,35 @@ def update_score_field(request, field_id, response_type):
 
     # TODO: check if the requesting user is having the responsibility for the match
     updated_information = dict()
-    set = game.get_current_set()
+    current_set = game.get_current_set()
     if 'team_a' in request.POST:
         value = request.POST['team_a']
         if value == '+':
-            set.add_point_team_a(m.rule)
+            current_set.add_point_team_a(m.rule)
         elif value == '-':
-            set.remove_point_team_a(m.rule)
+            current_set.remove_point_team_a(m.rule)
         updated_information['type'] = 'score-update'
         updated_information['game_id'] = game.id
-        updated_information['set_id'] = set.id
+        updated_information['set_id'] = current_set.id
         updated_information['field_id'] = field_id
-        updated_information['set_number'] = set.set_number
-        updated_information['set_score'] = set.get_score()
+        updated_information['set_number'] = current_set.set_number
+        updated_information['set_score'] = current_set.get_score()
         updated_information['game_score'] = game.get_sets()
-        updated_information['set_finished'] = set.is_finished(m.rule)
+        updated_information['set_finished'] = current_set.is_finished(m.rule)
     elif 'team_b' in request.POST:
         value = request.POST['team_b']
         if value == '+':
-            set.add_point_team_b(m.rule)
+            current_set.add_point_team_b(m.rule)
         elif value == '-':
-            set.remove_point_team_b(m.rule)
+            current_set.remove_point_team_b(m.rule)
         updated_information['type'] = 'score-update'
         updated_information['game_id'] = game.id
-        updated_information['set_id'] = set.id
+        updated_information['set_id'] = current_set.id
         updated_information['field_id'] = field_id
-        updated_information['set_number'] = set.set_number
-        updated_information['set_score'] = set.get_score()
+        updated_information['set_number'] = current_set.set_number
+        updated_information['set_score'] = current_set.get_score()
         updated_information['game_score'] = game.get_sets()
-        updated_information['set_finished'] = set.is_finished(m.rule)
+        updated_information['set_finished'] = current_set.is_finished(m.rule)
     elif 'switch_set' in request.POST:
         if game.is_won(m.rule):
             messages.info(request, 'Game is won. Removed it from the field')
@@ -628,27 +639,26 @@ def update_score_field(request, field_id, response_type):
             )
             updated_information['type'] = 'clear-field'
             updated_information['field_id'] = field_id
-            updated_information['game_field_link'] = str(reverse_lazy('remove_game_to_field', args=[game.id, field_id, '/']))
+            updated_information['game_field_link'] = str(
+                reverse_lazy('remove_game_to_field', args=[game.id, field_id, '/']))
             updated_information['game_name'] = game.name
             updated_information['game_id'] = game.id
         elif game.get_current_set().is_finished(m.rule):
             game.current_set += 1
             game.save()
 
-            set = game.get_current_set()
+            current_set = game.get_current_set()
             updated_information['type'] = 'update-current-set'
             updated_information['field_id'] = field_id
             updated_information['set_number'] = game.current_set
-            updated_information['set_label'] = 'Satz {0}'.format(set.set_number)
-            updated_information['set_score'] = set.get_score()
+            updated_information['set_label'] = 'Satz {0}'.format(current_set.set_number)
+            updated_information['set_score'] = current_set.get_score()
         else:
             if response_type is None:
-                messages.error(request,'Can not switch sets at this stage')
+                messages.error(request, 'Can not switch sets at this stage')
             updated_information = dict(error='Cannot switch sets at this stage')
     if 'error' not in updated_information:
         updated_information['error'] = None
-
-    print(updated_information)
 
     if response_type is None:
         return HttpResponseRedirect(reverse('manage_ticker_interface', args=[m.id]))
@@ -657,7 +667,7 @@ def update_score_field(request, field_id, response_type):
 
 @login_required
 def edit_parent_club(request, team_id):
-    old_parent_club = request.POST['old_parent_club']
+    # old_parent_club = request.POST['old_parent_club']
     new_club_id = request.POST['parent_club']
 
     team = Team.objects.get(id=team_id)
@@ -679,10 +689,7 @@ def edit_parent_club(request, team_id):
 def not_yet_implemented(request, *args):
     return HttpResponse('NOT YET IMPLEMENTED<br/>'
                         'RouteName: {0}<br/>'
-                        'Args: {1}<br/>'.format(
-        resolve(request.path_info).url_name,
-        json.dumps(args)
-    ))
+                        'Args: {1}<br/>'.format(resolve(request.path_info).url_name, json.dumps(args)))
 
 
 def validate_token(request):
@@ -714,7 +721,8 @@ def api_new_token(request, field_id):
         messages.error(request, 'Another token already exists')
         return redirect(request.META.get('HTTP_REFERER'))
     with transaction.atomic():
-        import time, hashlib
+        import time
+        import hashlib
         t_str = str(time.time())
         t_str = hashlib.md5(t_str.encode('utf-8')).hexdigest().upper()[:6]
         token = PresentationToken(field=pf, user=request.user, token=t_str)
@@ -725,7 +733,6 @@ def api_new_token(request, field_id):
 @login_required
 def invalidate_token(request, token_id):
     t = PresentationToken.objects.get(id=token_id)
-
     if request.user.is_superuser or t.user == request.user:
         t.is_used = True
         t.save()
@@ -755,4 +762,3 @@ def api_change_color(request):
             definition.save()
 
     return HttpResponseRedirect(reverse('manage_color_scheme'))
-

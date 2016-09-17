@@ -68,33 +68,33 @@ def api_simple_ticker(request, field_id, response_type):
         return HttpResponseRedirect(reverse_lazy('ticker_interface_simple', args=[field.id]))
 
     updated_information = dict()
-    set = game.get_current_set()
+    current_set = game.get_current_set()
     if 'team_a' in request.POST:
         if request.POST['team_a'] == '+':
-            set.add_point_team_a(match.rule)
+            current_set.add_point_team_a(match.rule)
         elif request.POST['team_a'] == '-':
-            set.remove_point_team_a(match.rule)
+            current_set.remove_point_team_a(match.rule)
         updated_information['type'] = 'score-update'
         updated_information['game_id'] = game.id
-        updated_information['set_id'] = set.id
+        updated_information['set_id'] = current_set.id
         updated_information['field_id'] = field.id
-        updated_information['set_number'] = set.set_number
-        updated_information['set_score'] = set.get_score()
+        updated_information['set_number'] = current_set.set_number
+        updated_information['set_score'] = current_set.get_score()
         updated_information['game_score'] = game.get_sets()
-        updated_information['set_finished'] = set.is_finished(match.rule)
+        updated_information['set_finished'] = current_set.is_finished(match.rule)
     elif 'team_b' in request.POST:
         if request.POST['team_b'] == '+':
-            set.add_point_team_b(match.rule)
+            current_set.add_point_team_b(match.rule)
         elif request.POST['team_b'] == '-':
-            set.remove_point_team_b(match.rule)
+            current_set.remove_point_team_b(match.rule)
         updated_information['type'] = 'score-update'
         updated_information['game_id'] = game.id
-        updated_information['set_id'] = set.id
+        updated_information['set_id'] = current_set.id
         updated_information['field_id'] = field.id
-        updated_information['set_number'] = set.set_number
-        updated_information['set_score'] = set.get_score()
+        updated_information['set_number'] = current_set.set_number
+        updated_information['set_score'] = current_set.get_score()
         updated_information['game_score'] = game.get_sets()
-        updated_information['set_finished'] = set.is_finished(match.rule)
+        updated_information['set_finished'] = current_set.is_finished(match.rule)
     elif 'switch_set' in request.POST:
         if game.is_won(match.rule):
             messages.info(request, 'Game is won. Removed it from the field')
@@ -112,12 +112,12 @@ def api_simple_ticker(request, field_id, response_type):
             game.current_set += 1
             game.save()
 
-            set = game.get_current_set()
+            current_set = game.get_current_set()
             updated_information['type'] = 'update-current-set'
             updated_information['field_id'] = field.id
             updated_information['set_number'] = game.current_set
-            updated_information['set_label'] = 'Satz {0}'.format(set.set_number)
-            updated_information['set_score'] = set.get_score()
+            updated_information['set_label'] = 'Satz {0}'.format(current_set.set_number)
+            updated_information['set_score'] = current_set.get_score()
         else:
             updated_information = dict(error='Cannot switch sets at this stage')
     if response_type is not None:
