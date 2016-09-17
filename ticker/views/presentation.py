@@ -62,12 +62,12 @@ def team_display(request, field_id, response_type):
 def presentation_view(request, presentation_id, match_id):
     # TODO: Implement this
     match = Match.objects.get(id=match_id)
-    #fields = FieldAllocation.objects.filter(is_active=True, game__in=match.games)
+    # fields = FieldAllocation.objects.filter(is_active=True, game__in=match.games)
     team_fields = PlayingField.objects.filter(team=match.team_a)
 
     team_a = match.team_a
-    #presentation = Presentation.objects.filter(team=team_a).first()
-    #slides = PresentationSlideTeam.objects.filter(presentation=presentation).\
+    # presentation = Presentation.objects.filter(team=team_a).first()
+    # slides = PresentationSlideTeam.objects.filter(presentation=presentation).\
     #    order_by('slide_number').values_list('slide', flat=True)
     slides = []
     next_home_games = Match.objects.filter(match_time__gte=timezone.now(),
