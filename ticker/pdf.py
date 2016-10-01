@@ -5,7 +5,9 @@ from fdfgen import forge_fdf
 from django.core.exceptions import ImproperlyConfigured
 from django.template import engines
 from django.template.backends.base import BaseEngine
-from django.template.engine import Engine, _dirs_undefined
+from django.template.engine import Engine
+
+_dirs_undefined = object()
 
 
 class PdfTemplateError(Exception):
