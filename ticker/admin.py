@@ -52,7 +52,6 @@ admin.site.register(Set, SetAdmin)
 
 class RuleAdmin(admin.ModelAdmin):
     list_display = ['id', 'rule_name']
-    list_editable = ['id', 'rule_name']
 
 
 admin.site.register(Rules, RuleAdmin)
