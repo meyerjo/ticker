@@ -1,5 +1,7 @@
-django==1.9.7
+django
 django_python3_ldap
+celery
+django-celery
 whitenoise
 jsonpickle
 fdfgen
