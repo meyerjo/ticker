@@ -1,4 +1,4 @@
-django
+django==1.9.7
 django_python3_ldap
 celery
 django-celery
