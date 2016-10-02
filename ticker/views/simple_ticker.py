@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
+from django.views.decorators.cache import cache_page
 
 from ticker.models import FieldAllocation
 from ticker.models import PresentationToken
@@ -35,6 +36,7 @@ def has_valid_token(f):
     return wrap
 
 
+@cache_page(15*60)
 def simple_ticker_login(request):
     if request.user.is_authenticated():
         messages.info(request, 'Sie sind bereits eingeloggt')

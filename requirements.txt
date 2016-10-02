@@ -5,3 +5,4 @@ django-celery
 whitenoise
 jsonpickle
 fdfgen
+mysqlclient

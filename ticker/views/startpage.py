@@ -2,11 +2,13 @@ from datetime import timedelta
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.datetime_safe import datetime
+from django.views.decorators.cache import cache_page
 
 from ticker.models import League
 from ticker.models import Match
 
 
+@cache_page(15*60)
 def start_page(request):
     league = League.objects.filter(name='Bundesliga').first()
     from datetime import timedelta

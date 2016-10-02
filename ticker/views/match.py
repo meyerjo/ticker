@@ -1,6 +1,7 @@
 import jsonpickle
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.decorators.cache import cache_page
 
 from ticker.models import FieldAllocation
 from ticker.models import Match
@@ -36,6 +37,7 @@ def format_json(match):
     return result
 
 
+@cache_page(10)
 def match_ticker(request, matchid, response_type):
     response_type = None if response_type == '/' or response_type == '' else response_type
     m = Match.objects.filter(id=matchid).first()

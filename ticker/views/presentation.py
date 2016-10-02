@@ -3,6 +3,7 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
+from django.views.decorators.cache import cache_page
 
 from ticker.models import Club
 from ticker.models import FieldAllocation
@@ -13,6 +14,7 @@ from ticker.models.presentation import Presentation, PresentationSlideTeam
 from ticker.templatetags.custom_tags import format_players
 
 
+@cache_page(15*60)
 def display_dashboard(request):
     clubs = Club.objects.all().order_by('club_name')
     return render(request, 'presentation/score_dashboard.html', dict(clubs=clubs))
