@@ -3,6 +3,7 @@ from django.conf.urls import url
 from ticker.views.api import not_yet_implemented
 from ticker.views.export import export_match, export_game
 from ticker.views.match import match_ticker, match_ticker_json
+from ticker.views.offline_views import offline_input, offline_score, offline_team
 from ticker.views.presentation import presentation_view, score_display, team_display, display_dashboard
 from ticker.views.simple_ticker import simple_ticker_interface
 from ticker.views.simple_ticker import simple_ticker_login
@@ -48,6 +49,11 @@ urlpatterns = [
     url(r'^presentation/field/dashboard/?$', display_dashboard, name='display_dashboard'),
 
     url(r'^settings/color/scheme/?$', manage_colors, name='manage_color_scheme'),
+
+    url(r'^offline/input/?$', offline_input, name='offline_input'),
+    url(r'^offline/score/?$', offline_score, name='offline_score'),
+    url(r'^offline/team/?$', offline_team, name='offline_team'),
+
 
 
     url(r'^login/?$', login, name='login'),

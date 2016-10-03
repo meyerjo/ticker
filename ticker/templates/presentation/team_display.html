@@ -69,14 +69,14 @@
     <div id="container">
         <div data-team="team_a" id="top_div" class="playernames">
             {% if game != None %}
-            {{ game.player_a|format_players }}
+            {{ game.player_a|format_players|safe }}
             {% else %}
                 Kein Spiel
             {% endif %}
         </div>
         <div data-team="team_b" id="bottom_div" class="playernames">
             {% if game != None %}
-                {{ game.player_b|format_players }}
+                {{ game.player_b|format_players|safe }}
             {% else %}
                 Kein Spiel
             {% endif %}

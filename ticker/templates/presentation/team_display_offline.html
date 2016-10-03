@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block extrahtmltag %}
+    manifest="/offline.appcache"
+{% endblock %}
+{% load custom_tags %}
+{% block extracss %}
+    <style>
+         .playernames {
+            font-size: 17vh;
+            padding-left: 5%;
+        }
+
+        #container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            padding-left: 50px;
+        }
+
+        #top_div {
+            background-color: #000000 ;
+            color: #fce405;
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 50%;
+            text-align:left;
+            overflow:hidden;
+        }
+
+        #bottom_div {
+            background-color: #000000;
+            color: #8dcff0;
+            position: absolute;
+            top: 50%;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            text-align:left;
+            vertical-align: middle;
+            overflow:hidden;
+        }
+    </style>
+{% endblock %}
+{% load custom_tags %}
+
+{% block extrajs %}
+    <script type="text/javascript">
+        setInterval(function() {updateTeam()}, 1000);
+
+        function updateTeam() {
+            var obj = localStorage.getItem('offline_obj');
+            var obj = $.parseJSON(obj);
+            $('#top_div').html(obj['homeTeam']);
+            $('#bottom_div').html(obj['awayTeam']);
+        }
+    </script>
+{% endblock %}
+{% block content %}
+    <div id="container">
+        <div data-team="team_a" id="top_div" class="playernames">
+
+        </div>
+        <div data-team="team_b" id="bottom_div" class="playernames">
+
+        </div>
+    </div>
+{% endblock %}

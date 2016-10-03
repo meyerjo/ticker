@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+{% load custom_tags %}
+
+
+{% block extrahtmltag %}
+    manifest="/offline.appcache"
+{% endblock %}
+
+{% block extracss %}
+    <link href="{% static 'css/ticker_interface_simple.css' %}" rel="stylesheet"/>
+{% endblock %}
+
+{% block extrajs %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('form').on('submit', function() {
+                event.preventDefault();
+
+                var obj = {
+                    'homeTeam': $('textarea[name="homeTeam"]').val(),
+                    'awayTeam': $('textarea[name="awayTeam"]').val(),
+                };
+
+                for (var i = 1; i <= 5; i++ ) {
+                    obj['set_' + i] = [
+                        $('input[name="set_home_' + i + '"]').val(),
+                        $('input[name="set_away_' + i + '"]').val()
+                    ]
+                }
+
+                localStorage.setItem('offline_obj', JSON.stringify(obj));
+            })
+        })
+    </script>
+{% endblock %}
+
+{% block navigation %}
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{% url 'manage_dashboard' %}">Ticker</a>
+            </div>
+
+        </div>
+    </nav>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+        <form>
+            <div class="row">
+                <div class="col-sm-6">
+                    <textarea name="homeTeam"></textarea>
+                </div>
+                <div class="col-sm-6">
+                    <textarea name="awayTeam"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <input type="number" value="0" name="set_home_1"/>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" value="0" name="set_home_2"/>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" value="0" name="set_home_3"/>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" value="0" name="set_home_4"/>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" value="0" name="set_home_5"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <input type="number" value="0" name="set_away_1"/>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" value="0" name="set_away_2"/>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" value="0" name="set_away_3"/>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" value="0" name="set_away_4"/>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" value="0" name="set_away_5"/>
+                </div>
+            </div>
+            <div class="row">
+                <button type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
