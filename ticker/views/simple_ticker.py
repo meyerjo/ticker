@@ -123,5 +123,5 @@ def api_simple_ticker(request, field_id, response_type):
         else:
             updated_information = dict(error='Cannot switch sets at this stage')
     if response_type is not None:
-        return HttpResponse(json.dumps(updated_information))
+        return HttpResponse(json.dumps(updated_information), content_type='application/json')
     return HttpResponseRedirect(reverse_lazy('ticker_interface_simple', args=[field.id]))

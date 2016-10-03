@@ -29,7 +29,7 @@
 		</script>
 
         <script type="text/javascript">
-            var TICKER_UPDATE_URL = '{% url 'match_ticker' match.id '/json' %}';
+            var TICKER_UPDATE_URL = '{% url 'match_ticker_json' match.id %}';
         </script>
         <script type="text/javascript" src="{% static 'js/general_presentation_update.js' %}"></script>
         <style>

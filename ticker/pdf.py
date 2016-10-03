@@ -7,7 +7,7 @@ from django.template import engines
 from django.template.backends.base import BaseEngine
 from django.template.engine import Engine
 
-_dirs_undefined = object()
+_dirs_undefined = []
 
 
 class PdfTemplateError(Exception):

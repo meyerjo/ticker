@@ -79,17 +79,25 @@
 
 {% block extrajs %}
     <script type="text/javascript">
-        setInterval(function() {updateScore()}, 10000);
+        setInterval(function() {updateScore()}, 5000);
 
         function updateScore() {
             $.ajax({
                 url: '{% url 'score_display' field_id '/json' %}',
                 method: 'get'
             }).done(function(data) {
-                var obj = $.parseJSON(data);
+                var obj = data;
                 $.each(obj, function(key, val) {
-                   $('div[data-setnumber="' + key + '"][data-team="a"]').html(val[0]);
-                   $('div[data-setnumber="' + key + '"][data-team="b"]').html(val[1]);
+                    if (key != 'active_set') {
+                        $('div[data-setnumber="' + key + '"][data-team="a"]').html(val[0]);
+                        $('div[data-setnumber="' + key + '"][data-team="b"]').html(val[1]);
+                    } else {
+                        var current_set_element = $('div[data-setnumber="' + val + '"]');
+                        if ($(current_set_element).hasClass('active') == false) {
+                            $('div[data-setnumber]').removeClass('active');
+                            $(current_set_element).addClass('active')
+                        }
+                    }
                 });
             });
         }
@@ -101,26 +109,26 @@
         <div id="top_div" class="playernames team_a">
             {% if game == None %}
                 {% for setnr in 6|get_range:1 %}
-                <div data-setnumber="{{ setnr }}" data-team="a" class="set  ">0</div>
+                    <div data-setnumber="{{ setnr }}" data-team="a" class="set  ">0</div>
                 {% endfor %}
             {% else %}
-            {% for set in game.sets.all %}
-                <div data-setnumber="{{ set.set_number }}" data-team="a"
-                     class="set {% if set.set_number == game.current_set %} active {% endif %} ">{{ set.get_score.0 }}</div>
-            {% endfor %}
+                {% for set in game.sets.all %}
+                    <div data-setnumber="{{ set.set_number }}" data-team="a"
+                         class="set {% if set.set_number == game.current_set %} active {% endif %} ">{{ set.get_score.0 }}</div>
+                {% endfor %}
             {% endif %}
         </div>
         <div id="bottom_div" class="playernames team_b">
             {% if game == None %}
                 {% for setnr in 6|get_range:1 %}
-                <div data-setnumber="{{ setnr }}" data-team="a" class="set  ">0</div>
+                    <div data-setnumber="{{ setnr }}" data-team="b" class="set  ">0</div>
                 {% endfor %}
-        {% else %}
-            {% for set in game.sets.all %}
-                <div data-setnumber="{{ set.set_number }}" data-team="b"
-                     class="set {% if set.set_number == game.current_set %} active {% endif %} ">{{ set.get_score.1 }}</div>
-            {% endfor %}
-        {% endif %}
+            {% else %}
+                {% for set in game.sets.all %}
+                    <div data-setnumber="{{ set.set_number }}" data-team="b"
+                         class="set {% if set.set_number == game.current_set %} active {% endif %} ">{{ set.get_score.1 }}</div>
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
 {% endblock %}

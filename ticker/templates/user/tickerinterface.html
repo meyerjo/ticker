@@ -8,7 +8,7 @@
 
 {% block extrajs %}
     <script type="text/javascript">
-        var TICKER_UPDATE_URL = '{% url 'match_ticker' match.id '/json' %}';
+        var TICKER_UPDATE_URL = '{% url 'match_ticker_json' match.id %}';
     </script>
     <script type="text/javascript" src="{% static 'js/django_csrf_post.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/tickerinterface.js' %}"></script>

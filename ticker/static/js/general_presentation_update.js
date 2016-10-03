@@ -8,7 +8,11 @@ function update_presentation() {
         url: TICKER_UPDATE_URL,
         method: 'GET'
     }).done(function (data) {
-        var obj = $.parseJSON(data);
+        if (typeof(data) === "object") {
+            var obj = data;
+        } else {
+            var obj = $.parseJSON(data);
+        }
 
         $('#score').html(obj['result'][0] + '-' + obj['result'][1]);
 
@@ -55,4 +59,4 @@ function update_presentation() {
     });
 }
 
-setInterval(update_presentation, 5000);
+setInterval(update_presentation, 10000);

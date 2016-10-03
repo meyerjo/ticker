@@ -1,0 +1,28 @@
+  .matchtime {
+        font-size: 2em;
+        text-align: center;
+    }
+
+    .team, .score {
+        text-align: center;
+        font-size: 1.5em;
+    }
+
+    .score {
+        font-weight: bold;
+    }
+
+    .title {
+        font-size: 3em;
+        text-align: center;
+    }
+
+    a .matchentry {
+        border-radius: 5px;
+        border: 1px solid gray;
+    }
+
+    a:link, a:visited, a:hover {
+        text-decoration: none;
+        color: black;
+    }

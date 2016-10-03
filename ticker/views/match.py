@@ -33,15 +33,16 @@ def format_json(match):
             tmp_dict_game['field'] = alloc.field.id
 
         result['games'].append(tmp_dict_game)
-
     return result
 
 
-@cache_page(10)
-def match_ticker(request, matchid, response_type):
-    response_type = None if response_type == '/' or response_type == '' else response_type
+@cache_page(5*60)
+def match_ticker(request, matchid):
     m = Match.objects.filter(id=matchid).first()
-
-    if response_type is not None:
-        return HttpResponse(jsonpickle.encode(format_json(m)))
     return render(request, 'match.html', dict(match=m))
+
+
+@cache_page(10)
+def match_ticker_json(request, matchid):
+    m = Match.objects.filter(id=matchid).first()
+    return HttpResponse(jsonpickle.encode(format_json(m)), content_type='application/json')

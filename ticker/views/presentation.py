@@ -26,20 +26,20 @@ def score_display(request, field_id, response_type):
     response_type = None if response_type == '/' or response_type == '' else response_type
     if response_type is not None:
         resp = {
-            1: [0,0],
-            2: [0,0],
-            3: [0,0],
-            4: [0,0],
-            5: [0,0],
+            1: [0, 0],
+            2: [0, 0],
+            3: [0, 0],
+            4: [0, 0],
+            5: [0, 0],
             'active_set': 1
         }
         if game is None:
-            return HttpResponse(json.dumps(resp))
+            return HttpResponse(json.dumps(resp), content_type='application/json')
 
         for set in game.sets.all():
             resp[set.set_number] = set.get_score()
-        resp['active_set'] = game.active_set
-        return HttpResponse(json.dumps(resp))
+        resp['active_set'] = game.current_set
+        return HttpResponse(json.dumps(resp), content_type='application/json')
 
     team_a = Team.objects.filter(fields__id=field_id).first()
     return render(request, 'presentation/score_display.html', dict(game=game, field_id=field_id, team_a=team_a))
@@ -52,10 +52,10 @@ def team_display(request, field_id, response_type):
     if response_type is not None:
         resp = dict(team_a='', team_b='')
         if game is None:
-            return HttpResponse(json.dumps(resp))
+            return HttpResponse(json.dumps(resp), content_type='application/json')
         resp['team_a'] = format_players(game.player_a.all())
         resp['team_b'] = format_players(game.player_b.all())
-        return HttpResponse(json.dumps(resp))
+        return HttpResponse(json.dumps(resp), content_type='application/json')
 
     team_a = Team.objects.filter(fields__id=field_id).first()
     return render(request, 'presentation/team_display.html', dict(game=game, field_id=field_id, team_a=team_a))
