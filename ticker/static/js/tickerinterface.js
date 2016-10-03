@@ -35,7 +35,11 @@ $(document).ready(function () {
             method: 'post',
             data: obj
         }).done(function(data) {
-            var result_obj = $.parseJSON(data);
+            if (typeof(data) === "object") {
+                var result_obj = data;
+            } else {
+                var result_obj = $.parseJSON(data);
+            }
             if (result_obj['type'] == 'score-update') {
                 var field_id = result_obj['field_id'];
                 var set_id = result_obj['set_id'];
@@ -104,7 +108,11 @@ $(document).ready(function () {
             url: TICKER_UPDATE_URL,
             method: 'get'
         }).done(function (data) {
-            var obj = $.parseJSON(data);
+            if (typeof(data) === "object") {
+                var obj = data;
+            } else {
+                var obj = $.parseJSON(data);
+            }
             if (('games' in obj) == false) {
                 console.log('Games field has to be in the objs')
             }
