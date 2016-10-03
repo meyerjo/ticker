@@ -207,7 +207,8 @@ class Game(models.Model):
         :return:
         """
         set = self.get_current_set()
-        from django.db.models.functions import Length, Upper, Value
+        from django.db.models.functions import Length, Upper
+        from django.db.models import Value
         points_team_a = Point.objects.filter(
             canceled=False, points_team_a__game=self, points_team_a__set_number=set.set_number
         ).annotate(team=Value('a', CharField())).\
