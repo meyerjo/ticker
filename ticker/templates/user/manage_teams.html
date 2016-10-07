@@ -22,7 +22,11 @@
                 method: 'get',
                 data: {'dynamic_content': content}
             }).done(function (data) {
-                var obj = $.parseJSON(data);
+                if (typeof(data) === 'object') {
+                    var obj = data;
+                } else {
+                    var obj = $.parseJSON(data);
+                }
                 var tr = $('tr.addrow');
                 $('.generated').remove();
                 for (var i = 0; i < obj.length; i++) {

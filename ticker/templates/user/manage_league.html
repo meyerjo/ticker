@@ -87,7 +87,11 @@
                     data: {'dynamic_content': content}
                 }).done(function (data) {
                     $('tr.generated').remove();
-                    var obj = $.parseJSON(data);
+                    if (typeof(data) === 'object') {
+                        var obj = data;
+                    } else {
+                        var obj = $.parseJSON(data);
+                    }
                     $.each(obj, function(i, element) {
                         var tr = $('table.matchplantable tr:last');
                         var elm = $(tr).clone();

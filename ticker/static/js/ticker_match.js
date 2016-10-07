@@ -4,7 +4,7 @@ function update_ticker() {
             url: MATCH_TICKER_JSON_URL,
             method: 'get'
         }).done(function(data) {
-            var obj = $.parseJSON(data);
+            var obj = data;
             $('#team_a').html(obj['team_a']);
             $('#team_b').html(obj['team_b']);
             $('#score').html(obj['result'][0]+ ':' + obj['result'][1]);
