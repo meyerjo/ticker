@@ -30,3 +30,5 @@ urlpatterns = [
     url(r'^simple/?$', RedirectView.as_view(url='/ticker/manage/ticker/simple/login/', permanent=True)),
     url(r'^$', start_page),
 ]
+
+handler404 = 'ticker.views.error_404_view'

@@ -17,3 +17,8 @@ def start_page(request):
     matches = Match.objects.filter(match_time__gte=last_week)
     context = dict(matches=matches, league=league)
     return render(request, 'index.html', context)
+
+
+@cache_page(60*60)
+def error_404_view(request):
+    return render(request, 'error/404page.html', dict())
