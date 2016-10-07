@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^player/add/?$', add_player, name='player_add'),
 
     url(r'^player/parse/dynamic/?$', player_dynamic, name='player_dynamic'),
+    url(r'^player/edit/([0-9]+)/?$', api_change_player_profile, name='api_change_player_profile'),
 
     url(r'^season/add/?$', add_season, name='add_season'),
 
@@ -43,7 +44,6 @@ urlpatterns = [
     url(r'^update/score/field/([0-9]+)(/?|/json/?)$', update_score_field, name='update_score_field'),
     url(r'^update/score/field/simple/([0-9]+)(/?|/json/?)$', api_simple_ticker, name='update_score_field_simple'),
 
-    url(r'^change/color/?', api_change_color, name='api_change_color')
-
+    url(r'^change/color/?', api_change_color, name='api_change_color'),
 
 ]

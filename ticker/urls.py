@@ -21,7 +21,7 @@ urlpatterns = [
     url(r'^manage/teams/details/([0-9]+)/?$', manage_team_details, name='manage_teams_details'),
 
     url(r'^manage/players/([0-9]+)/?$', manage_players_club, name='manage_players'),
-    url(r'^manage/player/([0-9]+)/edit/?$', not_yet_implemented, name='manage_player_profile'),
+    url(r'^manage/player/([0-9]+)/edit/?$', manage_edit_player_profile, name='manage_player_profile'),
 
     url(r'^manage/fields/([0-9]+)/?$', manage_fields, name='manage_fields'),
     url(r'^manage/league/?$', manage_league, name='manage_league'),

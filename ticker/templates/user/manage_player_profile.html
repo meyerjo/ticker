@@ -17,7 +17,7 @@
         <div class="row">
             <div class="col-sm-12">
                 {% if player %}
-                    <form method="post" action="TODO">
+                    <form method="post" action="{% url 'api_change_player_profile' player.id %}">
                     {% csrf_token %}
                         <div class="form-control">
                             <label for="prename">

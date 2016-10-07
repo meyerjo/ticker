@@ -762,3 +762,8 @@ def api_change_color(request):
             definition.save()
 
     return HttpResponseRedirect(reverse('manage_color_scheme'))
+
+
+@login_required()
+def api_change_player_profile(request, player_id):
+    return HttpResponse(json.dumps(dict(error='not yet implemented')), content_type='application/json')

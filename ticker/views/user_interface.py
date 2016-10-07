@@ -135,5 +135,10 @@ def login(request):
 @login_required
 def manage_game(request, game_id):
     game = Game.objects.get(id=game_id)
-
     return render(request, 'user/manage_game.html', dict(game=game))
+
+
+@login_required()
+def manage_edit_player_profile(request, player_id):
+    player = Player.objects.filter(id=player_id).first()
+    return render(request, 'user/manage_player_profile.html', dict(player=player))
