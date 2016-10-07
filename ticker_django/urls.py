@@ -31,4 +31,4 @@ urlpatterns = [
     url(r'^$', start_page),
 ]
 
-handler404 = 'ticker.views.error_404_view'
+# handler404 = 'ticker.views.startpage.error_404_view'
