@@ -766,4 +766,18 @@ def api_change_color(request):
 
 @login_required()
 def api_change_player_profile(request, player_id):
-    return HttpResponse(json.dumps(dict(error='not yet implemented')), content_type='application/json')
+    p = Player.objects.filter(id=player_id).first()
+    if p is None:
+        messages.error(request, '')
+        return HttpResponseRedirect(reverse('manage_player_profile', args=[player_id]))
+    pre_name = request.POST.get('prename', None)
+    last_name = request.POST.get('lastname', None)
+    if pre_name is None or last_name is None:
+        messages.error(request, 'Prename or Lastname missing')
+        return HttpResponseRedirect(reverse('manage_player_profile', args=[player_id]))
+    with transaction.atomic():
+        p.prename = pre_name
+        p.lastname = last_name
+        p.save()
+    messages.info(request, 'Name changed')
+    return HttpResponseRedirect(reverse('manage_player_profile', args=[player_id]))
