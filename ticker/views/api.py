@@ -767,3 +767,26 @@ def api_change_color(request):
 @login_required()
 def api_change_player_profile(request, player_id):
     return HttpResponse(json.dumps(dict(error='not yet implemented')), content_type='application/json')
+
+
+@login_required()
+def api_change_game(request, game_id):
+    game = Game.objects.filter(id=game_id).first()
+    if game is None:
+        messages.error(request, 'Message does not exist')
+        return HttpResponseRedirect(reverse('change_game', args=[game_id]))
+    sets = []
+    for set in range(1, 6):
+        set_home = request.POST.get('set_{0}_home'.format(set), None)
+        set_away = request.POST.get('set_{0}_away'.format(set), None)
+        if set_home is None or set_away is None:
+            messages.error(request, 'Not all required sets are available')
+            return HttpResponseRedirect(reverse('change_game', args=[game_id]))
+        sets.append([set_home, set_away])
+    number_of_sets_in_game = 5
+    if len(sets) != number_of_sets_in_game:
+        messages.error(request, 'Not enough sets in request data')
+
+
+
+    return HttpResponse(json.dumps(dict(error='not yet implemented')), content_type='application/json')
