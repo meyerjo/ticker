@@ -15,25 +15,28 @@
             </div>
         {% endif %}
         <div class="row">
-            <div class="col-sm-12">
-                {% if player %}
-                    <form method="post" action="{% url 'api_change_player_profile' player.id %}">
+            {% if player %}
+                <form method="post" action="{% url 'api_change_player_profile' player.id %}">
                     {% csrf_token %}
-                        <div class="form-control">
-                            <label for="prename">
-                                <input name="prename" type="text" id="prename" value="{{ player.prename }}"/>
-                            </label>
-                        </div>
-                        <div class="form-control">
-                            <label for="lastname">
-                                <input name="lastname" type="text" id="lastname" value="{{ player.lastname }}"/>
-                            </label>
-                        </div>
-                    </form>
-                {% else %}
-                    <h2>Player does not exist</h2>
-                {% endif %}
-            </div>
+                    <div class="col-xs-5">
+                        <label for="prename">
+                            Vorname:
+                            <input name="prename" type="text" id="prename" value="{{ player.prename }}"/>
+                        </label>
+                    </div>
+                    <div class="col-xs-5">
+                        <label for="lastname">
+                            Nachname:
+                            <input name="lastname" type="text" id="lastname" value="{{ player.lastname }}"/>
+                        </label>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="submit" class="btn btn-primary">Speichern</button>
+                    </div>
+                </form>
+            {% else %}
+                <h2>Player does not exist</h2>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
