@@ -7,8 +7,6 @@ from django.template import engines
 from django.template.backends.base import BaseEngine
 from django.template.engine import Engine
 
-_dirs_undefined = []
-
 
 class PdfTemplateError(Exception):
     pass
@@ -26,8 +24,8 @@ class PdftkEngine(BaseEngine):
         super(PdftkEngine, self).__init__(params)
         self.engine = self._Engine(self.dirs, self.app_dirs, **options)
 
-    def get_template(self, template_name, dirs=_dirs_undefined):
-        return PdfTemplate(self.engine.get_template(template_name, dirs))
+    def get_template(self, template_name):
+        return PdfTemplate(self.engine.get_template(template_name))
 
     class _Engine(Engine):
         def make_origin(self, display_name, loader, name, dirs):
