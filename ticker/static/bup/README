@@ -1,0 +1,7 @@
+This directory contains bup, the Badminton Umpire Panel.
+
+* cur is a symlink to the current installation
+* dev (optional) can be the development version of bup
+* version-numbered directories (e.g. 2016.11.18.71adae0) are specific versions
+
+To make bup management work, this directory must be writeable by the web process.

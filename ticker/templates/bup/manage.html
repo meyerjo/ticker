@@ -1,0 +1,25 @@
+{% extends 'user/manage_base.html' %}
+
+{% block content %}
+<h1>Badminton Umpire Panel</h1>
+
+{% if note %}
+<div class="note_message">{{note}}</div>
+{% endif %}
+
+
+<div>Verfügbare Versionen:</div>
+
+<ul>
+{% for v in versions %}
+<li>{% if cur == v %}<strong>{{v}}</strong>{% else %}
+{{v}} <form class="inline-form" action="{% url 'manage_bup_switch' %}" method="POST">{% csrf_token %}<input type="hidden" name="v" value="{{v}}" /><button role="submit">Verwenden</button></form>{% endif %}</li>
+{% endfor %}
+</ul>
+
+<form method="POST" action="{% url 'manage_bup_download' %}">
+{% csrf_token %}
+<button role="submit">bup aktualisieren</button>
+</form>
+
+{% endblock %}

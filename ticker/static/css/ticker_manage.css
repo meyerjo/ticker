@@ -26,3 +26,13 @@ ul.teamlist {
        padding: 0;
        width: 100%;
    }
+
+.note_message {
+  display: inline-block;
+  padding: 0.2em 0.5em;
+  background: #ffeeaa;
+  border: 1px solid #b8b822;
+}
+.inline-form {
+  display: inline-block;
+}
