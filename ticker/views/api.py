@@ -794,8 +794,8 @@ def api_change_player_profile(request, player_id):
 def api_change_game(request, game_id):
     game = Game.objects.filter(id=game_id).first()
     if game is None:
-        messages.error(request, 'Message does not exist')
-        return HttpResponseRedirect(reverse('change_game', args=[game_id]))
+        messages.error(request, 'Game does not exist')
+        return HttpResponseRedirect(reverse('manage_ticker'))
     sets = []
     for set in range(1, 6):
         set_home = request.POST.get('set_{0}_home'.format(set), None)

@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.db.models import CharField
 from django.db.models import Value
 from django.http import HttpResponse
@@ -134,8 +134,11 @@ def login(request):
 
 @login_required
 def manage_game(request, game_id):
-    game = Game.objects.get(id=game_id)
-    return render(request, 'user/manage_game.html', dict(game=game))
+    game = Game.objects.filter(id=game_id).first()
+    if game is not None:
+        return render(request, 'user/manage_game.html', dict(game=game))
+    messages.error(request, 'Game does not exist')
+    return HttpResponseRedirect(reverse_lazy('manage_ticker'))
 
 
 @login_required()
