@@ -54,6 +54,8 @@ coverage.xml
 # Django stuff:
 *.log
 local_settings.py
+ticker_django/.local_settings.py
+mysqlclient-1.3.9-cp35-cp35m-win_amd64.whl
 
 # Flask stuff:
 instance/
