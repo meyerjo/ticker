@@ -11,7 +11,7 @@
         </div>
         {% for match in matches %}
             <div class="row-fluid matchentry">
-            <a href="{% url 'match_ticker' match.id '' %}">
+            <a href="{% url 'match_ticker' match.id %}">
                 <div class="col-sm-12 matchtime">
                     {{ match.match_time|date:"d.m.Y G:i" }}
                 </div>

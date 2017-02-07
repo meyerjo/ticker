@@ -27,6 +27,8 @@ urlpatterns = [
 
     url(r'^league/add/?$', add_league, name='add_league'),
 
+    url(r'^game/([0-9]+)/edit/?$', api_change_game, name='api_change_game'),
+
     url(r'^league/([0-9]+)/edit/?$', edit_league, name='edit_league'),
 
     url(r'^league/dynamic/matchplan/?', dynamic_matchplan, name='dynamic_matchplan'),
