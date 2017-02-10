@@ -3,8 +3,29 @@
 {% load custom_tags %}
 {% block content %}
     <div class="container">
+    {% if messages %}
+            <div class="row-fluid">
+                <div class="col-sm-12">
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+            <div class="row-fluid">
+                <div class="col-sm-12">
+                    <ul class="messages">
+                        <div class="alert alert-information">
+                            Bitte beachten: Wenn der aktuelle Satz von z.B. Satz 4 auf Satz 2 zurueckgestellt wird, werden alle zwischenzeitlichen Punkteingaben fuer die Saetze 3 und 4 geloescht. Ist nur eine Ergebniskorrektur gewuenscht, bitte einfach den Spielstand anpassen.
+                        </div>
+                    </ul>
+                </div>
+            </div>
         <div class="row">
             <form action="{% url 'api_change_game' game.id %}" method="post">
+            {% csrf_token %}
             <table class="table table-bordered table-striped">
                 <tr>
                     <td>Spieltyp</td>
@@ -49,9 +70,11 @@
                     </td>
                     {% for set in game.get_set_objects %}
                         <td>
-                            <input class="input-sm" type="text" name="set_team_a_{{ set.id }}" value="{{ set.get_score.0 }}"/>
+                            <input class="input-sm" type="text" name="set_{{ forloop.counter }}_team_a" value="{{ set.get_score.0 }}"/>
                             <span>:</span>
-                            <input class="input-sm" type="text" name="set_team_b_{{ set.id }}" value="{{ set.get_score.1 }}"/>
+                            <input class="input-sm" type="text" name="set_{{ forloop.counter }}_team_b" value="{{ set.get_score.1 }}"/>
+
+                            <input type="hidden" name="set_{{ forloop.counter }}" value="{{ set.id }}"/>
                         </td>
                     {% endfor %}
                     <tr>

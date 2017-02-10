@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils import timezone
 
-from ticker.models import Club, Team, Season, League, Rules
+from ticker.models import Club, Team, Season, League, Rules, Set
 from django.http import HttpResponseRedirect
 
 from ticker.models import ColorDefinition
@@ -21,6 +21,7 @@ from ticker.models import PlayingField
 from ticker.models import Game
 from ticker.models import Match
 from ticker.models import Player
+from ticker.models import Point
 from ticker.models import PresentationToken
 from ticker.models import Profile
 from ticker.models import TeamPlayerAssociation
@@ -790,21 +791,101 @@ def api_change_player_profile(request, player_id):
     return HttpResponseRedirect(reverse('manage_player_profile', args=[player_id]))
 
 
+def _get_sets_from_request(request, expected_number_sets):
+    sets = []
+    for set_nr in range(1, expected_number_sets + 1):
+        set_home = request.POST.get('set_{0}_team_a'.format(set_nr), None)
+        set_away = request.POST.get('set_{0}_team_b'.format(set_nr), None)
+        # TODO: validate if the string is a number
+        if set_home is not None and set_away is not None:
+            if set_home == '':
+                set_home = '0'
+            if set_away == '':
+                set_away = '0'
+            if re.match('^\d+$', set_home) and re.match('^\d+$', set_away):
+                sets.append([int(set_home), int(set_away)])
+    return sets
+
+
 @login_required()
 def api_change_game(request, game_id):
     game = Game.objects.filter(id=game_id).first()
+    match = Match.objects.filter(games__in=[game]).first()
+    number_of_sets_in_game = 5
     if game is None:
         messages.error(request, 'Game does not exist')
         return HttpResponseRedirect(reverse('manage_ticker'))
-    sets = []
-    for set in range(1, 6):
-        set_home = request.POST.get('set_{0}_home'.format(set), None)
-        set_away = request.POST.get('set_{0}_away'.format(set), None)
-        if set_home is None or set_away is None:
-            messages.error(request, 'Not all required sets are available')
-            return HttpResponseRedirect(reverse('change_game', args=[game_id]))
-        sets.append([set_home, set_away])
-    number_of_sets_in_game = 5
+    current_sets = request.POST.getlist('current_set')
+    if len(current_sets) == 0:
+        messages.error(request, 'Es muss ein Satz als aktueller Satz ausgewaehlt werden')
+        return HttpResponseRedirect(reverse('manage_game', args=[game_id]))
+    if len(current_sets) > 1:
+        messages.error(request, 'Es kann maximal ein Satz ausgewaehlt werden.')
+        return HttpResponseRedirect(reverse('manage_game', args=[game_id]))
+
+    sets = _get_sets_from_request(request, number_of_sets_in_game)
+    last_won_set = -1
+    for i, tmp_set in enumerate(sets):
+        valid_score = match.rule.validate(tmp_set[0], tmp_set[1])
+        if not valid_score:
+            messages.error(request, 'Satzergebnis {0} ist ungueltig'.format(i+1))
+            return HttpResponseRedirect(reverse('manage_game', args=[game_id]))
+        if match.rule.is_won_by_any_team(tmp_set):
+            if last_won_set != i-1:
+                messages.error(request, 'Satz {0} kann nicht gewonnen sein, da Satz {1} nicht gewonnen war'.format(i+1, i))
+                return HttpResponseRedirect(reverse('manage_game', args=[game_id]))
+            last_won_set = i
+
+    # Adopt the current set number from the user input
+    current_set_nr = int(current_sets[0])
+    if current_set_nr < 1 or current_set_nr > number_of_sets_in_game:
+        messages.error(request, 'Ungueltige Satznummer')
+        return HttpResponseRedirect(reverse('manage_game', args=[game_id]))
+    if current_set_nr > game.current_set:
+        # check if the current set as a input has a valid score
+        previous_set_db = Set.objects.filter(game=game, set_number=current_set_nr-1).first()
+        finished_set = previous_set_db.is_finished(match.rule)
+        if not finished_set:
+            messages.error(request, 'Vorheriger Satz muss beendet sein.')
+            return HttpResponseRedirect(reverse('manage_game', args=[game_id]))
+
+        with transaction.atomic():
+            game.current_set = current_set_nr
+            game.save()
+    elif current_set_nr < game.current_set:
+        # delete the old results
+        with transaction.atomic():
+            game.current_set = current_set_nr
+            sets = Set.objects.filter(game=game, set_number__gt=game.current_set)
+            for tmp_set in sets:
+                tmp_set.reset_points()
+            game.save()
+
+    # TODO: set-number has to be dependent on the rule set
     if len(sets) != number_of_sets_in_game:
-        messages.error(request, 'Not enough sets in request data')
-    return HttpResponse(json.dumps(dict(error='not yet implemented')), content_type='application/json')
+        messages.error(request, 'Anfrage enthaelt nicht die richtige Anzahl von Saetzen {0} != {1}'.
+                       format(len(sets), number_of_sets_in_game))
+        return HttpResponseRedirect(reverse('manage_game', args=[game_id]))
+    # Check the differences in the sets
+    sets_db = game.get_set_objects()
+    if len(sets_db) != len(sets):
+        messages.error(request, 'Nicht die gleiche Anzahl von Saetzen vorhanden.')
+        return HttpResponseRedirect(reverse('manage_game', args=[game_id]))
+
+    # save the changes to the score
+    sets_to_change = []
+    for i, db_set in enumerate(sets_db):
+        if db_set.get_score() != sets[i]:
+            sets_to_change.append(i)
+            with transaction.atomic():
+                # delete all the points
+                tmp_set = Set.objects.filter(game__id=game.id, set_number=(i+1)).first()
+                tmp_set.reset_points()
+
+                # add the points
+                for tmp_point in range(0, sets[i][0]):
+                    tmp_set.add_point_team_a(match.rule)
+                for tmp_point in range(0, sets[i][1]):
+                    tmp_set.add_point_team_b(match.rule)
+
+    return HttpResponseRedirect(reverse('manage_game', args=[game_id]))

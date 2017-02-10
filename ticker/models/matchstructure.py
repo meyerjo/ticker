@@ -56,6 +56,9 @@ class Rules(models.Model):
     def team_b_won(self, score):
         return self.team_a_won(list(reversed(score)))
 
+    def is_won_by_any_team(self, score):
+        return self.team_a_won(score) or self.team_b_won(score)
+
     def set_started(self, score):
         return score != [0, 0]
 
@@ -67,6 +70,12 @@ class Set(models.Model):
     set_number = models.IntegerField(default=1)
     points_team_a = ManyToManyField(Point, related_name='points_team_a', blank=True)
     points_team_b = ManyToManyField(Point, related_name='points_team_b', blank=True)
+
+    def reset_points(self):
+        p = self.points_team_a.all()
+        p.update(canceled=True)
+        p = self.points_team_b.all()
+        p.update(canceled=True)
 
     def add_point_team_a(self, rule):
         old_score = self.get_score()
