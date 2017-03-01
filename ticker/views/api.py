@@ -428,12 +428,11 @@ def save_lineup(request, matchid, response_type):
     response_type = None if response_type == '/' or response_type == '' else response_type
     req_dict = request.GET
 
-    if 'unlock_field' not in request.POST:
+    if 'unlock_field' not in request.POST and match.has_lineup():
         if response_type is None:
             messages.error(request, 'Feld muss entsichert werden')
             return HttpResponseRedirect(reverse_lazy('manage_ticker_interface', args=[matchid]))
         return HttpResponse('FIELD_NOT_UNLOCKED', content_type='text')
-
 
     data_dict = dict()
     player_game_counter = dict()

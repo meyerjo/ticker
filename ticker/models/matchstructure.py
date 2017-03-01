@@ -158,7 +158,7 @@ class Game(models.Model):
     game_type = models.CharField(max_length=32, choices=game_types)
 
     def __str__(self):
-        return '{0} {1} {2}'.format(self.name, self.game_type, '0')
+        return 'Game {3}: {0} {1} {2}'.format(self.name, self.game_type, '0', self.id)
 
     def in_progress(self):
         if self.current_set != 1:
@@ -207,8 +207,7 @@ class Game(models.Model):
 
     def get_current_set(self):
         current_set = self.current_set
-        set = self.sets.filter(set_number=current_set).first()
-        return set
+        return self.sets.filter(set_number=current_set).first()
 
     def get_point_history(self):
         """
