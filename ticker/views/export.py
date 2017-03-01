@@ -1,3 +1,5 @@
+import re
+
 from django.http import HttpResponse
 
 from ticker.models import Game
@@ -5,6 +7,7 @@ from ticker.models import Match
 from ticker.pdf import get_template
 
 
+# noinspection PyUnusedLocal
 def export_match(request, match_id):
     template_name = 'pdf/spielbericht_buli.pdf'
     match = Match.objects.filter(id=match_id).first()
@@ -46,11 +49,12 @@ def export_match(request, match_id):
 
         # set number
         for setnumber in range(1, 6):
-            set = game.sets.filter(set_number=setnumber).first()
+            tmp_set = game.sets.filter(set_number=setnumber).first()
             set_home = '{0}_Satz_{1}_Heim'.format(mapped_name, setnumber)
             set_guest = '{0}_Satz_{1}_Gast'.format(mapped_name, setnumber)
-            context[set_home.encode('utf-8')] = set.get_score()[0]
-            context[set_guest.encode('utf-8')] = set.get_score()[1]
+            tmp_score = tmp_set.get_score()
+            context[set_home.encode('utf-8')] = tmp_score[0]
+            context[set_guest.encode('utf-8')] = tmp_score[1]
 
         # game points
         tmp_points = game.get_points()
@@ -68,7 +72,6 @@ def export_match(request, match_id):
 
         #
         result = game.is_won_by(match.rule)
-        tmp_score = None
         if result == 'team_a':
             tmp_score = [1, 0]
             context['{0}_Spiel_Heim'.format(mapped_name).encode('utf-8')] = tmp_score[0]
@@ -108,6 +111,7 @@ def export_match(request, match_id):
     return response
 
 
+# noinspection PyUnusedLocal
 def export_game(request, game_id):
     template_name = 'pdf/spielbericht_buli_spiel.pdf'
     game = Game.objects.get(id=game_id)
@@ -133,9 +137,11 @@ def export_game(request, game_id):
         context[b'Spieler_A_Gast'] = player_b[0].get_name()
         context[b'Spieler_B_Gast'] = player_b[1].get_name()
 
+    pattern = re.compile('[\W_]+')
+    game_name = pattern.sub('', game.name)
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = \
-        'attachment; filename=Schiedsrichterzettel.pdf'
+        'attachment; filename=Schiedsrichterzettel_{0}_{1}.pdf'.format(game_id, game_name)
 
     template = get_template(template_name)
     response.write(template.render(context))
