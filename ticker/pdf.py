@@ -3,7 +3,7 @@ import subprocess
 
 from fdfgen import forge_fdf
 from django.core.exceptions import ImproperlyConfigured
-from django.template import engines
+from django.template import engines, TemplateDoesNotExist
 from django.template.backends.base import BaseEngine
 from django.template.engine import Engine
 
@@ -27,7 +27,11 @@ class PdftkEngine(BaseEngine):
         self.engine = self._Engine(self.dirs, self.app_dirs, **options)
 
     def get_template(self, template_name, dirs=_dirs_undefined):
-        return PdfTemplate(self.engine.get_template(template_name, dirs))
+        try:
+            template = self.engine.get_template(template_name, dirs)
+        except BaseException as e:
+            raise TemplateDoesNotExist('')
+        return PdfTemplate(template)
 
     class _Engine(Engine):
         def make_origin(self, display_name, loader, name, dirs):
