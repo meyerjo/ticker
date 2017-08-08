@@ -270,8 +270,12 @@
                                     <td>{{ match.team_a.get_name }}</td>
                                     <td>{{ match.team_b.get_name }}</td>
                                     <td>#{{ match.get_all_games|length }}</td>
-                                    <td>{{ match.get_score }}</td>
-                                    <td>TODO Edit</td>
+                                    <td>{{ match.get_score.0 }}:{{ match.get_score.1 }}</td>
+                                    <td>
+                                        <a href="{% url 'manage_edit_matchdate' match.id %}">
+                                            <i class="fa fa-edit"></i> Bearbeiten
+                                        </a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                             <tr>

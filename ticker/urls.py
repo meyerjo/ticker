@@ -38,6 +38,7 @@ urlpatterns = [
     url(r'^manage/presentation/?$', manage_presentation, name='manage_presentation'),
     url(r'^manage/presentation/([0-9]+)/?$', manage_presentation, name='manage_load_presentation'),
     url(r'^manage/presentation/new/?$', manage_presentation_new, name='manage_presentation_new'),
+    url(r'^manage/matchdate/([0-9]+)/?$', manage_edit_matchdate, name='manage_edit_matchdate'),
 
     url(r'^match/([0-9]+)/?$', match_ticker, name='match_ticker'),
     url(r'^match/([0-9]+)/json/?$', match_ticker_json, name='match_ticker_json'),

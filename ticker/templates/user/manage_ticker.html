@@ -13,21 +13,36 @@
                 </div>
             </div>
         {% endif %}
-        {% for match in matches %}
-                <div class="row">
-            <a href="{% url 'manage_ticker_interface' match.id %}">
-                    <div class="col-sm-12">
-                        {{ match.match_time|date:"d.m.Y G:i" }}
-                    </div>
-                    <div class="col-sm-3">{{ match.team_a.get_name }}</div>
-                    <div class="col-sm-3">{{ match.get_score.0 }}:{{ match.get_score.1 }}</div>
-                    <div class="col-sm-3">{{ match.team_b.get_name }}</div>
-                </a>
-                    <div class="col-sm-3"><a href="{% url 'presentation_view' 0 match.id %}"><i class="fa fa-desktop"></i></a></div>
-                </div>
-        {% endfor %}
-        {% if matches|length_is:0 %}
-            <h1>No matches available</h1>
-        {% endif %}
+        <div class="row">
+            <div class="col-sm-12">
+                <ul class="list-group">
+                    {% for match in matches %}
+                        <li class="list-group-item">
+                            <h4 class="list-group-item-heading">
+                                <a href="{% url 'manage_ticker_interface' match.id %}">
+                                    {{ match.team_a.get_name }} - {{ match.team_b.get_name }}: {{ match.get_score.0 }}:{{ match.get_score.1 }}
+                                </a>
+                            </h4>
+                            <div class="list-group-item-text">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        {{ match.match_time|date:"d.m.Y H:i" }}
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <a href="{% url 'manage_ticker_interface' match.id %}"><i class="fa fa-edit"></i> Ticker</a>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <a href="{% url 'presentation_view' 0 match.id %}"><i class="fa fa-desktop"></i> Präsentation starten</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                {% if matches|length_is:0 %}
+                    <h1>No matches available</h1>
+                {% endif %}
+            </div>
+        </div>
     </div>
 {% endblock %}

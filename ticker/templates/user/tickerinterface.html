@@ -28,6 +28,13 @@
                 </div>
             </div>
         {% endif %}
+        {% if match.match_time|date:"d.m.Y" != now|date:"d.m.Y" %}
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="alert alert-warning">Der Matchzeitpunkt ist nicht heute!</div>
+                </div>
+            </div>
+        {% endif %}
         <div class="row-fluid headline">
             {% with score=match.get_score team_names=match.get_team_names %}
                 <div class="col-sm-4 teamname">{{ team_names.0 }} <a href="{% url 'manage_teams_details' match.team_a.id %}">(<i class="fa fa-link"></i>)</a></div>

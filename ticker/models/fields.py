@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import CASCADE
 
-from ticker.models import Game
+from ticker.models import Game, Team
 
 
 class PlayingField(models.Model):
@@ -21,6 +21,9 @@ class PlayingField(models.Model):
                 field_allocations = field_allocations.order_by('-create_time')
             return field_allocations[0].game
         return None
+
+    def get_teams(self):
+        return Team.objects.filter(fields__in=[self])
 
     def has_token(self):
         tokens = PresentationToken.objects.filter(

@@ -482,7 +482,6 @@ def save_lineup(request, matchid, response_type):
                 if v in gametype_player_counter[g.game_type]:
                     gametype_player_counter[g.game_type][v] += 1
                     player_twice_in_same_game_type.append(v)
-                    print(player_twice_in_same_game_type)
                 else:
                     gametype_player_counter[g.game_type][v] = 1
     if len(player_twice_in_same_game_type) != 0:

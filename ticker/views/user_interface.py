@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
@@ -9,7 +11,9 @@ from django.forms import formset_factory
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils.timezone import now
 
+from ticker.forms.matchplan import MatchForm
 from ticker.forms.presentation import PresentationForm, SlideForm
 from ticker.models import Club, Team, Player, Season, League
 from ticker.models import ColorDefinition
@@ -78,7 +82,13 @@ def manage_league(request, league_id=None):
 
 @login_required
 def manage_dashboard(request):
-    context = dict()
+    p = Profile.objects.filter(user=request.user).first()
+    club = p.associated_club if p is not None else None
+
+    matches = Match.objects.filter(canceled=False, match_time__range=[now()-timedelta(days=2), now()+timedelta(days=2)])
+    if club is not None:
+        matches = matches.filter(team_a__parent_club=club) | matches.filter(team_b__parent_club=club)
+    context = dict(matches=matches)
     return render(request, 'user/manage_dashboard.html', context)
 
 
@@ -150,6 +160,23 @@ def manage_game(request, game_id):
 def manage_edit_player_profile(request, player_id):
     player = Player.objects.filter(id=player_id).first()
     return render(request, 'user/manage_player_profile.html', dict(player=player))
+
+
+@login_required()
+def manage_edit_matchdate(request, matchdate_id):
+    match = Match.objects.filter(id=matchdate_id).first()
+    form = MatchForm(instance=match)
+
+    if request.POST:
+        form = MatchForm(request.POST, instance=match)
+        if form.is_valid() and form.has_changed():
+            with transaction.atomic():
+                form.save()
+                messages.success(request, 'Success')
+        else:
+            messages.error(request, 'Form is not valid')
+
+    return render(request, 'user/manage_edit_matchdate.html', dict(form=form))
 
 
 @login_required()

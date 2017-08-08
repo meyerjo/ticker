@@ -17,18 +17,25 @@
             <div class="col-sm-12">
                 <h1>TODO fields for club {{ club.get_name }}</h1>
                 <table class="table table-striped table-bordered">
+                    <thead>
                     <tr>
                         <th>ID</th>
                         <th>Fieldname</th>
                         <th>Teams</th>
                         <th></th>
                     </tr>
+                    </thead>
+                    <tbody>
                     {% for field in club.get_fields %}
                         <tr>
-                        <td>{{ field.id }}</td>
-                        <td>{{ field.get_name }}</td>
-                        <td></td>
-                        <td></td>
+                            <td>{{ field.id }}</td>
+                            <td>{{ field.get_name }}</td>
+                            <td>
+                                {% for team in field.get_teams %}
+                                    {{ team }},
+                                {% endfor %}
+                            </td>
+                            <td></td>
                         </tr>
                     {% endfor %}
                     <tr>
@@ -42,6 +49,7 @@
                             </select>
                         </td>
                     </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
