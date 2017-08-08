@@ -62,10 +62,10 @@
                                             <div class="row">
                                                 <div class="col-sm-4">
                                                     <button type="submit" class="btn btn-primary" name="team_a" value="+"
-                                                    {% if field.has_token %} disabled {% endif %}>
+                                                            {% if field.has_token %} disabled {% endif %}>
                                                         +</button>
                                                     <button type="submit" class="btn btn-primary" name="team_a" value="-"
-                                                    {% if field.has_token %} disabled {% endif %}>
+                                                            {% if field.has_token %} disabled {% endif %}>
                                                         -</button>
                                                 </div>
                                                 <div class="col-sm-1 setscore" id="field_{{ field.id }}_current_set_team_a">
@@ -75,9 +75,9 @@
                                                     Satz {{ game.get_current_set.set_number }}
                                                     {% if field.has_token %}
                                                         <button type="button" class="btn btn-default" data-container="body" data-toggle="popover"
-                                                data-placement="top" data-content="Der aktuelle Satz wird nicht aktualisiert, solange der Token aktiv ist. Die Ergebnisse unten sind stets aktuell.">
-                                            <i class="fa fa-info-circle"></i>
-                                        </button>
+                                                                data-placement="top" data-content="Der aktuelle Satz wird nicht aktualisiert, solange der Token aktiv ist. Die Ergebnisse unten sind stets aktuell.">
+                                                            <i class="fa fa-info-circle"></i>
+                                                        </button>
                                                     {% endif %}
                                                 </div>
                                                 <div class="col-sm-1 setscore" id="field_{{ field.id }}_current_set_team_b">
@@ -85,11 +85,11 @@
                                                 </div>
                                                 <div class="col-sm-4">
                                                     <button type="submit" class="btn btn-primary" name="team_b" value="+"
-                                                        {% if field.has_token %} disabled {% endif %}>
+                                                            {% if field.has_token %} disabled {% endif %}>
                                                         +
                                                     </button>
                                                     <button type="submit" class="btn btn-primary" name="team_b" value="-"
-                                                        {% if field.has_token %} disabled {% endif %}>
+                                                            {% if field.has_token %} disabled {% endif %}>
                                                         -
                                                     </button>
                                                 </div>
@@ -99,7 +99,7 @@
                                                 <div class="col-sm-12" style="text-align: center">
                                                     <button type="submit" class="btn btn-primary"
                                                             name="switch_set" value="True"
-                                                    {% if field.has_token %} disabled {% endif %}>
+                                                            {% if field.has_token %} disabled {% endif %}>
                                                         Naechster Satz
                                                     </button>
                                                 </div>
@@ -120,14 +120,14 @@
                                     <input type="hidden" name="has_token_{{ field.id }}" value="{{ field.has_token }}"/>
                                     {% if field.has_token %}
                                         {% with token=field.get_token %}
-                                        Token <b>{{ token.token }}</b>
-                                        <a href="{% url 'api_invalidate_token' token.id %}">
-                                            <i class="fa fa-minus"></i>Token loeschen
-                                        </a>
-                                        <button type="button" class="btn btn-default" data-container="body" data-toggle="popover"
-                                                data-placement="top" data-content="Auf https://shuttlecock-live.com/simple den Token {{ token.token }} verwenden">
-                                            <i class="fa fa-info-circle"></i>Hilfe
-                                        </button>
+                                            Token <b>{{ token.token }}</b>
+                                            <a href="{% url 'api_invalidate_token' token.id %}">
+                                                <i class="fa fa-minus"></i>Token loeschen
+                                            </a>
+                                            <button type="button" class="btn btn-default" data-container="body" data-toggle="popover"
+                                                    data-placement="top" data-content="Auf https://shuttlecock-live.com/simple den Token {{ token.token }} verwenden">
+                                                <i class="fa fa-info-circle"></i>Hilfe
+                                            </button>
                                         {% endwith %}
                                     {% else %}
                                         <form action="{% url 'api_new_token' field.id %}" method="post">
@@ -144,8 +144,11 @@
         </div>
         <div class="row-fluid matches">
             <div class="col-sm-12">
-                <form method="post" action="{% url 'match_lineup_save' match.id '/' %}">
+{#                <form method="post" action="{% url 'match_lineup_save' match.id '/' %}">#}
+                <form method="post">
                     {% csrf_token %}
+                    {{ formset.management_form }}
+
                     <table class="table table-responsive table-striped">
                         <tr>
                             <th>ID</th>
@@ -157,60 +160,107 @@
                             <th>Editieren</th>
                             <th><a href="{% url 'export_match' match.id %}" target="_blank">Export</a></th>
                         </tr>
-                        {% for game in match.get_all_games %}
-                            <tr id="row_{{ game.id }}">
-                                <td>{{ game.id }} <input type="hidden" name="game_id" value="{{ game.id }}"/> </td>
-                                <td>{{ game.name }}</td>
-                                <td>
-                                    <select title="Erster Spieler" name="player_a_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
-                                        {% for player in game|get_players:"1,a" %}
-                                            <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    {% if game.game_type|is_in:"single" == 0 %}
-                                        <select title="Zweiter Spieler" name="player_a_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
-                                            {% for player in game|get_players:"2,a" %}
-                                                <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
+                        {% for form in formset %}
+                            {% with game=form.get_game %}
+                                {% if game %}
+                                    <tr>
+                                        <td>
+                                            {{ game.id }}
+                                            {{ form.id }}
+                                        </td>
+                                        <td>
+                                            {{ game.name }}
+                                            {{ form.name }}
+                                        </td>
+                                        <td>
+                                            {{ form.player_a }}
+                                            {{ form.player_a_double }}
+                                        </td>
+                                        <td>
+                                            {{ form.player_b }}
+                                            {{ form.player_b_double }}
+                                        </td>
+                                        <td></td>
+                                        <td id="score_game_{{ game.id }}">
+                                            {{ game.get_score }}
+                                        </td>
+                                        <td>
+                                            {% for field in match.get_fields %}
+                                                {% with field_active=field|field_active:game %}
+                                                    {% if field_active == 'active' %}
+                                                        <a href="{% url 'remove_game_to_field' game.id field.id '' %}"
+                                                           class="fieldname {{ field_active }}">{{ forloop.counter }}</a>
+                                                    {% else %}
+                                                        <a href="{% url 'assign_game_to_field' game.id field.id '' %}"
+                                                           class="fieldname {{ field_active }}">{{ forloop.counter }}</a>
+                                                    {% endif %}
+                                                {% endwith %}
                                             {% endfor %}
-                                        </select>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <select title="Erster Spieler" name="player_b_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
-                                        {% for player in game|get_players:"1,b" %}
-                                            <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    {% if game.game_type|is_in:"single" == 0 %}
-                                        <select title="Zweiter Spieler" name="player_b_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>
-                                            {% for player in game|get_players:"2,b" %}
-                                                <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    {% endif %}
-                                </td>
-                                <td id="score_game_{{ game.id }}">{{ game.get_sets }}</td>
-                                <td>
-                                    {% for field in match.get_fields %}
-                                        {% with field_active=field|field_active:game %}
-                                            {% if field_active == 'active' %}
-                                                <a href="{% url 'remove_game_to_field' game.id field.id '' %}"
-                                                   class="fieldname {{ field_active }}">{{ forloop.counter }}</a>
-                                            {% else %}
-                                                <a href="{% url 'assign_game_to_field' game.id field.id '' %}"
-                                                   class="fieldname {{ field_active }}">{{ forloop.counter }}</a>
-                                            {% endif %}
-                                        {% endwith %}
-                                    {% endfor %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'manage_game' game.id %}">Edit</a>
-                                </td>
-                                <td>
-                                    <a target="_blank" href="{% url 'export_game' game.id %}">Export Game</a>
-                                </td>
-                            </tr>
+                                        </td>
+                                        <td>
+                                                                                <a href="{% url 'manage_game' game.id %}">Edit</a>
+                                        </td>
+                                        <td>
+                                                                                <a target="_blank" href="{% url 'export_game' game.id %}">Export Game</a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endwith %}
                         {% endfor %}
+                        {#                        {% for game in match.get_all_games %}#}
+                        {#                            <tr id="row_{{ game.id }}">#}
+                        {#                                <td>{{ game.id }} <input type="hidden" name="game_id" value="{{ game.id }}"/> </td>#}
+                        {#                                <td>{{ game.name }}</td>#}
+                        {#                                <td>#}
+                        {#                                    <select title="Erster Spieler" name="player_a_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>#}
+                        {#                                        {% for player in game|get_players:"1,a" %}#}
+                        {#                                            <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>#}
+                        {#                                        {% endfor %}#}
+                        {#                                    </select>#}
+                        {#                                    {% if game.game_type|is_in:"single" == 0 %}#}
+                        {#                                        <select title="Zweiter Spieler" name="player_a_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>#}
+                        {#                                            {% for player in game|get_players:"2,a" %}#}
+                        {#                                                <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>#}
+                        {#                                            {% endfor %}#}
+                        {#                                        </select>#}
+                        {#                                    {% endif %}#}
+                        {#                                </td>#}
+                        {#                                <td>#}
+                        {#                                    <select title="Erster Spieler" name="player_b_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>#}
+                        {#                                        {% for player in game|get_players:"1,b" %}#}
+                        {#                                            <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>#}
+                        {#                                        {% endfor %}#}
+                        {#                                    </select>#}
+                        {#                                    {% if game.game_type|is_in:"single" == 0 %}#}
+                        {#                                        <select title="Zweiter Spieler" name="player_b_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>#}
+                        {#                                            {% for player in game|get_players:"2,b" %}#}
+                        {#                                                <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>#}
+                        {#                                            {% endfor %}#}
+                        {#                                        </select>#}
+                        {#                                    {% endif %}#}
+                        {#                                </td>#}
+                        {#                                <td id="score_game_{{ game.id }}">{{ game.get_sets }}</td>#}
+                        {#                                <td>#}
+                        {#                                    {% for field in match.get_fields %}#}
+                        {#                                        {% with field_active=field|field_active:game %}#}
+                        {#                                            {% if field_active == 'active' %}#}
+                        {#                                                <a href="{% url 'remove_game_to_field' game.id field.id '' %}"#}
+                        {#                                                   class="fieldname {{ field_active }}">{{ forloop.counter }}</a>#}
+                        {#                                            {% else %}#}
+                        {#                                                <a href="{% url 'assign_game_to_field' game.id field.id '' %}"#}
+                        {#                                                   class="fieldname {{ field_active }}">{{ forloop.counter }}</a>#}
+                        {#                                            {% endif %}#}
+                        {#                                        {% endwith %}#}
+                        {#                                    {% endfor %}#}
+                        {#                                </td>#}
+                        {#                                <td>#}
+                        {#                                    <a href="{% url 'manage_game' game.id %}">Edit</a>#}
+                        {#                                </td>#}
+                        {#                                <td>#}
+                        {#                                    <a target="_blank" href="{% url 'export_game' game.id %}">Export Game</a>#}
+                        {#                                </td>#}
+                        {#                            </tr>#}
+                        {#                        {% endfor %}#}
                         <tr>
                             <td colspan="2"></td>
                             <td colspan="2">

@@ -7,10 +7,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse, reverse_lazy, resolve
 from django.db import transaction
+from django.forms import modelformset_factory
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils import timezone
 
+from ticker.forms.matchplan import GameLineUpFormSet, GameLineUpForm
 from ticker.models import Club, Team, Season, League, Rules, Set
 from django.http import HttpResponseRedirect
 
@@ -427,6 +429,14 @@ def save_lineup(request, matchid, response_type):
     match = Match.objects.get(id=matchid)
     response_type = None if response_type == '/' or response_type == '' else response_type
     req_dict = request.GET
+
+    ModelFormSet = modelformset_factory(Game, form=GameLineUpForm, formset=GameLineUpFormSet)
+    formset = ModelFormSet(queryset=match.get_all_games())
+    if request.POST:
+        print('POST:' + str(request.POST))
+        formset = ModelFormSet(request.POST)
+        print('Cleaned data: ' + str(formset.clean()))
+
 
     if 'unlock_field' not in request.POST and match.has_lineup():
         if response_type is None:

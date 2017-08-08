@@ -7,13 +7,13 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import transaction
 from django.db.models import CharField
 from django.db.models import Value
-from django.forms import formset_factory
+from django.forms import formset_factory, modelformset_factory
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.timezone import now
 
-from ticker.forms.matchplan import MatchForm
+from ticker.forms.matchplan import MatchForm, GameLineUpForm, GameLineUpFormSet
 from ticker.forms.presentation import PresentationForm, SlideForm
 from ticker.models import Club, Team, Player, Season, League
 from ticker.models import ColorDefinition
@@ -94,7 +94,27 @@ def manage_dashboard(request):
 
 @login_required
 def manage_ticker_interface(request, match_id):
-    context = dict(match=Match.objects.get(id=match_id))
+    match = Match.objects.get(id=match_id)
+
+    ModelFormSet = modelformset_factory(Game, form=GameLineUpForm, formset=GameLineUpFormSet)
+    formset = ModelFormSet(queryset=match.get_all_games())
+
+    if request.POST:
+        if 'unlock_field' not in request.POST and match.has_lineup():
+            messages.error(request, 'Feld muss entsichert werden')
+        else:
+            formset = ModelFormSet(request.POST)
+            if not formset.is_valid():
+                messages.error(request, 'Formset is not valid')
+                try:
+                    formset.clean()
+                except BaseException as e:
+                    messages.error(request, str(e))
+            else:
+                #formset.save(False)
+                messages.success(request, 'Selection valid')
+
+    context = dict(match=match, formset=formset)
     return render(request, 'user/tickerinterface.html', context)
 
 

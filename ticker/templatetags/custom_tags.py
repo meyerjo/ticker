@@ -182,3 +182,8 @@ def get_color(team, color_label):
     if cd is None:
         return None
     return cd.color_hexcode if cd else None
+
+
+@register.filter
+def is_double(game_type):
+    return game_type == 'mixed' or 'double' in game_type
