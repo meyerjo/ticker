@@ -167,7 +167,7 @@ def get_club(user):
 @register.filter
 def get_leagues_club(user):
     club = get_club(user)
-    leagues = League.objects.filter(teams__parent_club=club)
+    leagues = League.objects.filter(teams__parent_club=club).distinct()
     return leagues
 
 

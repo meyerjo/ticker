@@ -11,6 +11,7 @@ from ticker.models import Profile
 from ticker.models import Rules
 from ticker.models import Set
 from ticker.models import Team
+from ticker.models.presentation import Presentation, PresentationSlideTeam, Slide
 
 
 class PlayerAdmin(admin.ModelAdmin):
@@ -104,3 +105,19 @@ class LeagueAdmin(admin.ModelAdmin):
     list_display_links = ['id', 'name']
 
 admin.site.register(League, LeagueAdmin)
+
+
+class PresentationAdmin(admin.ModelAdmin):
+    list_display = ['id', 'team', 'name', 'displayed']
+
+admin.site.register(Presentation, PresentationAdmin)
+
+class PresentationSlideTeamAdmin(admin.ModelAdmin):
+    list_display = ['id', 'slide', 'slide_number', 'slide_visible', 'create_time']
+
+admin.site.register(PresentationSlideTeam, PresentationSlideTeamAdmin)
+
+class SlideAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title', 'content_type', 'content_path', ]
+
+admin.site.register(Slide, SlideAdmin)

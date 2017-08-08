@@ -2,11 +2,15 @@ from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse, reverse_lazy
+from django.db import transaction
 from django.db.models import CharField
 from django.db.models import Value
+from django.forms import formset_factory
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+
+from ticker.forms.presentation import PresentationForm, SlideForm
 from ticker.models import Club, Team, Player, Season, League
 from ticker.models import ColorDefinition
 from ticker.models import DefinableColor
@@ -14,6 +18,7 @@ from ticker.models import FieldAllocation
 from ticker.models import Game
 from ticker.models import Match
 from ticker.models import Profile
+from ticker.models.presentation import Presentation, Slide, PresentationSlideTeam
 
 
 @login_required
@@ -145,3 +150,60 @@ def manage_game(request, game_id):
 def manage_edit_player_profile(request, player_id):
     player = Player.objects.filter(id=player_id).first()
     return render(request, 'user/manage_player_profile.html', dict(player=player))
+
+
+@login_required()
+def manage_presentation(request, presentation=None):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('login'))
+    p = Profile.objects.filter(user=request.user).first()
+    club = p.associated_club
+
+    presentations = Presentation.objects.filter(team__parent_club=club)
+    if presentation is not None:
+        selected_presentation = presentations.filter(id=presentation).first()
+        slides = Slide.objects.filter(presentationslideteam__presentation=selected_presentation)
+    else:
+        slides = None
+
+    return render(request, 'user/manage_presentations.html', dict(presentations=presentations, slides=slides))
+
+
+@login_required()
+def manage_presentation_new(request):
+    p = Profile.objects.filter(user=request.user).first()
+    club = p.associated_club
+    presentation_form = PresentationForm(prefix='presentation')
+    SlideFormSet = formset_factory(SlideForm)
+    slides = SlideFormSet(prefix='slides')
+
+    if request.POST:
+        print(request.POST)
+        presentation_form = PresentationForm(request.POST, prefix='presentation')
+        slides = SlideFormSet(request.POST, prefix='slides')
+        if presentation_form.is_valid():
+            if slides.is_valid():
+
+                with transaction.atomic():
+                    presentation = presentation_form.instance
+                    presentation.save()
+
+                    team = presentation.team
+
+                    for slide in slides:
+                        s = slide.instance
+                        print(s.__dict__)
+                        print(s.club_id)
+                        s.club_id = club.id
+                        s.save()
+
+                        pst = PresentationSlideTeam.objects.create(presentation=presentation, slide=s, slide_number=1)
+            else:
+                messages.error(request, 'Slides are not valid')
+        else:
+            messages.error(request, 'PresentationForm is not valid')
+        return HttpResponseRedirect(reverse('manage_load_presentation', presentation.id))
+
+    return render(request, 'user/manage_new_presentation.html', dict(presentation_form=presentation_form,
+                                                                      slide_formset=slides))
+

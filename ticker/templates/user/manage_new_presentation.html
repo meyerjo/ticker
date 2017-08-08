@@ -1,0 +1,18 @@
+{% extends 'user/manage_base.html' %}
+
+{% block content %}
+    <div class="container">
+    <div class="row">
+        <form method="post">
+            {% csrf_token %}
+            <div class="col-sm-4">
+                {{ presentation_form }}
+            </div>
+            <div class="col-sm-8">
+                {{ slide_formset }}
+            </div>
+            <button type="submit">Save</button>
+        </form>
+    </div>
+    </div>
+{% endblock %}

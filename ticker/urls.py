@@ -35,6 +35,9 @@ urlpatterns = [
     url(r'^manage/ticker/simple/login/?', simple_ticker_login, name='ticker_interface_login'),
     url(r'^manage/ticker/simple/([0-9]+)/?', simple_ticker_interface, name='ticker_interface_simple'),
     url(r'^manage/?$', manage_dashboard, name='manage_dashboard'),
+    url(r'^manage/presentation/?$', manage_presentation, name='manage_presentation'),
+    url(r'^manage/presentation/([0-9]+)/?$', manage_presentation, name='manage_load_presentation'),
+    url(r'^manage/presentation/new/?$', manage_presentation_new, name='manage_presentation_new'),
 
     url(r'^match/([0-9]+)/?$', match_ticker, name='match_ticker'),
     url(r'^match/([0-9]+)/json/?$', match_ticker_json, name='match_ticker_json'),

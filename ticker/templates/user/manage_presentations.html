@@ -3,25 +3,29 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col-sm-6">
-                {% if presentation_slides %}
-                    <ul class="list-group">
-                        {% for slide in presentation_slides %}
-                            <li class="list-group-item">
-                                <span class="badge">{{ forloop.counter }}</span>
-                                {{ slide }}
-                            </li>
+            <div class="col-sm-9">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="panel-title">Slides</div>
+                    </div>
+                    <div class="list-group">
+                        {% for slide in slides %}
+                            {% if slide.is_deleted == False %}
+                                <a href="#" class="list-group-item active">
+                                    <h4 class="list-group-item-heading">
+                                        {{ slide.title }}
+                                        {% if not slide.is_visible %}Not visible{% endif %}
+                                    </h4>
+                                    <p class="list-group-item-text">
+                                        {{ slide.content_type }}
+                                    </p>
+                                </a>
+                            {% endif %}
                         {% endfor %}
-                    </ul>
-                {% else %}
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            No slide in presentation
-                        </li>
-                    </ul>
-                {% endif %}
+                    </div>
+                </div>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-3">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <div class="panel-title">Presentation</div>
@@ -29,7 +33,7 @@
                     <div class="list-group">
                         {% for presentation in presentations %}
                             {% if presentation.displayed %}
-                                <a href="#" class="list-group-item active">
+                                <a href="{% url 'manage_load_presentation' presentation.id %}" class="list-group-item active">
                                     <h4 class="list-group-item-heading">
                                         {{ presentation.name }}
                                     </h4>
@@ -39,29 +43,11 @@
                                 </a>
                             {% endif %}
                         {% endfor %}
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="panel-title">Slides</div>
-                    </div>
-                    <div class="list-group">
-                        {% for slide in slides %}
-                            {% if slide.is_deleted == False %}
-                                {% if slide.is_visible %}
-                                <a href="#" class="list-group-item active">
-                                    <h4 class="list-group-item-heading">
-                                        {{ slide.title }}
-                                    </h4>
-                                    <p class="list-group-item-text">
-                                        {{ slide.content_type }} ({{ slide.club.get_name }})
-                                    </p>
-                                </a>
-                                {% endif %}
-                            {% endif %}
-                        {% endfor %}
+                        <a href="{% url 'manage_presentation_new' %}" class="list-group-item">
+                            <h4 class="list-group-item-heading">
+                                Add new presentation
+                            </h4>
+                        </a>
                     </div>
                 </div>
             </div>

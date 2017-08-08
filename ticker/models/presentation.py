@@ -50,7 +50,7 @@ class Presentation(models.Model):
     def __str__(self):
         return 'Presentation {0} of team {1}'.format(
             self.name,
-            str(self.team)
+            self.team
         )
 
     def get_all_slides_of_club(self):

@@ -1,5 +1,4 @@
-django==1.9.7
-django_python3_ldap
+django>=1.10,1.11
 celery
 django-celery
 whitenoise
