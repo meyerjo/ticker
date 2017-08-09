@@ -4,8 +4,9 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 
-from ticker.models import Club
+from ticker.models import Club, Profile
 from ticker.models import FieldAllocation
 from ticker.models import Match
 from ticker.models import PlayingField
@@ -15,8 +16,14 @@ from ticker.templatetags.custom_tags import format_players
 
 
 @cache_page(15*60)
+@vary_on_cookie
 def display_dashboard(request):
+    p = Profile.objects.filter(user=request.user).first() if request.user.is_authenticated else None
+    club = p.associated_club if p is not None and p.associated_club is not None else None
+
     clubs = Club.objects.all().order_by('club_name')
+    if club is not None:
+        clubs = clubs.filter(id=club.id)
     return render(request, 'presentation/score_dashboard.html', dict(clubs=clubs))
 
 

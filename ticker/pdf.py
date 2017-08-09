@@ -27,10 +27,12 @@ class PdftkEngine(BaseEngine):
         self.engine = self._Engine(self.dirs, self.app_dirs, **options)
 
     def get_template(self, template_name, dirs=_dirs_undefined):
-        try:
-            template = self.engine.get_template(template_name, dirs)
-        except BaseException as e:
-            raise TemplateDoesNotExist('')
+        template = None
+        if not template_name.endswith('.pdf'):
+            try:
+                template = self.engine.get_template(template_name, dirs)
+            except BaseException as e:
+                raise TemplateDoesNotExist('')
         return PdfTemplate(template)
 
     class _Engine(Engine):

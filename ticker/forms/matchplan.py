@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import BaseFormSet, BaseModelFormSet, Select, ModelMultipleChoiceField, HiddenInput, RadioSelect, \
-    SelectMultiple
+    SelectMultiple, ModelChoiceField
 
 from ticker.models import Match, Game, Team, Player
 
@@ -14,7 +14,6 @@ class MatchForm(forms.ModelForm):
 
 class GameLineUpFormSet(BaseModelFormSet):
 
-
     def clean(self):
         if any(self.errors):
             # Don't bother validating the formset unless each form is valid on its own
@@ -26,8 +25,8 @@ class GameLineUpFormSet(BaseModelFormSet):
             for f in tmp_fields:
                 if f not in form.cleaned_data:
                     continue
-                if form.cleaned_data[f].first() is not None:
-                    name = form.cleaned_data[f].first().get_name()
+                if form.cleaned_data[f] is not None:
+                    name = form.cleaned_data[f].get_name()
                     if name in player_game_counter:
                         player_game_counter[name] += 1
                     else:
@@ -54,8 +53,8 @@ class GameLineUpFormSet(BaseModelFormSet):
             for f in tmp_fields:
                 if f not in form.cleaned_data:
                     continue
-                if form.cleaned_data[f].first() is not None:
-                    name = form.cleaned_data[f].first().get_name()
+                if form.cleaned_data[f] is not None:
+                    name = form.cleaned_data[f].get_name()
                     if name in gametype_player_counter[game.game_type]:
                         gametype_player_counter[game.game_type][name] += 1
                         player_twice_in_same_game_type.append(name)
@@ -67,39 +66,70 @@ class GameLineUpFormSet(BaseModelFormSet):
                 ','.join(player_twice_in_same_game_type)
             ))
 
-class M2M_Select(SelectMultiple):
-    allow_multiple_selected = False
-
-
-
 
 class GameLineUpForm(forms.ModelForm):
-
-    player_a_double = ModelMultipleChoiceField( required=False,   queryset=Player.objects.all())
-    player_b_double = ModelMultipleChoiceField( required=False,  queryset=Player.objects.all())
+    player_a = ModelChoiceField(required=False, queryset=Player.objects.all())
+    player_b = ModelChoiceField(required=False, queryset=Player.objects.all())
+    player_a_double = ModelChoiceField( required=False,   queryset=Player.objects.all())
+    player_b_double = ModelChoiceField( required=False,  queryset=Player.objects.all())
 
     def save(self, commit=False):
-        print(self.__dict__)
-        super(GameLineUpForm, self).save(commit)
-        self.player_a.clear()
-        players_a = self.cleaned_data['player_a'] | self.cleaned_data['player_a_double']
-        print(players_a)
-        self.player_a.add(players_a)
-        print(self.player_a.all())
-        self.player_b.clear()
-        self.player_b.add(self.cleaned_data['player_b'] | self.cleaned_data['player_b_double'])
-        #self.cleaned_data['player_b'] = self.cleaned_data['player_b'] | self.cleaned_data['player_b_double']
+        # get the game
+        game = Game.objects.filter(id=self.instance.id).first()
+        if game is None:
+            raise ValidationError('Game is none')
+
+        if not hasattr(self, 'cleaned_data'):
+            raise ValidationError('Cleaned data field is missing')
+
+        # clear the data
+        # save the player lineup
+        game.player_a.clear()
+        players_a = [self.cleaned_data['player_a']]
+        if 'player_a_double' in self.cleaned_data:
+            players_a.append(self.cleaned_data['player_a_double'])
+        game.player_a.add(*players_a)
+        #
+        game.player_b.clear()
+        players_b = [self.cleaned_data['player_b']]
+        if 'player_b_double' in self.cleaned_data:
+            players_b.append(self.cleaned_data['player_b_double'])
+        game.player_b.add(*players_b)
+        game.save()
 
     def get_game(self):
         return Game.objects.filter(id=self.instance.id).first()
 
     def __init__(self, *args, **kwargs):
+        print(args)
+        print(kwargs)
         super(GameLineUpForm, self).__init__(*args, **kwargs)
-
         game = Game.objects.filter(id=self.instance.id).first()
+        if game is None:
+            return
+
+        data = dict()
+        players_a = game.player_a.all()
+        players_b = game.player_b.all()
+
+        if len(players_a) >= 1:
+            data['player_a'] = players_a[0].id
+            if len(players_a) == 2:
+                data['player_a_double'] = players_a[1].id
+
+        if len(players_b) >= 1:
+            data['player_b'] = players_b[0].id
+            if len(players_b) == 2:
+                data['player_b_double'] = players_b[1].id
+
+        super(GameLineUpForm, self).__init__(initial=data, *args, **kwargs)
+
         teams = Team.objects.filter(team_a__games__in=[game]) | Team.objects.filter(team_b__games__in=[game])
         if game:
-            self.fields['player_a'].required = False
+            #self.fields['player_a'].required = False
+
+            players_a = game.player_a.all()
+
             self.fields['player_b'].required = False
             self.fields['player_a_double'].required = False
             self.fields['player_b_double'].required = False
@@ -109,14 +139,6 @@ class GameLineUpForm(forms.ModelForm):
                 if game.game_type == 'men_double':
                     self.fields['player_a_double'].queryset = teams[0].players.filter(sex='male')
                     self.fields['player_b_double'].queryset = teams[1].players.filter(sex='male')
-                    self.fields['player_a_double'].required = False
-                    self.fields['player_b_double'].required = False
-
-                    players = game.player_a.all()
-
-
-                    # self.fields['player_a_double'].initial = game.player_b.all()[1].id
-
                 else:
                     self.fields['player_a_double'].widget = HiddenInput()
                     self.fields['player_b_double'].widget = HiddenInput()
@@ -126,8 +148,6 @@ class GameLineUpForm(forms.ModelForm):
                 if game.game_type == 'women_double':
                     self.fields['player_a_double'].queryset = teams[0].players.filter(sex='female')
                     self.fields['player_b_double'].queryset = teams[1].players.filter(sex='female')
-                    self.fields['player_a_double'].required = False
-                    self.fields['player_b_double'].required = False
                 else:
                     self.fields['player_a_double'].widget = HiddenInput()
                     self.fields['player_b_double'].widget = HiddenInput()
@@ -136,8 +156,6 @@ class GameLineUpForm(forms.ModelForm):
                 self.fields['player_a_double'].queryset = teams[0].players.filter(sex='female')
                 self.fields['player_b'].queryset = teams[1].players.filter(sex='male')
                 self.fields['player_b_double'].queryset = teams[1].players.filter(sex='female')
-                self.fields['player_a_double'].required = False
-                self.fields['player_b_double'].required = False
 
     def is_valid(self):
         game = Game.objects.filter(id=self.instance.id).first()
@@ -148,24 +166,24 @@ class GameLineUpForm(forms.ModelForm):
         if 'player_b' not in self.cleaned_data:
             return False
 
-        player_a = self.cleaned_data['player_a']
-        player_b = self.cleaned_data['player_b']
-        player_a_double = self.cleaned_data['player_a_double']
-        player_b_double = self.cleaned_data['player_b_double']
+        player_a = self.cleaned_data.get('player_a', None)
+        player_b = self.cleaned_data.get('player_b', None)
+        player_a_double = self.cleaned_data.get('player_a_double', None)
+        player_b_double = self.cleaned_data.get('player_b_double', None)
 
-        if player_a.count() == 0:
+        if player_a is None:
             return False
-        if player_b.count() == 0:
+        if player_b is None:
             return False
 
         if 'double' in game.game_type or game.game_type == 'mixed':
-            if player_a_double.count() == 0:
+            if player_a_double is None:
                 return False
-            if player_b_double.count() == 0:
+            if player_b_double is None:
                 return False
-            if player_a[0] == player_a_double[0]:
+            if player_a == player_a_double:
                 return False
-            if player_b[0] == player_b_double[0]:
+            if player_b == player_b_double:
                 return False
         return super(GameLineUpForm, self).is_valid()
 
@@ -175,34 +193,34 @@ class GameLineUpForm(forms.ModelForm):
         if game is None:
             return True
 
-        player_a = cleaned_data.get('player_a', [])
-        player_b = cleaned_data.get('player_b', [])
-        player_a_double = cleaned_data.get('player_a_double', [])
-        player_b_double = cleaned_data.get('player_b_double', [])
+        player_a = cleaned_data.get('player_a', None)
+        player_b = cleaned_data.get('player_b', None)
+        player_a_double = cleaned_data.get('player_a_double', None)
+        player_b_double = cleaned_data.get('player_b_double', None)
 
-        if len(player_a) == 0:
+        if player_a is None:
             raise forms.ValidationError(
                 'No player selected'
             )
-        if len(player_b) == 0:
+        if player_b is None:
             raise forms.ValidationError(
                 'No player selected'
             )
 
         if 'double' in game.game_type or game.game_type == 'mixed':
-            if len(player_a_double) == 0:
+            if player_a_double is None:
                 raise forms.ValidationError(
                     'Double player not selected'
                 )
-            if len(player_b_double) == 0:
+            if player_b_double is None:
                 raise forms.ValidationError(
                     'Double player not selected'
                 )
-            if player_a[0] == player_a_double[0]:
+            if player_a.id == player_a_double.id:
                 raise forms.ValidationError(
                     'One player cannot play both roles in one game'
                 )
-            if player_b[0] == player_b_double[0]:
+            if player_b.id == player_b_double.id:
                 raise forms.ValidationError(
                     'One player cannot play both roles in one game'
                 )
@@ -211,8 +229,6 @@ class GameLineUpForm(forms.ModelForm):
         model = Game
         fields = ['id', 'name', 'player_a', 'player_b']
         widgets = {
-            'player_a': M2M_Select,
-            'player_b': M2M_Select,
             'id': HiddenInput(),
             'name': HiddenInput()
         }

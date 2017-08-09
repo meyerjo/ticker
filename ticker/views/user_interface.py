@@ -111,7 +111,7 @@ def manage_ticker_interface(request, match_id):
                 except BaseException as e:
                     messages.error(request, str(e))
             else:
-                #formset.save(False)
+                formset.save(True)
                 messages.success(request, 'Selection valid')
 
     context = dict(match=match, formset=formset)

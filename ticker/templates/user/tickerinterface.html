@@ -28,10 +28,13 @@
                 </div>
             </div>
         {% endif %}
-        {% if match.match_time|date:"d.m.Y" != now|date:"d.m.Y" %}
+        {% now "d.m.Y" as today %}
+        {% if match.match_time|date:"d.m.Y" != today %}
             <div class="row">
                 <div class="col-sm-12">
-                    <div class="alert alert-warning">Der Matchzeitpunkt ist nicht heute!</div>
+                    <div class="alert alert-warning">
+                        Der Matchzeitpunkt ist nicht heute!
+                    </div>
                 </div>
             </div>
         {% endif %}
@@ -144,7 +147,7 @@
         </div>
         <div class="row-fluid matches">
             <div class="col-sm-12">
-{#                <form method="post" action="{% url 'match_lineup_save' match.id '/' %}">#}
+                {#                <form method="post" action="{% url 'match_lineup_save' match.id '/' %}">#}
                 <form method="post">
                     {% csrf_token %}
                     {{ formset.management_form }}
@@ -180,9 +183,8 @@
                                             {{ form.player_b }}
                                             {{ form.player_b_double }}
                                         </td>
-                                        <td></td>
                                         <td id="score_game_{{ game.id }}">
-                                            {{ game.get_score }}
+                                            {{ game.get_sets }}
                                         </td>
                                         <td>
                                             {% for field in match.get_fields %}
@@ -198,10 +200,10 @@
                                             {% endfor %}
                                         </td>
                                         <td>
-                                                                                <a href="{% url 'manage_game' game.id %}">Edit</a>
+                                            <a href="{% url 'manage_game' game.id %}">Edit</a>
                                         </td>
                                         <td>
-                                                                                <a target="_blank" href="{% url 'export_game' game.id %}">Export Game</a>
+                                            <a target="_blank" href="{% url 'export_game' game.id %}">Export Game</a>
                                         </td>
                                     </tr>
                                 {% endif %}

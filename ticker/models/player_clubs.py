@@ -47,11 +47,9 @@ class Player(models.Model):
         return '{0} {1}'.format(self.prename, self.lastname)
 
     def __str__(self):
-        return '{0} {1} {2} {3}'.format(
+        return '{0} {1}'.format(
             self.prename,
-            self.lastname,
-            self.sex,
-            '' if self.birth_date is None else self.birth_date.strftime('%d.%m.%Y')
+            self.lastname
         )
 
 
