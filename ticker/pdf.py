@@ -7,8 +7,6 @@ from django.template import engines, TemplateDoesNotExist
 from django.template.backends.base import BaseEngine
 from django.template.engine import Engine
 
-_dirs_undefined = []
-
 
 class PdfTemplateError(Exception):
     pass
@@ -26,11 +24,11 @@ class PdftkEngine(BaseEngine):
         super(PdftkEngine, self).__init__(params)
         self.engine = self._Engine(self.dirs, self.app_dirs, **options)
 
-    def get_template(self, template_name, dirs=_dirs_undefined):
+    def get_template(self, template_name):
         template = None
         if not template_name.endswith('.pdf'):
             try:
-                template = self.engine.get_template(template_name, dirs)
+                template = self.engine.get_template(template_name)
             except BaseException as e:
                 raise TemplateDoesNotExist('')
         return PdfTemplate(template)
