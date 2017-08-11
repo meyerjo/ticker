@@ -7,6 +7,7 @@ from ticker.views.offline_views import offline_input, offline_score, offline_tea
 from ticker.views.presentation import presentation_view, score_display, team_display, display_dashboard
 from ticker.views.simple_ticker import simple_ticker_interface
 from ticker.views.simple_ticker import simple_ticker_login
+from ticker.views.bup import manage_bup_overview, manage_bup_download, manage_bup_switch, bup_list, bup_sync
 from ticker.views.startpage import start_page
 from ticker.views.user_interface import *
 
@@ -30,6 +31,13 @@ urlpatterns = [
     url(r'^manage/season/([0-9]+)/?$', manage_season, name='manage_season'),
     url(r'^manage/ticker/?$', manage_ticker, name='manage_ticker'),
     url(r'^manage/ticker/([0-9]+)/?', manage_ticker_interface, name='manage_ticker_interface'),
+
+    url(r'^manage/bup/?$', manage_bup_overview, name='manage_bup_overview'),
+    url(r'^manage/bup/download$', manage_bup_download, name='manage_bup_download'),
+    url(r'^manage/bup/switch$', manage_bup_switch, name='manage_bup_switch'),
+    url(r'^manage/bup/list$', bup_list, name='bup_list'),
+    url(r'^manage/bup/sync$', bup_sync, name='bup_sync'),
+
 
     url(r'^manage/game/([0-9]+)/?$', manage_game, name='manage_game'),
     url(r'^manage/ticker/simple/login/?', simple_ticker_login, name='ticker_interface_login'),

@@ -156,6 +156,7 @@ class Game(models.Model):
                   ('mixed', 'Mixed'))
     current_set = models.IntegerField(default=1)
     game_type = models.CharField(max_length=32, choices=game_types)
+    presses_json = models.TextField(default=None, blank=True, null=True)
 
     def __str__(self):
         return 'Game {3}: {0} {1} {2}'.format(self.name, self.game_type, '0', self.id)

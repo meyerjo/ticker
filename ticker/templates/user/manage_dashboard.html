@@ -1,6 +1,7 @@
 {% extends 'user/manage_base.html' %}
 
 {% load custom_tags %}
+{% load staticfiles %}
 {% block content %}
     <div class="container">
         <div class="row">
@@ -64,14 +65,15 @@
                                         <p class="list-group-item-text">
                                             {{ match.match_time|date:"d.m.Y H:i" }} -
                                             <a href="{% url 'manage_ticker_interface' match.id %}">Ticker</a> -
-                                            <a href="{% url 'presentation_view' 0 match.id %}">Präsentation starten</a>
+                                            <a href="{% url 'presentation_view' 0 match.id %}">Präsentation starten</a> -
+                                            <a href="{% static 'bup/cur/bup.html' %}#jt_id={{match.id}}">Umpire Panel</a>
                                         </p>
                                     </li>
                                 {% endfor %}
                             {% endif %}
-                        </ul>
-                    </div>
+                    </ul>
                 </div>
+            </div>
             </div>
         {% endwith %}
     </div>
