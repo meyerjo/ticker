@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from django.db import models
 from django.db import transaction
 from django.db.models import ManyToManyField, CharField
 from django.utils import timezone
+from django.utils.timezone import now
 
 from ticker.models.player_clubs import Player, Team
 
@@ -294,8 +297,10 @@ class Match(models.Model):
 
 
     @staticmethod
-    def all_matches():
+    def all_matches(dt=None):
         matches = Match.objects.filter(canceled=False)
+        if dt is not None:
+            matches = matches.objects.filter(match_date__gte=dt)
         return matches
 
 

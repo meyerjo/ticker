@@ -120,15 +120,16 @@ def manage_ticker_interface(request, match_id):
 
 @login_required
 def manage_ticker(request):
+    tmp_date = now()-timedelta(days=7)
     if request.user.is_superuser:
-        matches = Match.all_matches()
+        matches = Match.all_matches(tmp_date)
     else:
         p = Profile.objects.filter(user=request.user).first()
         if p is None:
             matches = []
         else:
-            matches = Match.objects.filter(team_a__parent_club=p.associated_club) | \
-                      Match.objects.filter(team_b__parent_club=p.associated_club)
+            matches = Match.objects.filter(team_a__parent_club=p.associated_club, canceled=False, match_time__gte=tmp_date ) | \
+                      Match.objects.filter(team_b__parent_club=p.associated_club, canceled=False, match_time__gte=tmp_date)
     return render(request, 'user/manage_ticker.html', dict(matches=matches))
 
 
