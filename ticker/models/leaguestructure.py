@@ -45,7 +45,7 @@ class League(models.Model):
         return self.teams.all().count()
 
     def get_matches_in_league(self):
-        return self.matches.filter(canceled=False)
+        return self.matches.filter(canceled=False).order_by('-match_time')
 
     def get_all_possible_teams(self):
         teams_not_in_league = Team.objects.exclude(id__in=self.teams.values_list('id', flat=True))
