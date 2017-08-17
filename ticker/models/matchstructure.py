@@ -300,7 +300,7 @@ class Match(models.Model):
     def all_matches(dt=None):
         matches = Match.objects.filter(canceled=False)
         if dt is not None:
-            matches = matches.objects.filter(match_date__gte=dt)
+            matches = matches.filter(match_time__gte=dt)
         return matches
 
 

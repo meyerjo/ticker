@@ -1,7 +1,9 @@
 django>=1.10,1.11
 celery
 django-celery
-whitenoise
 jsonpickle
 fdfgen==0.14.0
 mysqlclient
+gunicorn
+django-favicon
+django-js-reverse
