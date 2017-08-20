@@ -8,7 +8,7 @@ from ticker.views.presentation import presentation_view, score_display, team_dis
 from ticker.views.simple_ticker import simple_ticker_interface
 from ticker.views.simple_ticker import simple_ticker_login
 from ticker.views.bup import manage_bup_overview, manage_bup_download, manage_bup_switch, bup_list, bup_sync
-from ticker.views.startpage import start_page
+from ticker.views.startpage import start_page, imprint
 from ticker.views.user_interface import *
 
 # /ticker/
@@ -65,6 +65,8 @@ urlpatterns = [
     url(r'^offline/input/?$', offline_input, name='offline_input'),
     url(r'^offline/score/?$', offline_score, name='offline_score'),
     url(r'^offline/team/?$', offline_team, name='offline_team'),
+
+    url(r'^impressum/?$', imprint, name='impressum'),
 
 
 

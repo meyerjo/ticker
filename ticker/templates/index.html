@@ -6,28 +6,55 @@
 
 {% block content %}
     <div class="container">
-        <div class="row title">
-            Live-Ticker: {{ league.get_name }}
+        <div class="row">
+            <h2>Live-Ticker: {{ league.get_name }}</h2>
         </div>
-        {% for match in matches %}
-            <div class="row-fluid matchentry">
-            <a href="{% url 'match_ticker' match.id %}">
-                <div class="col-sm-12 matchtime">
-                    {{ match.match_time|date:"d.m.Y G:i" }}
-                </div>
-                <div class="col-sm-4 team">
-                    {{ match.team_a.get_name }}
-                </div>
-                <div class="col-sm-4 score">
-                    {% with score=match.get_score %}
-                        {{ score.0 }}:{{ score.1 }}
-                    {% endwith %}
-                </div>
-                <div class="col-sm-4 team">
-                    {{ match.team_b.get_name }}
-                </div>
-            </a>
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>Heute</h3>
+                <ul class="list-group">
+                    {% for match in matches_today %}
+                        <li class="list-group-item">
+                            <div class="row matchentry">
+                                <a href="{% url 'match_ticker' match.id %}">
+                                    <div class="col-sm-12 matchtime">
+                                        {{ match.match_time|date:"G:i" }} Uhr
+                                    </div>
+                                    <div class="col-sm-12 score">
+                                        {% with score=match.get_score %}
+                                            {{ score.0 }}:{{ score.1 }}
+                                        {% endwith %}
+                                    </div>
+                                    <div class="col-sm-6 team">
+                                        {{ match.team_a.get_name }}
+                                    </div>
+                                    <div class="col-sm-6 team">
+                                        {{ match.team_b.get_name }}
+                                    </div>
+                                </a>
+                                <div class="col-sm-12" style="text-align: center;">
+                                <a href="{% url 'match_ticker' match.id %}" class="btn btn-success">Zum Live-Ticker</a>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
             </div>
-        {% endfor %}
+            <div class="col-sm-6">
+                <ul class="list-group">
+                    <li class="list-group-item"><b>Nächsten Spiele</b></li>
+                    {% for match in matches %}
+                        <li class="list-group-item">
+                            {{ match.match_time|date:"d.m.Y G:i" }}: {{ match.team_a.get_name }} - {{ match.team_b.get_name }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
     </div>
+        <footer class="footer">
+        <div class="container">
+            <a href="{% url 'impressum' %}">Impressum</a>
+        </div>
+        </footer>
 {% endblock %}
