@@ -55,9 +55,7 @@ class League(models.Model):
                 (team.id, team.get_name(), True)
             )
         for team in teams_not_in_league:
-            result.append(
-                (team.id, team.get_name(), False)
-            )
+            result.append((team.id, team.get_name(), False))
         return result
 
     @staticmethod
