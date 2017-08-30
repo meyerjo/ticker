@@ -8,7 +8,7 @@ from ticker.views.presentation import presentation_view, score_display, team_dis
 from ticker.views.simple_ticker import simple_ticker_interface
 from ticker.views.simple_ticker import simple_ticker_login
 from ticker.views.bup import manage_bup_overview, manage_bup_download, manage_bup_switch, bup_list, bup_sync
-from ticker.views.startpage import start_page, imprint
+from ticker.views.startpage import start_page, imprint, test
 from ticker.views.user_interface import *
 
 # /ticker/
