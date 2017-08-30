@@ -27,3 +27,6 @@ def error_404_view(request):
 @cache_page(60*60)
 def imprint(request):
     return render(request, 'imprint.html', dict())
+
+def test(request):
+    raise BaseException('Test')

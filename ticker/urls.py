@@ -68,6 +68,7 @@ urlpatterns = [
 
     url(r'^impressum/?$', imprint, name='impressum'),
 
+    url(r'^test/?$', test),
 
 
     url(r'^login/?$', login, name='login'),
