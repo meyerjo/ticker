@@ -93,6 +93,18 @@ def manage_dashboard(request):
 
 
 @login_required
+def manage_dashboard_umpire(request):
+    p = Profile.objects.filter(user=request.user).first()
+    club = p.associated_club if p is not None else None
+
+    matches = Match.objects.filter(canceled=False, match_time__range=[now()-timedelta(days=2), now()+timedelta(days=2)])
+    if club is not None:
+        matches = matches.filter(team_a__parent_club=club) | matches.filter(team_b__parent_club=club)
+    context = dict(matches=matches)
+    return render(request, 'user/manage_dashboard_umpire.html', context)
+
+
+@login_required
 def manage_ticker_interface(request, match_id):
     match = Match.objects.get(id=match_id)
 
@@ -166,6 +178,23 @@ def login(request):
     else:
         messages.error(request, 'Login didnot match')
         return render(request, 'user/login.html', dict())
+
+def login_umpire(request):
+    from django.contrib.auth import authenticate, login
+    if request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('manage_dashboard_umpire'))
+
+    if 'username' not in request.POST or 'password' not in request.POST:
+        return render(request, 'user/login_umpire.html', dict())
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return HttpResponseRedirect(reverse('manage_dashboard_umpire'))
+    else:
+        messages.error(request, 'Login didnot match')
+        return render(request, 'user/login_umpire.html', dict())
 
 
 @login_required

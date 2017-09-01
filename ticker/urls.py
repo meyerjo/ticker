@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'^manage/ticker/simple/login/?', simple_ticker_login, name='ticker_interface_login'),
     url(r'^manage/ticker/simple/([0-9]+)/?', simple_ticker_interface, name='ticker_interface_simple'),
     url(r'^manage/?$', manage_dashboard, name='manage_dashboard'),
+    url(r'^manage/umpire/?$', manage_dashboard_umpire, name='manage_dashboard_umpire'),
     url(r'^manage/presentation/?$', manage_presentation, name='manage_presentation'),
     url(r'^manage/presentation/([0-9]+)/?$', manage_presentation, name='manage_load_presentation'),
     url(r'^manage/presentation/new/?$', manage_presentation_new, name='manage_presentation_new'),
@@ -72,5 +73,6 @@ urlpatterns = [
 
 
     url(r'^login/?$', login, name='login'),
+    url(r'^login/umpire/?$', login_umpire, name='login_umpire'),
     url('', start_page),
 ]

@@ -1,0 +1,45 @@
+{% extends 'user/manage_base.html' %}
+
+{% load custom_tags %}
+{% load staticfiles %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+        {% with associated_club=request.user|get_club %}
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Heutige Spiele</div>
+                        <ul class="list-group">
+                            {% if matches.count == 0 %}
+                                <li class="list-group-item">Keine Spiele gefunden.</li>
+                            {% else %}
+                                {% for match in matches %}
+                                    <li class="list-group-item">
+                                        <h4 class="list-group-item-heading">
+                                            {{ match.team_a }} - {{ match.team_b }}: {{ match.get_score.0 }}:{{ match.get_score.1 }}
+                                        </h4>
+                                        <p class="list-group-item-text">
+                                            {{ match.match_time|date:"d.m.Y H:i" }} -
+                                            <a href="{% static 'bup/cur/bup.html' %}#jt_id={{match.id}}">Umpire Panel</a>
+                                        </p>
+                                    </li>
+                                {% endfor %}
+                            {% endif %}
+                    </ul>
+                </div>
+            </div>
+            </div>
+        {% endwith %}
+    </div>
+{% endblock %}
