@@ -87,13 +87,15 @@ class GameLineUpForm(forms.ModelForm):
         game.player_a.clear()
         players_a = [self.cleaned_data['player_a']]
         if 'player_a_double' in self.cleaned_data:
-            players_a.append(self.cleaned_data['player_a_double'])
+            if self.cleaned_data['player_a_double'] is not None:
+                players_a.append(self.cleaned_data['player_a_double'])
         game.player_a.add(*players_a)
         #
         game.player_b.clear()
         players_b = [self.cleaned_data['player_b']]
         if 'player_b_double' in self.cleaned_data:
-            players_b.append(self.cleaned_data['player_b_double'])
+            if self.cleaned_data['player_b_double'] is not None:
+                players_b.append(self.cleaned_data['player_b_double'])
         game.player_b.add(*players_b)
         game.save()
 
