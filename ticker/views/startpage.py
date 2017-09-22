@@ -13,7 +13,7 @@ def start_page(request):
     from datetime import timedelta
     from django.utils import timezone
     last_week = timezone.now() - timedelta(days=7)
-    matches = Match.objects.filter(match_time__gte=last_week)
+    matches = Match.objects.filter(match_time__gte=last_week).order_by('match_time')
     matches_today = matches.filter(match_time__date=now().date())
     matches_not_today = matches.filter(~Q(match_time__date=now().date()))
     context = dict(matches=matches_not_today, matches_today=matches_today, league=league)
