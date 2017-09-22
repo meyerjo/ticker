@@ -166,20 +166,20 @@ def add_player(request):
                 lastname=lastname,
                 sex=sex
             )
+            now_date = datetime.date.today()
+            start_date = datetime.date(year=now_date.year, month=8, day=1)
+            end_date = datetime.date(year=now_date.year + 1, month=7, day=31)
             if created:
                 p.save()
                 t.players.add(p)
                 t.save()
-                now_date = datetime.date.today()
-                start_date = datetime.date(year=now_date.year, month=8, day=1)
-                end_date = datetime.date(year=now_date.year + 1, month=7, day=31)
 
-                team_assoc = TeamPlayerAssociation(team=t, player=p, start_association=start_date,
-                                                   end_association=end_date)
-                team_assoc.save()
                 responses.append('CREATED')
             else:
                 responses.append('EXISTED')
+            team_assoc = TeamPlayerAssociation(team=t, player=p, start_association=start_date,
+                                               end_association=end_date)
+            team_assoc.save()
     print(responses)
     if 'response_type' in request.POST:
         if request.POST['response_type'] == 'json':
