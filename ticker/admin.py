@@ -128,4 +128,4 @@ admin.site.register(Slide, SlideAdmin)
 class TeamPlayerAssociationAdmin(admin.ModelAdmin):
     list_display = ['id', 'team', 'player', 'start_association', 'end_association']
 
-admin.site.register(TeamPlayerAssociation, TeamPlayerAssociationAdmin)
+admin.site.register(TeamPlayerAssociationAdmin, TeamPlayerAssociation)
