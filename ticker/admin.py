@@ -12,6 +12,7 @@ from ticker.models import Rules
 from ticker.models import Set
 from ticker.models import Team
 from ticker.models.presentation import Presentation, PresentationSlideTeam, Slide
+from ticker.models import TeamPlayerAssociation
 
 
 class PlayerAdmin(admin.ModelAdmin):
@@ -128,4 +129,4 @@ admin.site.register(Slide, SlideAdmin)
 class TeamPlayerAssociationAdmin(admin.ModelAdmin):
     list_display = ['id', 'team', 'player', 'start_association', 'end_association']
 
-admin.site.register(TeamPlayerAssociationAdmin, TeamPlayerAssociation)
+admin.site.register(TeamPlayerAssociation, TeamPlayerAssociationAdmin)
