@@ -128,15 +128,16 @@ class GameLineUpForm(forms.ModelForm):
 
         teams = Team.objects.filter(team_a__games__in=[game]) | Team.objects.filter(team_b__games__in=[game])
         if game:
-            #self.fields['player_a'].required = False
-
             players_a = game.player_a.all()
+
+            sex_male_team_a = Player.objects.filter(team__teamplayerassociation=teams[0], sex='male').distinct('id')
 
             self.fields['player_b'].required = False
             self.fields['player_a_double'].required = False
             self.fields['player_b_double'].required = False
             if game.game_type == 'men_double' or game.game_type == 'single':
-                self.fields['player_a'].queryset = teams[0].players.filter(sex='male')
+                # self.fields['player_a'].queryset = teams[0].players.filter(sex='male')
+                self.fields['player_a'].queryset = sex_male_team_a
                 self.fields['player_b'].queryset = teams[1].players.filter(sex='male')
                 if game.game_type == 'men_double':
                     self.fields['player_a_double'].queryset = teams[0].players.filter(sex='male')
