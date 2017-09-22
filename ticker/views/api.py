@@ -171,12 +171,12 @@ def add_player(request):
             end_date = datetime.date(year=now_date.year + 1, month=7, day=31)
             if created:
                 p.save()
-                t.players.add(p)
-                t.save()
-
                 responses.append('CREATED')
             else:
                 responses.append('EXISTED')
+            t.players.add(p)
+            t.save()
+
             team_assoc = TeamPlayerAssociation(team=t, player=p, start_association=start_date,
                                                end_association=end_date)
             team_assoc.save()
