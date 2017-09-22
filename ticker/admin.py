@@ -112,12 +112,20 @@ class PresentationAdmin(admin.ModelAdmin):
 
 admin.site.register(Presentation, PresentationAdmin)
 
+
 class PresentationSlideTeamAdmin(admin.ModelAdmin):
     list_display = ['id', 'slide', 'slide_number', 'slide_visible', 'create_time']
 
 admin.site.register(PresentationSlideTeam, PresentationSlideTeamAdmin)
 
+
 class SlideAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'content_type', 'content_path', ]
 
 admin.site.register(Slide, SlideAdmin)
+
+
+class TeamPlayerAssociationAdmin(admin.ModelAdmin):
+    list_display = ['id', 'team', 'player', 'start_association', 'end_association']
+
+admin.site.register(TeamPlayerAssociation, TeamPlayerAssociationAdmin)
