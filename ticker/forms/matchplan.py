@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.forms import BaseFormSet, BaseModelFormSet, Select, ModelMultipleChoiceField, HiddenInput, RadioSelect, \
     SelectMultiple, ModelChoiceField
 
-from ticker.models import Match, Game, Team, Player
+from ticker.models import Match, Game, Team, Player, TeamPlayerAssociation
 
 
 class MatchForm(forms.ModelForm):
@@ -129,8 +129,19 @@ class GameLineUpForm(forms.ModelForm):
         teams = Team.objects.filter(team_a__games__in=[game]) | Team.objects.filter(team_b__games__in=[game])
         if game:
             players_a = game.player_a.all()
+            import datetime
+            now_date = datetime.date.today()
+            start_date = datetime.date(year=now_date.year, month=8, day=1)
+            end_date = datetime.date(year=now_date.year + 1, month=7, day=31)
 
-            sex_male_team_a = Player.objects.filter(team__teamplayerassociation=teams[0], sex='male').distinct('id')
+            team_players_team_a = TeamPlayerAssociation.objects.filter(team=teams[0], start_association=start_date, end_association=end_date)
+            team_players_team_b = TeamPlayerAssociation.objects.filter(team=teams[1], start_association=start_date, end_association=end_date)
+
+            sex_male_team_a = Player.objects.filter(team__players__teamplayerassociation=team_players_team_a, sex='male')
+            sex_female_team_a = Player.objects.filter(team__players__teamplayerassociation=team_players_team_a, sex='female')
+
+            sex_male_team_b = Player.objects.filter(team__players__teamplayerassociation=team_players_team_b, sex='male')
+            sex_female_team_b = Player.objects.filter(team__players__teamplayerassociation=team_players_team_b, sex='female')
 
             self.fields['player_b'].required = False
             self.fields['player_a_double'].required = False
@@ -138,27 +149,27 @@ class GameLineUpForm(forms.ModelForm):
             if game.game_type == 'men_double' or game.game_type == 'single':
                 # self.fields['player_a'].queryset = teams[0].players.filter(sex='male')
                 self.fields['player_a'].queryset = sex_male_team_a
-                self.fields['player_b'].queryset = teams[1].players.filter(sex='male')
+                self.fields['player_b'].queryset = sex_male_team_b
                 if game.game_type == 'men_double':
-                    self.fields['player_a_double'].queryset = teams[0].players.filter(sex='male')
-                    self.fields['player_b_double'].queryset = teams[1].players.filter(sex='male')
+                    self.fields['player_a_double'].queryset = sex_male_team_a
+                    self.fields['player_b_double'].queryset = sex_male_team_a
                 else:
                     self.fields['player_a_double'].widget = HiddenInput()
                     self.fields['player_b_double'].widget = HiddenInput()
             elif game.game_type == 'womansingle' or game.game_type == 'women_double':
-                self.fields['player_a'].queryset = teams[0].players.filter(sex='female')
-                self.fields['player_b'].queryset = teams[1].players.filter(sex='female')
+                self.fields['player_a'].queryset = sex_female_team_a
+                self.fields['player_b'].queryset = sex_female_team_b
                 if game.game_type == 'women_double':
-                    self.fields['player_a_double'].queryset = teams[0].players.filter(sex='female')
-                    self.fields['player_b_double'].queryset = teams[1].players.filter(sex='female')
+                    self.fields['player_a_double'].queryset = sex_female_team_a
+                    self.fields['player_b_double'].queryset = sex_female_team_b
                 else:
                     self.fields['player_a_double'].widget = HiddenInput()
                     self.fields['player_b_double'].widget = HiddenInput()
             else:
-                self.fields['player_a'].queryset = teams[0].players.filter(sex='male')
-                self.fields['player_a_double'].queryset = teams[0].players.filter(sex='female')
-                self.fields['player_b'].queryset = teams[1].players.filter(sex='male')
-                self.fields['player_b_double'].queryset = teams[1].players.filter(sex='female')
+                self.fields['player_a'].queryset = sex_male_team_a
+                self.fields['player_a_double'].queryset = sex_female_team_a
+                self.fields['player_b'].queryset = sex_male_team_b
+                self.fields['player_b_double'].queryset = sex_female_team_b
 
     def is_valid(self):
         game = Game.objects.filter(id=self.instance.id).first()
