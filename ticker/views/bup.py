@@ -251,6 +251,9 @@ def bup_sync(request):
             diff_a = new_a - cur_a
             diff_b = new_b - cur_b
 
+            if not rule.validate(new_a, new_b):
+                continue
+
             while diff_a > 0:
                 cur_game.add_point_team_a(rule)
                 diff_a -= 1
