@@ -156,7 +156,7 @@ class GameLineUpForm(forms.ModelForm):
                 self.fields['player_b'].queryset = sex_male_team_b
                 if game.game_type == 'men_double':
                     self.fields['player_a_double'].queryset = sex_male_team_a
-                    self.fields['player_b_double'].queryset = sex_male_team_a
+                    self.fields['player_b_double'].queryset = sex_male_team_b
                 else:
                     self.fields['player_a_double'].widget = HiddenInput()
                     self.fields['player_b_double'].widget = HiddenInput()
