@@ -179,6 +179,7 @@ def login(request):
         messages.error(request, 'Login didnot match')
         return render(request, 'user/login.html', dict())
 
+
 def login_umpire(request):
     from django.contrib.auth import authenticate, login
     if request.user.is_authenticated():
