@@ -161,7 +161,7 @@ def add_player(request):
             if len(sex_id) == 0:
                 continue
 
-            player = Player.objects.filter(prename=prename, lastname=lastname, sex=sex).first()
+            p = Player.objects.filter(prename=prename, lastname=lastname, sex=sex).first()
             created = False
             if player is None:
                 p = Player.objects.create(prename=prename, lastname=lastname, sex=sex)
