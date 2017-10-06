@@ -131,7 +131,7 @@ class GameLineUpForm(forms.ModelForm):
         # (This is not for discrimination but an early design decision ;-))
         if game.game_type == 'mixed':
             for team in ['player_a', 'player_b']:
-                if team in data:
+                if team not in data:
                     continue
                 p1 = Player.objects.filter(id=data[team]).first()
                 if p1 is None:
