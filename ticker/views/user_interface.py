@@ -142,6 +142,7 @@ def manage_ticker(request):
         else:
             matches = Match.objects.filter(team_a__parent_club=p.associated_club, canceled=False, match_time__gte=tmp_date ) | \
                       Match.objects.filter(team_b__parent_club=p.associated_club, canceled=False, match_time__gte=tmp_date)
+            matches = matches.order_by('match_time')
     return render(request, 'user/manage_ticker.html', dict(matches=matches))
 
 
