@@ -163,7 +163,7 @@ def add_player(request):
 
             p = Player.objects.filter(prename=prename, lastname=lastname, sex=sex).first()
             created = False
-            if player is None:
+            if p is None:
                 p = Player.objects.create(prename=prename, lastname=lastname, sex=sex)
                 created = True
 
