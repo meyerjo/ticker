@@ -161,11 +161,12 @@ def add_player(request):
             if len(sex_id) == 0:
                 continue
 
-            p, created = Player.objects.get_or_create(
-                prename=prename,
-                lastname=lastname,
-                sex=sex
-            )
+            player = Player.objects.filter(prename=prename, lastname=lastname, sex=sex).first()
+            created = False
+            if player is None:
+                p = Player.objects.create(prename=prename, lastname=lastname, sex=sex)
+                created = True
+
             now_date = datetime.date.today()
             start_date = datetime.date(year=now_date.year, month=8, day=1)
             end_date = datetime.date(year=now_date.year + 1, month=7, day=31)
@@ -177,8 +178,7 @@ def add_player(request):
             t.players.add(p)
             t.save()
 
-            team_assoc = TeamPlayerAssociation(team=t, player=p, start_association=start_date,
-                                               end_association=end_date)
+            team_assoc = TeamPlayerAssociation(team=t, player=p, start_association=start_date, end_association=end_date)
             team_assoc.save()
     print(responses)
     if 'response_type' in request.POST:
