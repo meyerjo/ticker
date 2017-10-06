@@ -155,7 +155,8 @@ class GameLineUpForm(forms.ModelForm):
             self.fields['player_b'].required = False
             self.fields['player_a_double'].required = False
             self.fields['player_b_double'].required = False
-            if 'double' not in game.game_type:
+            # if
+            if 'double' not in game.game_type and game.game_type != 'mixed':
                 self.fields['player_a_double'].widget = HiddenInput()
                 self.fields['player_b_double'].widget = HiddenInput()
 
