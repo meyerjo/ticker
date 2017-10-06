@@ -155,10 +155,10 @@ class GameLineUpForm(forms.ModelForm):
             team_players_team_a = TeamPlayerAssociation.objects.filter(team=teams[0], start_association=start_date, end_association=end_date)
             team_players_team_b = TeamPlayerAssociation.objects.filter(team=teams[1], start_association=start_date, end_association=end_date)
 
-            sex_male_team_a = teams[0].players.filter(sex='male')
-            sex_female_team_a = teams[0].players.filter(sex='female')
-            sex_male_team_b = teams[1].players.filter(sex='male')
-            sex_female_team_b = teams[1].players.filter(sex='female')
+            sex_male_team_a = teams[0].players.filter(sex='male').order_by('lastname')
+            sex_female_team_a = teams[0].players.filter(sex='female').order_by('lastname')
+            sex_male_team_b = teams[1].players.filter(sex='male').order_by('lastname')
+            sex_female_team_b = teams[1].players.filter(sex='female').order_by('lastname')
 
             self.fields['player_b'].required = False
             self.fields['player_a_double'].required = False
