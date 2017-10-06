@@ -301,6 +301,7 @@ class Match(models.Model):
         matches = Match.objects.filter(canceled=False)
         if dt is not None:
             matches = matches.filter(match_time__gte=dt)
+        matches = matches.order_by('match_time')
         return matches
 
 
@@ -310,6 +311,7 @@ class Match(models.Model):
         current_day = datetime.datetime.now()
         matches = Match.objects.filter(canceled=False,
                                        match_time__day=current_day)
+        matches = matches.order_by('match_time')
         return matches
 
     def get_all_games(self):
