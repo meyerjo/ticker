@@ -1,3 +1,5 @@
+import logging
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import BaseFormSet, BaseModelFormSet, Select, ModelMultipleChoiceField, HiddenInput, RadioSelect, \
@@ -103,8 +105,7 @@ class GameLineUpForm(forms.ModelForm):
         return Game.objects.filter(id=self.instance.id).first()
 
     def __init__(self, *args, **kwargs):
-        print(args)
-        print(kwargs)
+        logger = logging.getLogger(__name__)
         super(GameLineUpForm, self).__init__(*args, **kwargs)
         game = Game.objects.filter(id=self.instance.id).first()
         if game is None:
@@ -113,6 +114,8 @@ class GameLineUpForm(forms.ModelForm):
         data = dict()
         players_a = game.player_a.all()
         players_b = game.player_b.all()
+        logger.error('Game ID: {0} Players Team A: {1}'.format(game.id, str(players_a)))
+        logger.error('Game ID: {0} Players Team B: {1}'.format(game.id, str(players_b)))
 
         if len(players_a) >= 1:
             data['player_a'] = players_a[0].id
@@ -123,12 +126,14 @@ class GameLineUpForm(forms.ModelForm):
             data['player_b'] = players_b[0].id
             if len(players_b) == 2:
                 data['player_b_double'] = players_b[1].id
+        logger.error('Game ID: {0} Players: {1}'.format(game.id, str(data)))
 
         super(GameLineUpForm, self).__init__(initial=data, *args, **kwargs)
 
-        teams = Team.objects.filter(team_a__games__in=[game]) | Team.objects.filter(team_b__games__in=[game])
+        # get the teams
+        teams = Team.objects.filter(team_a__games__in=[game]) | \
+                Team.objects.filter(team_b__games__in=[game])
         if game:
-            players_a = game.player_a.all()
             import datetime
             now_date = datetime.date.today()
             start_date = datetime.date(year=now_date.year, month=8, day=1)
@@ -150,25 +155,23 @@ class GameLineUpForm(forms.ModelForm):
             self.fields['player_b'].required = False
             self.fields['player_a_double'].required = False
             self.fields['player_b_double'].required = False
-            if game.game_type == 'men_double' or game.game_type == 'single':
+            if 'double' not in game.game_type:
+                self.fields['player_a_double'].widget = HiddenInput()
+                self.fields['player_b_double'].widget = HiddenInput()
+
+            if game.game_type in ['men_double', 'single']:
                 # self.fields['player_a'].queryset = teams[0].players.filter(sex='male')
                 self.fields['player_a'].queryset = sex_male_team_a
                 self.fields['player_b'].queryset = sex_male_team_b
                 if game.game_type == 'men_double':
                     self.fields['player_a_double'].queryset = sex_male_team_a
                     self.fields['player_b_double'].queryset = sex_male_team_b
-                else:
-                    self.fields['player_a_double'].widget = HiddenInput()
-                    self.fields['player_b_double'].widget = HiddenInput()
-            elif game.game_type == 'womansingle' or game.game_type == 'women_double':
+            elif game.game_type in ['women_double', 'womansingle']:
                 self.fields['player_a'].queryset = sex_female_team_a
                 self.fields['player_b'].queryset = sex_female_team_b
                 if game.game_type == 'women_double':
                     self.fields['player_a_double'].queryset = sex_female_team_a
                     self.fields['player_b_double'].queryset = sex_female_team_b
-                else:
-                    self.fields['player_a_double'].widget = HiddenInput()
-                    self.fields['player_b_double'].widget = HiddenInput()
             else:
                 self.fields['player_a'].queryset = sex_male_team_a
                 self.fields['player_a_double'].queryset = sex_female_team_a
