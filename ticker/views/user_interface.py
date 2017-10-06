@@ -12,6 +12,8 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.timezone import now
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 
 from ticker.forms.matchplan import MatchForm, GameLineUpForm, GameLineUpFormSet
 from ticker.forms.presentation import PresentationForm, SlideForm
@@ -131,6 +133,8 @@ def manage_ticker_interface(request, match_id):
 
 
 @login_required
+@vary_on_cookie
+@cache_page(10)
 def manage_ticker(request):
     tmp_date = now()-timedelta(days=7)
     if request.user.is_superuser:
