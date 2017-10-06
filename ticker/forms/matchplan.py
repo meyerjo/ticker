@@ -126,6 +126,17 @@ class GameLineUpForm(forms.ModelForm):
             data['player_b'] = players_b[0].id
             if len(players_b) == 2:
                 data['player_b_double'] = players_b[1].id
+
+        # for the mixed doubles we switch the values if the first player is female
+        # (This is not for discrimination but an early design decision ;-))
+        if game.game_type == 'mixed':
+            for team in ['player_a', 'player_b']:
+                p1 = Player.objects.filter(id=data[team]).first()
+                if p1.first() is None:
+                    continue
+                if p1.sex == 'female':
+                    data[team], data[team + '_double'] = data[team + '_double'], data[team]
+
         logger.error('Game ID: {0} Players: {1}'.format(game.id, str(data)))
 
         super(GameLineUpForm, self).__init__(initial=data, *args, **kwargs)
