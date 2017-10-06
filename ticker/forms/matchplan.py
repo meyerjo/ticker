@@ -132,7 +132,7 @@ class GameLineUpForm(forms.ModelForm):
         if game.game_type == 'mixed':
             for team in ['player_a', 'player_b']:
                 p1 = Player.objects.filter(id=data[team]).first()
-                if p1.first() is None:
+                if p1 is None:
                     continue
                 if p1.sex == 'female':
                     data[team], data[team + '_double'] = data[team + '_double'], data[team]
