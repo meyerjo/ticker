@@ -114,8 +114,8 @@ class GameLineUpForm(forms.ModelForm):
         data = dict()
         players_a = game.player_a.all()
         players_b = game.player_b.all()
-        logger.error('Game ID: {0} Players Team A: {1}'.format(game.id, str(players_a)))
-        logger.error('Game ID: {0} Players Team B: {1}'.format(game.id, str(players_b)))
+        logger.debug('Game ID: {0} Players Team A: {1}'.format(game.id, str(players_a)))
+        logger.debug('Game ID: {0} Players Team B: {1}'.format(game.id, str(players_b)))
 
         if len(players_a) >= 1:
             data['player_a'] = players_a[0].id
@@ -137,7 +137,7 @@ class GameLineUpForm(forms.ModelForm):
                 if p1.sex == 'female':
                     data[team], data[team + '_double'] = data[team + '_double'], data[team]
 
-        logger.error('Game ID: {0} Players: {1}'.format(game.id, str(data)))
+        logger.debug('Game ID: {0} Players: {1}'.format(game.id, str(data)))
 
         super(GameLineUpForm, self).__init__(initial=data, *args, **kwargs)
 
@@ -153,11 +153,6 @@ class GameLineUpForm(forms.ModelForm):
             team_players_team_a = TeamPlayerAssociation.objects.filter(team=teams[0], start_association=start_date, end_association=end_date)
             team_players_team_b = TeamPlayerAssociation.objects.filter(team=teams[1], start_association=start_date, end_association=end_date)
 
-            # sex_male_team_a = Player.objects.filter(team__teamplayerassociation__in=team_players_team_a, sex='male')
-            # sex_female_team_a = Player.objects.filter(team__teamplayerassociation__in=team_players_team_a, sex='female')
-            # sex_male_team_b = Player.objects.filter(team__teamplayerassociation__in=team_players_team_b, sex='male')
-            # sex_female_team_b = Player.objects.filter(team__teamplayerassociation__in=team_players_team_b, sex='female')
-
             sex_male_team_a = teams[0].players.filter(sex='male')
             sex_female_team_a = teams[0].players.filter(sex='female')
             sex_male_team_b = teams[1].players.filter(sex='male')
@@ -166,7 +161,7 @@ class GameLineUpForm(forms.ModelForm):
             self.fields['player_b'].required = False
             self.fields['player_a_double'].required = False
             self.fields['player_b_double'].required = False
-            # if
+            # if it is not a double or mixed we can ignore this result
             if 'double' not in game.game_type and game.game_type != 'mixed':
                 self.fields['player_a_double'].widget = HiddenInput()
                 self.fields['player_b_double'].widget = HiddenInput()
@@ -194,6 +189,7 @@ class GameLineUpForm(forms.ModelForm):
         game = Game.objects.filter(id=self.instance.id).first()
         if game is None:
             return True
+        # first player has to be set in any case
         if 'player_a' not in self.cleaned_data:
             return False
         if 'player_b' not in self.cleaned_data:
@@ -204,16 +200,22 @@ class GameLineUpForm(forms.ModelForm):
         player_a_double = self.cleaned_data.get('player_a_double', None)
         player_b_double = self.cleaned_data.get('player_b_double', None)
 
+        # first player has to be set
         if player_a is None:
             return False
         if player_b is None:
             return False
 
         if 'double' in game.game_type or game.game_type == 'mixed':
+            # if it is a double ..
+
+            # .. second player has to be set
             if player_a_double is None:
                 return False
             if player_b_double is None:
                 return False
+
+            # .. players should not be the same
             if player_a == player_a_double:
                 return False
             if player_b == player_b_double:
