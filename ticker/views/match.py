@@ -33,6 +33,7 @@ def format_json(match):
             tmp_dict_game['field'] = alloc.field.id
 
         result['games'].append(tmp_dict_game)
+        result['current_set'] = game.get_current_set()
     return result
 
 
