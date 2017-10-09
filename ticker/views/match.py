@@ -20,7 +20,8 @@ def format_json(match):
         tmp_dict_game = dict(id=game.id,
                              name=game.name,
                              player_a=format_players(game.player_a),
-                             player_b=format_players(game.player_b))
+                             player_b=format_players(game.player_b),
+                             current_set=game.current_set)
         tmp_dict_game['sets'] = []
         for set in game.get_set_objects():
             tmp_dict_game['sets'].append(
@@ -33,7 +34,6 @@ def format_json(match):
             tmp_dict_game['field'] = alloc.field.id
 
         result['games'].append(tmp_dict_game)
-        result['current_set'] = game.get_current_set()
     return result
 
 
