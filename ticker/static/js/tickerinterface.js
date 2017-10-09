@@ -134,8 +134,8 @@ $(document).ready(function () {
 
                     // update the current set
                     var current_set = item['current_set'];
-                    $('#field_' + item['field'] + '_current_set_team_a').html(items['sets'][current_set-1][2][0]);
-                    $('#field_' + item['field'] + '_current_set_team_b').html(items['sets'][current_set-1][2][1]);
+                    $('#field_' + item['field'] + '_current_set_team_a').html(item['sets'][current_set-1][2][0]);
+                    $('#field_' + item['field'] + '_current_set_team_b').html(item['sets'][current_set-1][2][1]);
                 }
             });
         })
