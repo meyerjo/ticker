@@ -132,6 +132,10 @@ $(document).ready(function () {
                     //}
                     $('#score_game_' + item['id']).html(result_string);
 
+                    // update the current set
+                    var current_set = item['current_set'];
+                    $('#field_' + item['field'] + '_current_set_team_a').html(items['sets'][current_set-1][2][0]);
+                    $('#field_' + item['field'] + '_current_set_team_b').html(items['sets'][current_set-1][2][1]);
                 }
             });
         })
