@@ -93,6 +93,7 @@ $(document).ready(function () {
     function update_score_for_fields_without_token() {
         if (TICKER_UPDATE_URL === undefined) {
             console.log('Update does not work if the update url is not defined')
+            return
         }
 
         var elements = $('input[name^="has_token_"]');
@@ -115,16 +116,22 @@ $(document).ready(function () {
             }
             if (('games' in obj) == false) {
                 console.log('Games field has to be in the objs')
+                return
             }
             $(obj['games']).each(function (i, item) {
                 if (item['field'] != -1) {
                     var elements = $('input[name="has_token_' + item['field'] + '"]');
-                    if ($(elements).val() == 'True') {
+                    var result_string = '';
+                    //if ($(elements).val() == 'True') {
                         $(item['sets']).each(function(j, set_item) {
                            $('#field_' + item['field'] + '_set_' + set_item[1] + '_team_a').html(set_item[2][0]);
                            $('#field_' + item['field'] + '_set_' + set_item[1] + '_team_b').html(set_item[2][1]);
+
+                           result_string += set_item[2][0] + ':' + set_item[2][1] + ' ';
                         });
-                    }
+                    //}
+                    $('#score_game_' + item['id']).html(result_string);
+
                 }
             });
         })
@@ -132,4 +139,4 @@ $(document).ready(function () {
 
     setInterval(update_score_for_fields_without_token, 5000);
 
-})
+});
