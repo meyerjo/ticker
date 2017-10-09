@@ -56,66 +56,7 @@
                                     {% csrf_token %}
                                     {% if field.get_game %}
                                         {% with game=field.get_game %}
-                                            <div class="col-sm-6 player">
-                                                {{ game.player_a|format_players|safe }}
-                                            </div>
-                                            <div class="col-sm-6 player">
-                                                {{ game.player_b|format_players|safe }}
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-4">
-                                                    <button type="submit" class="btn btn-primary" name="team_a" value="+"
-                                                            {% if field.has_token %} disabled {% endif %}>
-                                                        +</button>
-                                                    <button type="submit" class="btn btn-primary" name="team_a" value="-"
-                                                            {% if field.has_token %} disabled {% endif %}>
-                                                        -</button>
-                                                </div>
-                                                <div class="col-sm-1 setscore" id="field_{{ field.id }}_current_set_team_a">
-                                                    {{ game.get_current_set.get_score.0 }}
-                                                </div>
-                                                <div class="col-sm-2" id="field_{{ field.id }}_current_set_label">
-                                                    Satz {{ game.get_current_set.set_number }}
-                                                    {% if field.has_token %}
-                                                        <button type="button" class="btn btn-default" data-container="body" data-toggle="popover"
-                                                                data-placement="top" data-content="Der aktuelle Satz wird nicht aktualisiert, solange der Token aktiv ist. Die Ergebnisse unten sind stets aktuell.">
-                                                            <i class="fa fa-info-circle"></i>
-                                                        </button>
-                                                    {% endif %}
-                                                </div>
-                                                <div class="col-sm-1 setscore" id="field_{{ field.id }}_current_set_team_b">
-                                                    {{ game.get_current_set.get_score.1 }}
-                                                </div>
-                                                <div class="col-sm-4">
-                                                    <button type="submit" class="btn btn-primary" name="team_b" value="+"
-                                                            {% if field.has_token %} disabled {% endif %}>
-                                                        +
-                                                    </button>
-                                                    <button type="submit" class="btn btn-primary" name="team_b" value="-"
-                                                            {% if field.has_token %} disabled {% endif %}>
-                                                        -
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div {% if game.get_current_set|finished_set:match %}class="row"
-                                                 {% else %}class="row hidden"{% endif %} id="field_{{ field.id }}_next_set">
-                                                <div class="col-sm-12" style="text-align: center">
-                                                    <button type="submit" class="btn btn-primary"
-                                                            name="switch_set" value="True"
-                                                            {% if field.has_token %} disabled {% endif %}>
-                                                        Naechster Satz
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            {% for set in game.get_set_objects %}
-                                                <div class="row set {{ set|is_current_set:game }}">
-                                                    {% with score=set.get_score %}
-                                                        <div class="col-sm-5 setscore" id="field_{{ field.id }}_set_{{ forloop.counter }}_team_a">{{ score.0 }}</div>
-                                                        <div class="col-sm-2">Satz {{ set.set_number }}</div>
-                                                        <div class="col-sm-5 setscore" id="field_{{ field.id }}_set_{{ forloop.counter }}_team_b">{{ score.1 }}</div>
-                                                    {% endwith %}
-                                                </div>
-                                            {% endfor %}
+                                            {% include 'partials/tickerinterface-field.html' %}
                                         {% endwith %}
                                     {% endif %}
                                 </form>
@@ -209,60 +150,6 @@
                                 {% endif %}
                             {% endwith %}
                         {% endfor %}
-                        {#                        {% for game in match.get_all_games %}#}
-                        {#                            <tr id="row_{{ game.id }}">#}
-                        {#                                <td>{{ game.id }} <input type="hidden" name="game_id" value="{{ game.id }}"/> </td>#}
-                        {#                                <td>{{ game.name }}</td>#}
-                        {#                                <td>#}
-                        {#                                    <select title="Erster Spieler" name="player_a_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>#}
-                        {#                                        {% for player in game|get_players:"1,a" %}#}
-                        {#                                            <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>#}
-                        {#                                        {% endfor %}#}
-                        {#                                    </select>#}
-                        {#                                    {% if game.game_type|is_in:"single" == 0 %}#}
-                        {#                                        <select title="Zweiter Spieler" name="player_a_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>#}
-                        {#                                            {% for player in game|get_players:"2,a" %}#}
-                        {#                                                <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>#}
-                        {#                                            {% endfor %}#}
-                        {#                                        </select>#}
-                        {#                                    {% endif %}#}
-                        {#                                </td>#}
-                        {#                                <td>#}
-                        {#                                    <select title="Erster Spieler" name="player_b_one_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>#}
-                        {#                                        {% for player in game|get_players:"1,b" %}#}
-                        {#                                            <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>#}
-                        {#                                        {% endfor %}#}
-                        {#                                    </select>#}
-                        {#                                    {% if game.game_type|is_in:"single" == 0 %}#}
-                        {#                                        <select title="Zweiter Spieler" name="player_b_two_{{ game.id }}" {% if match.has_lineup %} disabled{% endif %}>#}
-                        {#                                            {% for player in game|get_players:"2,b" %}#}
-                        {#                                                <option value="{{ player.0 }}" {{ player.2|is_selected }}>{{ player.1 }}</option>#}
-                        {#                                            {% endfor %}#}
-                        {#                                        </select>#}
-                        {#                                    {% endif %}#}
-                        {#                                </td>#}
-                        {#                                <td id="score_game_{{ game.id }}">{{ game.get_sets }}</td>#}
-                        {#                                <td>#}
-                        {#                                    {% for field in match.get_fields %}#}
-                        {#                                        {% with field_active=field|field_active:game %}#}
-                        {#                                            {% if field_active == 'active' %}#}
-                        {#                                                <a href="{% url 'remove_game_to_field' game.id field.id '' %}"#}
-                        {#                                                   class="fieldname {{ field_active }}">{{ forloop.counter }}</a>#}
-                        {#                                            {% else %}#}
-                        {#                                                <a href="{% url 'assign_game_to_field' game.id field.id '' %}"#}
-                        {#                                                   class="fieldname {{ field_active }}">{{ forloop.counter }}</a>#}
-                        {#                                            {% endif %}#}
-                        {#                                        {% endwith %}#}
-                        {#                                    {% endfor %}#}
-                        {#                                </td>#}
-                        {#                                <td>#}
-                        {#                                    <a href="{% url 'manage_game' game.id %}">Edit</a>#}
-                        {#                                </td>#}
-                        {#                                <td>#}
-                        {#                                    <a target="_blank" href="{% url 'export_game' game.id %}">Export Game</a>#}
-                        {#                                </td>#}
-                        {#                            </tr>#}
-                        {#                        {% endfor %}#}
                         <tr>
                             <td colspan="2"></td>
                             <td colspan="2">
