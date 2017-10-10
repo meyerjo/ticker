@@ -92,18 +92,18 @@ $(document).ready(function () {
 
     function update_score_for_fields_without_token() {
         if (TICKER_UPDATE_URL === undefined) {
-            console.log('Update does not work if the update url is not defined')
+            console.log('Update does not work if the update url is not defined');
             return
         }
 
         var elements = $('input[name^="has_token_"]');
         var fields_with_token = [];
         $(elements).each(function(i, item) {
-           if (item.value == 'True') {
-               var tmp_name = item.name;
-               var field_id = tmp_name.substr(tmp_name.indexOf('has_token_') + 'has_token_'.length);
-               fields_with_token.push(field_id)
-           }
+            if (item.value == 'True') {
+                var tmp_name = item.name;
+                var field_id = tmp_name.substr(tmp_name.indexOf('has_token_') + 'has_token_'.length);
+                fields_with_token.push(field_id)
+            }
         });
         $.ajax({
             url: TICKER_UPDATE_URL,
@@ -114,31 +114,35 @@ $(document).ready(function () {
             } else {
                 var obj = $.parseJSON(data);
             }
-            if (('games' in obj) == false) {
+            // if games is empty we return it
+            if (('games' in obj) === false) {
                 console.log('Games field has to be in the objs')
                 return
             }
             $(obj['games']).each(function (i, item) {
-                if (item['field'] != -1) {
+                if (('field' in item) === false) {
+                    console.log('Key: "field" is missing in item: ' + item)
+                }
+                else if (item['field'] !== -1) {
                     var elements = $('input[name="has_token_' + item['field'] + '"]');
                     var result_string = '';
-                    //if ($(elements).val() == 'True') {
-                        $(item['sets']).each(function(j, set_item) {
-                           $('#field_' + item['field'] + '_set_' + set_item[1] + '_team_a').html(set_item[2][0]);
-                           $('#field_' + item['field'] + '_set_' + set_item[1] + '_team_b').html(set_item[2][1]);
+                    $(item['sets']).each(function(j, set_item) {
+                        // update the fields
+                        $('#field_' + item['field'] + '_set_' + set_item[1] + '_team_a').html(set_item[2][0]);
+                        $('#field_' + item['field'] + '_set_' + set_item[1] + '_team_b').html(set_item[2][1]);
 
-                           result_string += set_item[2][0] + ':' + set_item[2][1] + ' ';
-                        });
-                    //}
+                        // create the result string
+                        result_string += set_item[2][0] + ':' + set_item[2][1] + ' ';
+                    });
+                    // write string to field
                     $('#score_game_' + item['id']).html(result_string);
-
                     // update the current set
                     var current_set = item['current_set'];
                     $('#field_' + item['field'] + '_current_set_team_a').html(item['sets'][current_set-1][2][0]);
                     $('#field_' + item['field'] + '_current_set_team_b').html(item['sets'][current_set-1][2][1]);
                 }
             });
-        })
+        });
     }
 
     setInterval(update_score_for_fields_without_token, 5000);
