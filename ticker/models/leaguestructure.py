@@ -30,12 +30,13 @@ class League(models.Model):
     def league_matches_by_name(name):
         current_season = Season.get_current_season()
         print(current_season)
+        print(name)
         league = League.objects.filter(name=name, associated_season=current_season).first()
         print(league)
         if league is None:
             return None, None, None
         last_week = timezone.now() - timedelta(days=7)
-        matches = league.matches.filter(match_time__gte=last_week).order_by('match_time')
+        matches = league.matches.all().filter(match_time__gte=last_week).order_by('match_time')
         matches_today = []
         matches_not_today = []
         if matches is not None:
@@ -103,7 +104,7 @@ class Season(models.Model):
 
     @staticmethod
     def get_current_season():
-        return Season.objects.filter(start_date__gte=timezone.now(), end_date__lte=timezone.now())
+        return Season.objects.filter(start_date__lte=timezone.now(), end_date__gte=timezone.now()).first()
 
     def season_is_on(self):
         now_date = timezone.now()

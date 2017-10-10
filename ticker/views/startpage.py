@@ -16,7 +16,6 @@ from django.utils import timezone
 #@cache_page(15*60)
 def start_page(request):
     league_name = 'Bundesliga'
-    print(league_name)
     league = League.objects.filter(name=league_name).first()
     matches, matches_today, matches_not_today = League.league_matches_by_name(league_name)
 
