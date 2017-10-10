@@ -13,16 +13,18 @@ from datetime import timedelta
 from django.utils import timezone
 
 
-@cache_page(15*60)
+#@cache_page(15*60)
 def start_page(request):
-    league = League.objects.filter(name='Bundesliga').first()
-    matches, matches_today, matches_not_today = League.league_matches_by_name('Bundesliga')
+    league_name = 'Bundesliga'
+    print(league_name)
+    league = League.objects.filter(name=league_name).first()
+    matches, matches_today, matches_not_today = League.league_matches_by_name(league_name)
 
     context = dict(matches=matches_not_today, matches_today=matches_today, league=league)
     return render(request, 'index.html', context)
 
 
-@cache_page(15*60)
+#@cache_page(15*60)
 def start_page_leagues(request, league_name):
     league = League.objects.filter(name=league_name).first()
     matches, matches_today, matches_not_today = League.league_matches_by_name(league_name)
