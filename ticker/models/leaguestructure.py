@@ -28,7 +28,8 @@ class League(models.Model):
 
     @staticmethod
     def league_matches_by_name(name):
-        league = League.objects.filter(name=name).first()
+        current_season = Season.get_current_season()
+        league = League.objects.filter(name=name, associated_season=current_season).first()
         if league is None:
             return None, None, None
         last_week = timezone.now() - timedelta(days=7)
