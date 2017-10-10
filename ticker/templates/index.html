@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
+    {% if league %}
     <div class="container">
         <div class="row">
             <h2>Live-Ticker: {{ league.get_name }}</h2>
@@ -56,6 +57,11 @@
             </div>
         </div>
     </div>
+    {% else %}
+        <div class="container">
+            <h1>Liga existiert nicht</h1>
+        </div>
+    {% endif %}
     <footer class="footer">
         <div class="container">
             <a href="{% url 'impressum' %}">Impressum</a>

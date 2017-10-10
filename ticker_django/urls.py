@@ -20,7 +20,7 @@ from django.views.generic import RedirectView
 
 import ticker
 from ticker.views.offline_views import offline_appcache
-from ticker.views.startpage import start_page
+from ticker.views.startpage import start_page, start_page_leagues, start_page_leagues_json
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -29,6 +29,8 @@ urlpatterns = [
     url(r'^offline.appcache$', offline_appcache),
     url(r'^simple/?$', RedirectView.as_view(url='/ticker/manage/ticker/simple/login/', permanent=True)),
     url(r'^$', start_page),
+    url(r'^l/([^/]+)/$', start_page_leagues, name='start_page_leagues'),
+    url(r'^l/([^/]+)/json/?$', start_page_leagues_json, name='start_page_leagues')
 ]
 
 # handler404 = 'ticker.views.startpage.error_404_view'

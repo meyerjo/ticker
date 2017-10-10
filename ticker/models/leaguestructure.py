@@ -1,5 +1,9 @@
+from datetime import timedelta
+
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
+from django.utils.timezone import now
 
 from ticker.models.matchstructure import Match
 from ticker.models.player_clubs import Team
@@ -20,6 +24,21 @@ class League(models.Model):
                     continue
 
         pass
+
+
+    @staticmethod
+    def league_matches_by_name(name):
+        league = League.objects.filter(name=name).first()
+        if league is None:
+            return None
+        last_week = timezone.now() - timedelta(days=7)
+        matches = league.matches.filter(match_time__gte=last_week).order_by('match_time')
+        matches_today = []
+        matches_not_today = []
+        if matches is not None:
+            matches_today = matches.filter(match_time__date=now().date())
+            matches_not_today = matches.filter(~Q(match_time__date=now().date()))
+        return matches, matches_today, matches_not_today
 
     def add_team(self, team):
         leagues = League.objects.filter(teams__in=[team]).first()
@@ -78,6 +97,10 @@ class Season(models.Model):
         return Season.objects.filter(
             active=True
         )
+
+    @staticmethod
+    def get_current_season():
+        return Season.objects.filter(start_date__gte=timezone.now(), end_date__lte=timezone.now())
 
     def season_is_on(self):
         now_date = timezone.now()
