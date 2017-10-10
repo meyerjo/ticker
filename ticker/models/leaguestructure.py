@@ -30,7 +30,7 @@ class League(models.Model):
     def league_matches_by_name(name):
         league = League.objects.filter(name=name).first()
         if league is None:
-            return None
+            return None, None, None
         last_week = timezone.now() - timedelta(days=7)
         matches = league.matches.filter(match_time__gte=last_week).order_by('match_time')
         matches_today = []

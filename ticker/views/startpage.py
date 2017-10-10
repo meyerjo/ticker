@@ -34,7 +34,10 @@ def start_page_leagues(request, league_name):
 @cache_page(15*60)
 def start_page_leagues_json(request, league_name):
     matches, matches_today, matches_not_today = League.league_matches_by_name(league_name)
-    matches_array = [dict(id=m.id, team_a=m.team_a.get_name(), team_b=m.team_b.get_name(), match_time=m.match_time.timestamp()) for m in matches]
+    if matches is None:
+        matches_array = []
+    else:
+        matches_array = [dict(id=m.id, team_a=m.team_a.get_name(), team_b=m.team_b.get_name(), match_time=m.match_time.timestamp()) for m in matches]
     return HttpResponse(json.dumps(matches_array), content_type='application/json')
 
 
