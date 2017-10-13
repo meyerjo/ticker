@@ -30,7 +30,7 @@ urlpatterns = [
     url(r'^simple/?$', RedirectView.as_view(url='/ticker/manage/ticker/simple/login/', permanent=True)),
     url(r'^$', start_page),
     url(r'^l/([^/]+)/$', start_page_leagues, name='start_page_leagues'),
-    url(r'^l/([^/]+)/json/?$', start_page_leagues_json, name='start_page_leagues')
+    url(r'^l/([^/]+)/json/?$', start_page_leagues_json, name='start_page_leagues_json')
 ]
 
 # handler404 = 'ticker.views.startpage.error_404_view'
