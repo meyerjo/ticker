@@ -32,14 +32,15 @@ class League(models.Model):
         league = League.objects.filter(name=name, associated_season=current_season).first()
         if league is None:
             return None, None, None
+        # get the matches
         last_week = timezone.now() - timedelta(days=7)
-        league_matches = league.matches.all().values_list('id')
-        matches = Match.objects.filter(match_time__date__gte=last_week, id__in=league_matches)
+        matches = league.matches.filter(match_time__date__gte=last_week)
+        # filter the matches
         matches_today = []
         matches_not_today = []
         if matches is not None:
-            matches_today = matches.filter(match_time__date=now().date())
-            matches_not_today = matches.filter(~Q(match_time__date=now().date()))
+            matches_today = matches.filter(match_time__date=now().date()).order_by('match_time')
+            matches_not_today = matches.filter(~Q(match_time__date=now().date())).order_by('match_time')
         return matches, matches_today, matches_not_today
 
     def add_team(self, team):
