@@ -16,6 +16,13 @@ class League(models.Model):
 
     matches = models.ManyToManyField(Match)
 
+    @staticmethod
+    def get_other_leagues(league):
+        if league.associated_season is None:
+            return []
+        season = league.associated_season
+        return League.objects.filter(associated_season=season).filter(~Q(name=league.name))
+
     def generate_matches(self):
         teams = self.teams.all()
         for team in teams:
@@ -24,7 +31,6 @@ class League(models.Model):
                     continue
 
         pass
-
 
     @staticmethod
     def league_matches_by_name(name):
