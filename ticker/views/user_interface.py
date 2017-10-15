@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 from django.contrib import messages
@@ -15,9 +16,10 @@ from django.utils.timezone import now
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
+from ticker.forms.field_team import FieldTeamForm
 from ticker.forms.matchplan import MatchForm, GameLineUpForm, GameLineUpFormSet
 from ticker.forms.presentation import PresentationForm, SlideForm
-from ticker.models import Club, Team, Player, Season, League
+from ticker.models import Club, Team, Player, Season, League, PlayingField
 from ticker.models import ColorDefinition
 from ticker.models import DefinableColor
 from ticker.models import FieldAllocation
@@ -58,7 +60,23 @@ def manage_players_club(request, clubid):
 @login_required
 def manage_fields(request, clubid):
     club = Club.objects.get(id=int(clubid))
-    return render(request, 'user/manage_fields.html', dict(club=club))
+    form_field = FieldTeamForm(club, initial={'field_name': ''})
+    logger = logging.getLogger(__name__)
+
+    if request.POST:
+        form_field = FieldTeamForm(club, request.POST, initial={'field_name': ''})
+        if form_field.has_changed() and form_field.is_valid():
+            try:
+                with transaction.atomic():
+                    field = PlayingField.objects.create(field_name=form_field.cleaned_data['field_name'])
+                    teams = Team.objects.filter(id__in=form_field.cleaned_data['teams'])
+                    club.fields.add(field)
+                    for team in teams:
+                        team.fields.add(field)
+                form_field = FieldTeamForm(club, initial={'field_name': ''})
+            except BaseException as e:
+                logger.error(str(e))
+    return render(request, 'user/manage_fields.html', dict(club=club, form=form_field))
 
 
 @login_required

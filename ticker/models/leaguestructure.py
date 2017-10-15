@@ -23,15 +23,6 @@ class League(models.Model):
         season = league.associated_season
         return League.objects.filter(associated_season=season).filter(~Q(name=league.name))
 
-    def generate_matches(self):
-        teams = self.teams.all()
-        for team in teams:
-            for team_b in teams:
-                if team.id == team_b.id:
-                    continue
-
-        pass
-
     @staticmethod
     def league_matches_by_name(name):
         current_season = Season.get_current_season()
@@ -40,7 +31,7 @@ class League(models.Model):
             return None, None, None
         # get the matches
         last_week = timezone.now() - timedelta(days=7)
-        matches = league.matches.filter(match_time__date__gte=last_week)
+        matches = league.matches.filter(match_time__date__gte=last_week, canceled=False)
         # filter the matches
         matches_today = []
         matches_not_today = []
@@ -79,9 +70,7 @@ class League(models.Model):
         teams_not_in_league = Team.objects.exclude(id__in=self.teams.values_list('id', flat=True))
         result = []
         for team in self.teams.all():
-            result.append(
-                (team.id, team.get_name(), True)
-            )
+            result.append((team.id, team.get_name(), True))
         for team in teams_not_in_league:
             result.append((team.id, team.get_name(), False))
         return result
@@ -103,15 +92,12 @@ class Season(models.Model):
 
     @staticmethod
     def get_seasons():
-        return Season.objects.filter(
-            active=True
-        )
+        return Season.objects.filter(active=True)
 
     @staticmethod
     def get_current_season():
         today = timezone.now()
-        return Season.objects.filter(start_date__lte=today,
-                                     end_date__gte=today).first()
+        return Season.objects.filter(start_date__lte=today, end_date__gte=today, active=True).first()
 
     def season_is_on(self):
         now_date = timezone.now()

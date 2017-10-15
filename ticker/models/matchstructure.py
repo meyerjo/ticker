@@ -279,6 +279,7 @@ class Match(models.Model):
              update_fields=None):
         super(Match, self).save(force_insert, force_update, using, update_fields)
         if self.games.count() == 0:
+            # TODO: get the games from the rule set
             games_dict = [
                 dict(games_name='1. Herreneinzel', games_type='single'),
                 dict(games_name='2. Herreneinzel', games_type='single'),
@@ -295,7 +296,6 @@ class Match(models.Model):
                     g.save()
                     self.games.add(g)
 
-
     @staticmethod
     def all_matches(dt=None):
         matches = Match.objects.filter(canceled=False)
@@ -303,7 +303,6 @@ class Match(models.Model):
             matches = matches.filter(match_time__gte=dt)
         matches = matches.order_by('match_time')
         return matches
-
 
     @staticmethod
     def get_matches():

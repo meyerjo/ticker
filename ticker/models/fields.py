@@ -26,18 +26,13 @@ class PlayingField(models.Model):
         return Team.objects.filter(fields__in=[self])
 
     def has_token(self):
-        tokens = PresentationToken.objects.filter(
-            field=self,
-            is_used=False,
-        )
+        tokens = PresentationToken.objects.filter(field=self, is_used=False,)
         return tokens.count() != 0
 
     def get_token(self):
-        tokens = PresentationToken.objects.filter(
-            field=self,
-            is_used=False,
-        )
+        tokens = PresentationToken.objects.filter(field=self, is_used=False,)
         return tokens.first()
+
 
 class FieldAllocation(models.Model):
     field = models.ForeignKey(PlayingField, CASCADE)
@@ -76,8 +71,5 @@ class PresentationToken(models.Model):
 
     @staticmethod
     def is_valid(token):
-        t = PresentationToken.objects.filter(
-            token=token,
-            is_used=False
-        )
+        t = PresentationToken.objects.filter(token=token, is_used=False)
         return True if t.first() is not None else False

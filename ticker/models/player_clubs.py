@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import CASCADE
 
+
+
 class Club(models.Model):
     club_name = models.CharField(max_length=255)
     fields = models.ManyToManyField('PlayingField', blank=True)
@@ -28,7 +30,10 @@ class Club(models.Model):
         return Player.objects.filter(teamplayerassociation__team__parent_club=self)[:9]
 
     def get_fields(self):
-        return self.fields.all()
+        from ticker.models import PlayingField
+        field_ids = PlayingField.objects.filter(team__parent_club=self).values_list('id', flat=True).distinct()
+        fields = PlayingField.objects.filter(id__in=field_ids)
+        return fields
 
     def __str__(self):
         return self.get_name()
@@ -47,10 +52,7 @@ class Player(models.Model):
         return '{0} {1}'.format(self.prename, self.lastname)
 
     def __str__(self):
-        return '{0} {1}'.format(
-            self.prename,
-            self.lastname
-        )
+        return '{0} {1}'.format(self.prename, self.lastname)
 
 
 class Team(models.Model):
