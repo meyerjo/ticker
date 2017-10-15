@@ -167,7 +167,12 @@ def get_club(user):
 @register.filter
 def get_leagues_club(user):
     club = get_club(user)
-    leagues = League.objects.filter(teams__parent_club=club).distinct()
+    if club is None and user.is_superuser:
+        from ticker.models import Season
+        season = Season.get_current_season()
+        leagues = League.objects.filter(associated_season=season)
+    else:
+        leagues = League.objects.filter(teams__parent_club=club).distinct()
     return leagues
 
 
