@@ -2,14 +2,12 @@ import logging
 from datetime import timedelta
 
 from django.contrib import messages
-from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import transaction
 from django.db.models import CharField
 from django.db.models import Value
 from django.forms import formset_factory, modelformset_factory
-from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.timezone import now
@@ -22,7 +20,6 @@ from ticker.forms.presentation import PresentationForm, SlideForm
 from ticker.models import Club, Team, Player, Season, League, PlayingField
 from ticker.models import ColorDefinition
 from ticker.models import DefinableColor
-from ticker.models import FieldAllocation
 from ticker.models import Game
 from ticker.models import Match
 from ticker.models import Profile
