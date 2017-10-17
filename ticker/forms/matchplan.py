@@ -151,6 +151,7 @@ class GameLineUpForm(forms.ModelForm):
 
             now_date = datetime.date.today()
 
+            # get the players id which are associated to the team for the season. Make sure that they are distinct()
             team_players_team_a = TeamPlayerAssociation.objects.\
                 filter(team=teams[0], start_association__lte=now_date, end_association__gte=now_date).\
                 values_list('player__id', flat=True).distinct()
@@ -163,12 +164,13 @@ class GameLineUpForm(forms.ModelForm):
             # sex_female_team_a = teams[0].players.filter(sex='female').order_by('lastname')
             # sex_male_team_b = teams[1].players.filter(sex='male').order_by('lastname')
             # sex_female_team_b = teams[1].players.filter(sex='female').order_by('lastname')
-
+            # filter the players
             sex_male_team_a = Player.objects.filter(id__in=team_players_team_a, sex='male').order_by('lastname')
             sex_female_team_a = Player.objects.filter(id__in=team_players_team_a, sex='female').order_by('lastname')
             sex_male_team_b = Player.objects.filter(id__in=team_players_team_b, sex='male').order_by('lastname')
             sex_female_team_b = Player.objects.filter(id__in=team_players_team_b, sex='female').order_by('lastname')
 
+            # assign the players to the fields
             self.fields['player_b'].required = False
             self.fields['player_a_double'].required = False
             self.fields['player_b_double'].required = False
