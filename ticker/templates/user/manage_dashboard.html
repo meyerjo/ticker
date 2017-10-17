@@ -17,6 +17,7 @@
         </div>
         {% with associated_club=request.user|get_club %}
             <div class="row">
+                {% if associated_club %}
                 <div class="col-sm-3">
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -34,6 +35,7 @@
                         </ul>
                     </div>
                 </div>
+                {% endif %}
                 <div class="col-sm-3">
                     <div class="panel panel-default">
                         <div class="panel-heading">Ligen</div>
