@@ -112,11 +112,13 @@ class GameLineUpForm(forms.ModelForm):
             return
 
         data = dict()
+        # get the players associated to the game
         players_a = game.player_a.all()
         players_b = game.player_b.all()
         logger.debug('Game ID: {0} Players Team A: {1}'.format(game.id, str(players_a)))
         logger.debug('Game ID: {0} Players Team B: {1}'.format(game.id, str(players_b)))
 
+        # assign the players to the fields
         if len(players_a) >= 1:
             data['player_a'] = players_a[0].id
             if len(players_a) == 2:
@@ -140,12 +142,13 @@ class GameLineUpForm(forms.ModelForm):
                     data[team], data[team + '_double'] = data[team + '_double'], data[team]
 
         logger.debug('Game ID: {0} Players: {1}'.format(game.id, str(data)))
-
+        # construct the form
         super(GameLineUpForm, self).__init__(initial=data, *args, **kwargs)
 
         # get the teams
         teams = Team.objects.filter(team_a__games__in=[game]) | \
                 Team.objects.filter(team_b__games__in=[game])
+        # fill the form with the right players
         if game:
             import datetime
 
@@ -160,10 +163,6 @@ class GameLineUpForm(forms.ModelForm):
                 filter(team=teams[1], start_association__lte=now_date, end_association__gte=now_date).\
                 values_list('player__id', flat=True).distinct()
 
-            # sex_male_team_a = teams[0].players.filter(sex='male').order_by('lastname')
-            # sex_female_team_a = teams[0].players.filter(sex='female').order_by('lastname')
-            # sex_male_team_b = teams[1].players.filter(sex='male').order_by('lastname')
-            # sex_female_team_b = teams[1].players.filter(sex='female').order_by('lastname')
             # filter the players
             sex_male_team_a = Player.objects.filter(id__in=team_players_team_a, sex='male').order_by('lastname')
             sex_female_team_a = Player.objects.filter(id__in=team_players_team_a, sex='female').order_by('lastname')
