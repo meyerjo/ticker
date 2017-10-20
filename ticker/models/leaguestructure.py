@@ -31,7 +31,7 @@ class League(models.Model):
             return None, None, None
         # get the matches
         last_week = timezone.now() - timedelta(days=7)
-        matches = league.matches.filter(match_time__date__gte=last_week, canceled=False)
+        matches = league.matches.filter(match_time__date__gte=last_week, canceled=False, test_game=False)
         # filter the matches
         matches_today = []
         matches_not_today = []
