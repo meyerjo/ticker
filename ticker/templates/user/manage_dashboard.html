@@ -62,6 +62,9 @@
                                 {% for match in matches %}
                                     <li class="list-group-item">
                                         <h4 class="list-group-item-heading">
+                                            {% if match.test_game %}
+                                                <span style="background-color: lightgreen;">TEST-GAME</span>
+                                            {% endif %}
                                             {{ match.team_a }} - {{ match.team_b }}: {{ match.get_score.0 }}:{{ match.get_score.1 }}
                                         </h4>
                                         <p class="list-group-item-text">
