@@ -26,6 +26,9 @@
                             <div class="list-group-item-text">
                                 <div class="row">
                                     <div class="col-sm-3">
+                                        {% if match.test_game %}
+                                            <span style="color: red; width: 50px">TEST</span>
+                                        {% endif %}
                                         {{ match.match_time|date:"d.m.Y H:i" }}
                                     </div>
                                     <div class="col-sm-3">
