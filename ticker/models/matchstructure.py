@@ -274,6 +274,7 @@ class Match(models.Model):
     team_a = models.ForeignKey(Team, related_name='team_a')
     team_b = models.ForeignKey(Team, related_name='team_b')
     games = ManyToManyField(Game, blank=True)
+    test_game = models.BooleanField(default=False)
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
