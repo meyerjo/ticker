@@ -202,7 +202,7 @@ def bup_list(request):
         'team_names': team_names,
         'matches': matches,
         'courts': courts,
-        'league_key': '1BL-2016',  # Fixed for now, since this information is not captured in this application
+        'league_key': '1BL-2017',  # Fixed for now, since this information is not captured in this application
     }
     return HttpResponse(json.dumps(res), content_type='application/json')
 
