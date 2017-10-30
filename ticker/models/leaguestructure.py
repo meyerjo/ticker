@@ -13,6 +13,7 @@ class League(models.Model):
     name = models.CharField(max_length=255)
     associated_season = models.ForeignKey('Season')
     teams = models.ManyToManyField(Team)
+    league_key = models.CharField(max_length=255, default='')
 
     matches = models.ManyToManyField(Match)
 

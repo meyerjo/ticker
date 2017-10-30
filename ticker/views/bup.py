@@ -24,8 +24,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from ticker.models import FieldAllocation, Game, Match, PlayingField
-
+from ticker.models import FieldAllocation, Game, Match, PlayingField, League
 
 LOCAL_BUP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static', 'bup'))
 VALID_VERSION = re.compile(r'^[0-9]+\.[0-9]{1,2}\.[0-9]{1,2}\.[0-9A-Za-z.]+|dev$')
@@ -142,7 +141,6 @@ def _calc_match(m):
         'match_name': m.name,
         'match_id': 'jticker_m%s' % m.id,
         'jticker_match_id': m.id,
-        'counting': '5x11_15',
     }
 
     player_a = m.player_a.all()
@@ -180,6 +178,7 @@ def bup_list(request):
     tm = Match.objects.filter(id=tm_id).first()
     if tm is None:
         raise Http404('team match %s not found!' % tm_id)
+    league = League.objects.filter(matches__in=[tm]).first()
 
     team_names = [tm.team_a.get_name(), tm.team_b.get_name()]
     match_objs = tm.get_all_games()
@@ -202,7 +201,7 @@ def bup_list(request):
         'team_names': team_names,
         'matches': matches,
         'courts': courts,
-        'league_key': '1BL-2017',  # Fixed for now, since this information is not captured in this application
+        'league_key': league.league_key,  # Fixed for now, since this information is not captured in this application
     }
     return HttpResponse(json.dumps(res), content_type='application/json')
 
