@@ -167,9 +167,10 @@ def add_player(request):
                 p = Player.objects.create(prename=prename, lastname=lastname, sex=sex)
                 created = True
 
-            now_date = datetime.date.today()
-            start_date = datetime.date(year=now_date.year, month=8, day=1)
-            end_date = datetime.date(year=now_date.year + 1, month=7, day=31)
+
+            season = Season.get_current_season()
+            start_date = season.start_date
+            end_date = season.end_date
             if created:
                 p.save()
                 responses.append('CREATED')
@@ -178,7 +179,9 @@ def add_player(request):
             t.players.add(p)
             t.save()
 
-            team_assoc = TeamPlayerAssociation(team=t, player=p, start_association=start_date, end_association=end_date)
+            team_assoc = TeamPlayerAssociation(team=t, player=p,
+                                               start_association=start_date,
+                                               end_association=end_date)
             team_assoc.save()
     print(responses)
     if 'response_type' in request.POST:
