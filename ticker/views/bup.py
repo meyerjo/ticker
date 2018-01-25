@@ -24,7 +24,16 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from ticker.models import FieldAllocation, Game, Match, PlayingField, League
+from ticker.models import (
+    FieldAllocation,
+    Game,
+    League,
+    Match,
+    Player,
+    PlayingField,
+    Season,
+    TeamPlayerAssociation,
+)
 
 LOCAL_BUP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static', 'bup'))
 VALID_VERSION = re.compile(r'^[0-9]+\.[0-9]{1,2}\.[0-9]{1,2}\.[0-9A-Za-z.]+|dev$')
@@ -145,7 +154,7 @@ def _calc_match(m):
 
     player_a = m.player_a.all()
     player_b = m.player_b.all()
-    setup['is_doubles'] = len(player_a) == 2
+    setup['is_doubles'] = m.game_type not in ('single', 'womansingle')
     setup['teams'] = [{
         'players': [{
             'name': p.get_name(),
@@ -168,6 +177,15 @@ def _calc_match(m):
         res['presses_json'] = m.presses_json
 
     return res
+
+
+def _get_players(team):
+    return [{
+        'firstname': p.prename,
+        'lastname': p.lastname,
+        'name': p.get_name(),
+        'gender': 'm' if p.sex == 'male' else 'f',
+    } for p in team.get_players()]
 
 
 @login_required
@@ -203,7 +221,74 @@ def bup_list(request):
         'courts': courts,
         'league_key': league.league_key,
     }
+
+    if request.GET.get('all'):
+        res['all_players'] = [_get_players(tm.team_a), _get_players(tm.team_b)]
+
     return HttpResponse(json.dumps(res), content_type='application/json')
+
+
+def _select_players(season, team, available, playerspec_list):
+    assert isinstance(playerspec_list, list)
+
+    res = []
+    for pspec in playerspec_list:
+        firstname = pspec['firstname']
+        assert firstname
+        lastname = pspec['lastname']
+        assert lastname
+        assert pspec['gender']
+        sex = 'male' if pspec['gender'] == 'm' else 'female'
+
+        for a in available:
+            if (a.prename == firstname) and (a.lastname == lastname):
+                res.append(a)
+                break
+        else:
+            # Player at another team / club?
+            p = Player.objects.filter(prename=firstname, lastname=lastname, sex=sex).first()
+            if p is None:  # New player
+                p = Player.objects.create(prename=firstname, lastname=lastname, sex=sex)
+                p.save()
+            res.append(p)
+
+            team.players.add(p)
+            team.save()
+
+            team_assoc = TeamPlayerAssociation(
+                team=team, player=p,
+                start_association=season.start_date,
+                end_association=season.end_date)
+            team_assoc.save()
+
+    return res
+
+
+@login_required
+def bup_teamsetup(request):
+    tm_id = request.GET['tm_id']
+    assert re.match(r'^[0-9]+$', tm_id)
+
+    teamsetup = json.loads(request.POST['players_json'])
+    with transaction.atomic():
+        season = Season.get_current_season()
+
+        tm = Match.objects.filter(id=tm_id).first()
+        if tm is None:
+            raise Http404('teammatch %s not found!' % tm_id)
+
+        available_players = [tm.team_a.get_players(), tm.team_a.get_players()]
+
+        for m in tm.get_all_games():
+            ts = teamsetup[str(m.id)]
+            assert len(ts) == 2
+            m.player_a = _select_players(season, tm.team_a, available_players[0], ts[0])
+            m.player_b = _select_players(season, tm.team_b, available_players[1], ts[1])
+            m.save()
+
+    return HttpResponse(json.dumps({
+        'status': 'ok',
+    }), content_type='application/json')
 
 
 @login_required
