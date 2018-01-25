@@ -148,6 +148,7 @@ class GameLineUpForm(forms.ModelForm):
         # get the teams
         teams = Team.objects.filter(team_a__games__in=[game]) | \
                 Team.objects.filter(team_b__games__in=[game])
+        logger.error(str(teams))
         # fill the form with the right players
         if game:
             import datetime
