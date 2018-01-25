@@ -146,9 +146,9 @@ class GameLineUpForm(forms.ModelForm):
         super(GameLineUpForm, self).__init__(initial=data, *args, **kwargs)
 
         # get the teams
-        teams = Team.objects.filter(team_a__games__in=[game]) | \
-                Team.objects.filter(team_b__games__in=[game])
-        logger.error(str(teams))
+        team_a = Team.objects.filter(team_a__games__in=[game])
+        team_b = Team.objects.filter(team_b__games__in=[game])
+        teams = list(team_a) + list(team_b)
         # fill the form with the right players
         if game:
             import datetime
