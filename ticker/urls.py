@@ -7,7 +7,7 @@ from ticker.views.offline_views import offline_input, offline_score, offline_tea
 from ticker.views.presentation import presentation_view, score_display, team_display, display_dashboard
 from ticker.views.simple_ticker import simple_ticker_interface
 from ticker.views.simple_ticker import simple_ticker_login
-from ticker.views.bup import manage_bup_overview, manage_bup_download, manage_bup_switch, bup_list, bup_sync
+from ticker.views.bup import manage_bup_overview, manage_bup_download, manage_bup_switch, bup_list, bup_teamsetup, bup_sync
 from ticker.views.startpage import start_page, imprint, test
 from ticker.views.user_interface import *
 
@@ -34,6 +34,7 @@ urlpatterns = [
     url(r'^manage/bup/download$', manage_bup_download, name='manage_bup_download'),
     url(r'^manage/bup/switch$', manage_bup_switch, name='manage_bup_switch'),
     url(r'^manage/bup/list$', bup_list, name='bup_list'),
+    url(r'^manage/bup/teamsetup$', bup_teamsetup, name='bup_list'),
     url(r'^manage/bup/sync$', bup_sync, name='bup_sync'),
 
 
