@@ -7,3 +7,4 @@ mysqlclient
 gunicorn
 django-favicon
 django-js-reverse
+raven
