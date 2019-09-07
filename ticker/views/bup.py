@@ -179,13 +179,13 @@ def _calc_match(m):
     return res
 
 
-def _get_players(team):
+def _get_players(players):
     return [{
         'firstname': p.prename,
         'lastname': p.lastname,
         'name': p.get_name(),
         'gender': 'm' if p.sex == 'male' else 'f',
-    } for p in team.get_players()]
+    } for p in players]
 
 
 @login_required
@@ -223,7 +223,7 @@ def bup_list(request):
     }
 
     if request.GET.get('all'):
-        res['all_players'] = [_get_players(tm.team_a), _get_players(tm.team_b)]
+        res['all_players'] = [_get_players(tm.player_a.all()), _get_players(tm.player_a.all())]
 
     return HttpResponse(json.dumps(res), content_type='application/json')
 
