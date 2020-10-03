@@ -6,70 +6,66 @@
 
 {% block content %}
     {% if league %}
-    <div class="container">
-        <div class="row">
-            <h2>Live-Ticker: {{ league.get_name }}</h2>
-        </div>
-        <div class="row">
-            <div class="col-sm-6">
-                <h3>Heute</h3>
-                <ul class="list-group">
-                    {% if not matches_today|length_is:0 %}
-                        {% for match in matches_today %}
-                            <li class="list-group-item">
-                                <div class="row matchentry">
-                                    <a href="{% url 'match_ticker' match.id %}">
-                                        <div class="col-sm-12 matchtime">
-                                            {{ match.match_time|date:"G:i" }} Uhr
+        <div class="container">
+            <div class="row">
+                <h2>Live-Ticker: {{ league.get_name }}</h2>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <h3>Heute</h3>
+                    <ul class="list-group">
+                        {% if not matches_today|length_is:0 %}
+                            {% for match in matches_today %}
+                                <li class="list-group-item">
+                                    <div class="row matchentry">
+                                        <a href="{% url 'match_ticker' match.id %}">
+                                            <div class="col-sm-12 matchtime">
+                                                {{ match.match_time|date:"G:i" }} Uhr
+                                            </div>
+                                            <div class="col-sm-12 score">
+                                                {% with score=match.get_score %}
+                                                    {{ score.0 }}:{{ score.1 }}
+                                                {% endwith %}
+                                            </div>
+                                            <div class="col-sm-6 team">
+                                                {{ match.team_a.get_name }}
+                                            </div>
+                                            <div class="col-sm-6 team">
+                                                {{ match.team_b.get_name }}
+                                            </div>
+                                        </a>
+                                        <div class="col-sm-12" style="text-align: center; color:white">
+                                            <a href="{% url 'match_ticker' match.id %}" class="btn btn-success">Zum Live-Ticker</a>
                                         </div>
-                                        <div class="col-sm-12 score">
-                                            {% with score=match.get_score %}
-                                                {{ score.0 }}:{{ score.1 }}
-                                            {% endwith %}
-                                        </div>
-                                        <div class="col-sm-6 team">
-                                            {{ match.team_a.get_name }}
-                                        </div>
-                                        <div class="col-sm-6 team">
-                                            {{ match.team_b.get_name }}
-                                        </div>
-                                    </a>
-                                    <div class="col-sm-12" style="text-align: center; color:white">
-                                        <a href="{% url 'match_ticker' match.id %}" class="btn btn-success">Zum Live-Ticker</a>
                                     </div>
-                                </div>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <h4>Keine Spiele heute</h4>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-sm-6">
+                    <ul class="list-group">
+                        <li class="list-group-item"><b>Nächsten Spiele</b></li>
+                        {% for match in matches %}
+                            <li class="list-group-item">
+                                {{ match.match_time|date:"d.m.Y G:i" }}: {{ match.team_a.get_name }} - {{ match.team_b.get_name }}
                             </li>
                         {% endfor %}
-                    {% else %}
-                        <h4>Keine Spiele heute</h4>
-                    {% endif %}
-                </ul>
-            </div>
-            <div class="col-sm-6">
-                <ul class="list-group">
-                    <li class="list-group-item"><b>Nächsten Spiele</b></li>
-                    {% for match in matches %}
-                        <li class="list-group-item">
-                            {{ match.match_time|date:"d.m.Y G:i" }}: {{ match.team_a.get_name }} - {{ match.team_b.get_name }}
-                        </li>
-                    {% endfor %}
-                </ul>
-                {% if other_leagues %}
-                <ul class="list-group">
-                    <li class="list-group-item"><b>Andere Ligen</b></li>
-                    {% for league in other_leagues %}
-                        <li class="list-group-item">
-                            <a href="{% url 'start_page_leagues' league.name %}"><i class="fa fa-link" aria-hidden="true" style="margin-right: 10px;"></i>{{ league.name }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
+                    </ul>
+                    {% include 'partials/other_leagues_part.html' %}
+                </div>
             </div>
         </div>
-    </div>
     {% else %}
         <div class="container">
             <h1>Liga existiert nicht</h1>
+            <div class="row">
+                <div class="col-sm-12">
+                    {% include 'partials/other_leagues_part.html' %}
+                </div>
+            </div>
         </div>
     {% endif %}
     <footer class="footer">

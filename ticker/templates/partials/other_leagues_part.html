@@ -1,0 +1,10 @@
+{% if other_leagues %}
+    <ul class="list-group">
+        <li class="list-group-item"><b>Andere Ligen</b></li>
+        {% for league in other_leagues %}
+            <li class="list-group-item">
+                <a href="{% url 'start_page_leagues' league.name %}"><i class="fa fa-link" aria-hidden="true" style="margin-right: 10px;"></i>{{ league.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
