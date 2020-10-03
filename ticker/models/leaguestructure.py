@@ -18,11 +18,17 @@ class League(models.Model):
     matches = models.ManyToManyField(Match)
 
     @staticmethod
-    def get_other_leagues(league):
-        if league.associated_season is None:
+    def get_other_leagues(league=None):
+        """
+        Returns all leagues associated to the same season as the given one (except the given one)
+        :param league: League object, if None empty list is returned
+        :return:
+        """
+        if league is None or league.associated_season is None:
             return []
-        season = league.associated_season
-        return League.objects.filter(associated_season=season).filter(~Q(name=league.name))
+        # filter all leagues for this season except the given league
+        return League.objects.filter(associated_season=league.associated_season).filter(
+            ~Q(name=league.name))
 
     @staticmethod
     def league_matches_by_name(name):
