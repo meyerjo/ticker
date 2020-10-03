@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -6,25 +7,28 @@ from django.views.decorators.cache import cache_page
 
 from ticker.models import League, Season
 
+logger = logging.getLogger(__name__)
 
 @cache_page(5*60)
 def start_page(request):
     league_name = 'Bundesliga'
-    current_season = Season.get_current_season()
-    league = League.objects.filter(name=league_name, associated_season=current_season).first()
-    matches, matches_today, matches_not_today = League.league_matches_by_name(league_name)
-    other_leagues = League.get_other_leagues(league)
-
-    context = dict(matches=matches_not_today, matches_today=matches_today, league=league, other_leagues=other_leagues)
-    return render(request, 'index.html', context)
+    return start_page_leagues(request, league_name)
 
 
 @cache_page(15*60)
 def start_page_leagues(request, league_name):
     current_season = Season.get_current_season()
     league = League.objects.filter(name=league_name, associated_season=current_season).first()
-    matches, matches_today, matches_not_today = League.league_matches_by_name(league_name)
-    other_leagues = League.get_other_leagues(league)
+    try:
+        matches, matches_today, matches_not_today = League.league_matches_by_name(league_name)
+    except BaseException as e:
+        logger.error(str(e))
+        raise e
+    try:
+        other_leagues = League.get_other_leagues(league)
+    except BaseException as e:
+        logger.error(str(e))
+        raise e
 
     context = dict(matches=matches_not_today, matches_today=matches_today, league=league, other_leagues=other_leagues)
     return render(request, 'index.html', context)
