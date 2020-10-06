@@ -17,7 +17,6 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.generic import RedirectView
 
-import ticker
 from ticker.views.offline_views import offline_appcache
 from ticker.views.startpage import start_page, start_page_leagues, start_page_leagues_json
 
