@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import CASCADE
-
+from django.utils.timezone import now
 
 
 class Club(models.Model):
@@ -51,6 +51,11 @@ class Player(models.Model):
     def get_name(self):
         return '{0} {1}'.format(self.prename, self.lastname)
 
+    @staticmethod
+    def get_by_ids(ids):
+        return Player.objects.filter(id__in=ids)
+
+
     def __str__(self):
         return '{0} {1}'.format(self.prename, self.lastname)
 
@@ -72,7 +77,15 @@ class Team(models.Model):
         return self.team_name
 
     def get_players(self):
-        return self.players.all()
+        """
+        Retrieves all players for the team from the teamplayerassociations
+        :return:
+        """
+        # retrieve the associations
+        team_player_associations = TeamPlayerAssociation.get_by_team(self)
+        # retrieve the player ids
+        player_ids = team_player_associations.values_list('player__id', flat=True)
+        return Player.get_by_ids(player_ids)
 
     def get_other_teams(self):
         teams =  Team.objects.filter(parent_club=self.parent_club).exclude(id=self.id)
@@ -102,6 +115,18 @@ class TeamPlayerAssociation(models.Model):
 
     start_association = models.DateField()
     end_association = models.DateField()
+
+    @staticmethod
+    def get_by_team(team, date=None):
+        """
+        Returns the teamplayerassociation for the given team at the given date. If date=None for the given date
+        :param date:
+        :return:
+        """
+        if date is None:
+            date = now()
+        return TeamPlayerAssociation.objects.filter(
+            team=team, start_association__lte=date.date(), end_association__gt=date.date())
 
 
 class Profile(models.Model):
