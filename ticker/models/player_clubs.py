@@ -53,7 +53,7 @@ class Player(models.Model):
 
     @staticmethod
     def get_by_ids(ids):
-        return Player.objects.filter(id__in=ids)
+        return Player.objects.filter(id__in=ids).order_by(['sex', 'lastname', 'prename'])
 
 
     def __str__(self):
