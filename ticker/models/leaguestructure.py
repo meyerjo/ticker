@@ -11,7 +11,7 @@ from ticker.models.player_clubs import Team
 
 class League(models.Model):
     name = models.CharField(max_length=255)
-    associated_season = models.ForeignKey('Season')
+    associated_season = models.ForeignKey('ticker.Season', on_delete=models.CASCADE)
     teams = models.ManyToManyField(Team)
     league_key = models.CharField(max_length=255, default='')
 

@@ -35,8 +35,8 @@ class PlayingField(models.Model):
 
 
 class FieldAllocation(models.Model):
-    field = models.ForeignKey(PlayingField, CASCADE)
-    game = models.ForeignKey(Game, CASCADE)
+    field = models.ForeignKey(PlayingField, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=True)
     end_allocation = models.DateTimeField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
@@ -50,8 +50,8 @@ class FieldAllocation(models.Model):
 
 
 class PresentationToken(models.Model):
-    user = models.ForeignKey(User)
-    field = models.ForeignKey(PlayingField)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    field = models.ForeignKey(PlayingField, on_delete=models.CASCADE)
     token = models.CharField(max_length=32)
 
     is_used = models.BooleanField(default=False)

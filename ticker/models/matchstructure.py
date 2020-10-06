@@ -271,9 +271,9 @@ class Match(models.Model):
     match_time = models.DateTimeField()
     create_time = models.DateTimeField(auto_now=True)
     canceled = models.BooleanField(default=False)
-    rule = models.ForeignKey(Rules)
-    team_a = models.ForeignKey(Team, related_name='team_a')
-    team_b = models.ForeignKey(Team, related_name='team_b')
+    rule = models.ForeignKey(Rules, on_delete=models.CASCADE)
+    team_a = models.ForeignKey(Team, related_name='team_a', on_delete=models.CASCADE)
+    team_b = models.ForeignKey(Team, related_name='team_b', on_delete=models.CASCADE)
     games = ManyToManyField(Game, blank=True)
     test_game = models.BooleanField(default=False)
 

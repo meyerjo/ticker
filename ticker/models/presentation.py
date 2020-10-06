@@ -1,5 +1,3 @@
-from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import User
 from django.db import models
 
 from ticker.models import Club
@@ -9,7 +7,7 @@ from ticker.models import Team
 
 class Slide(models.Model):
 
-    club = models.ForeignKey(Club)
+    club = models.ForeignKey(Club, on_delete=models.CASCADE)
 
     title = models.CharField(max_length=255)
     POSSIBLE_CONTENT_TYPE = [('score', 'Score'),
@@ -40,7 +38,7 @@ class Slide(models.Model):
 
 
 class Presentation(models.Model):
-    team = models.ForeignKey(Team)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
@@ -62,8 +60,8 @@ class Presentation(models.Model):
 
 class PresentationSlideTeam(models.Model):
 
-    presentation = models.ForeignKey(Presentation)
-    slide = models.ForeignKey(Slide)
+    presentation = models.ForeignKey(Presentation, on_delete=models.CASCADE)
+    slide = models.ForeignKey(Slide, on_delete=models.CASCADE)
 
     slide_number = models.IntegerField()
     slide_visible = models.BooleanField(default=True)

@@ -122,7 +122,7 @@ class DefinableColor(models.Model):
 
 class ColorDefinition(models.Model):
     club = models.ForeignKey(Club, CASCADE)
-    color_definition = models.ForeignKey(DefinableColor)
+    color_definition = models.ForeignKey(DefinableColor, on_delete=models.CASCADE)
     color_hexcode = models.CharField(max_length=32)
 
     def __str__(self):
