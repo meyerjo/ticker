@@ -88,7 +88,7 @@ class Team(models.Model):
         return Player.get_by_ids(player_ids)
 
     def get_other_teams(self):
-        teams =  Team.objects.filter(parent_club=self.parent_club).exclude(id=self.id)
+        teams = Team.objects.filter(parent_club=self.parent_club).exclude(id=self.id)
         print(teams)
         return teams
 
