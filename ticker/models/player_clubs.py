@@ -126,7 +126,7 @@ class TeamPlayerAssociation(models.Model):
         if date is None:
             date = now()
         return TeamPlayerAssociation.objects.filter(
-            team=team, start_association__lte=date.date(), end_association__gt=date.date())
+            team=team, start_association__gte=date.date(), end_association__lt=date.date())
 
 
 class Profile(models.Model):
