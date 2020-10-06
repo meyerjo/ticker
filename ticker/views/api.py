@@ -5,11 +5,11 @@ import re
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.core.urlresolvers import reverse, reverse_lazy, resolve
 from django.db import transaction
 from django.forms import modelformset_factory
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.urls import reverse_lazy, reverse, resolve
 from django.utils import timezone
 
 from ticker.forms.matchplan import GameLineUpFormSet, GameLineUpForm

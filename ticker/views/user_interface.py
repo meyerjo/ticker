@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.db import transaction
 from django.db.models import CharField
 from django.db.models import Value

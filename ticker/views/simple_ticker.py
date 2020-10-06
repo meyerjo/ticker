@@ -1,10 +1,10 @@
 import json
 
 from django.contrib import messages
-from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
