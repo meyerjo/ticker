@@ -265,7 +265,7 @@
                             </tr>
                             {% for match in league.get_matches_in_league %}
                                 <tr>
-                                    <td>{{ match.match_time|date:"d m Y" }}</td>
+                                    <td>{{ match.match_time|date:"d.m.Y" }}</td>
                                     <td>{{ match.match_time|date:"H:i" }}</td>
                                     <td>{{ match.team_a.get_name }}</td>
                                     <td>{{ match.team_b.get_name }}</td>
@@ -273,7 +273,7 @@
                                     <td>{{ match.get_score.0 }}:{{ match.get_score.1 }}</td>
                                     <td>
                                         <a href="{% url 'manage_edit_matchdate' match.id %}">
-                                            <i class="fa fa-edit"></i> Bearbeiten
+                                            <i class="fa fa-edit"></i>
                                         </a>
                                     </td>
                                 </tr>

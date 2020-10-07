@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 from django.db import models
@@ -8,6 +9,7 @@ from django.utils.timezone import now
 
 from ticker.models.player_clubs import Player, Team
 
+logger = logging.getLogger(__name__)
 
 class Point(models.Model):
     canceled = models.BooleanField(default=False)
@@ -277,6 +279,9 @@ class Match(models.Model):
     games = ManyToManyField(Game, blank=True)
     test_game = models.BooleanField(default=False)
 
+    cached_scorestr = models.CharField(max_length=32, default='0:0')
+    cached_datetime = models.DateTimeField(auto_now=True)
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         super(Match, self).save(force_insert, force_update, using, update_fields)
@@ -332,9 +337,17 @@ class Match(models.Model):
             if res is None:
                 continue
             if res == 'team_a':
-                score_team_a +=1
+                score_team_a += 1
             elif res == 'team_b':
-                score_team_b +=1
+                score_team_b += 1
+        if self.cached_datetime + timedelta(minutes=5) >= timezone.now() and \
+            f'{score_team_a}:{score_team_b}' != self.cached_scorestr:
+            try:
+                self.cached_scorestr = f'{score_team_a}:{score_team_b}'
+                self.save()
+            except BaseException as e:
+                logger.error(f'Error in saving the cache {self.cached_scorestr}')
+
         return [score_team_a, score_team_b]
 
     def get_fields(self):
@@ -366,10 +379,9 @@ class Match(models.Model):
         return True
 
     def __str__(self):
-        return 'Match {0}: {1}:{2} Result: {3}:{4}'.format(
+        return 'Match {0}: {1}:{2} Result: {3}'.format(
             self.match_time.strftime('%d.%m.%Y %H:%M'),
             self.team_a.get_name(),
             self.team_b.get_name(),
-            self.get_score()[0],
-            self.get_score()[1]
+            self.cached_scorestr
         )
