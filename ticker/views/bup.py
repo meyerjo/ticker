@@ -266,26 +266,31 @@ def _select_players(season, team, available, playerspec_list):
 
 @login_required
 def bup_teamsetup(request):
+    import logging
+    logger = logging.getLogger(__name__)
     tm_id = request.GET['tm_id']
-    assert re.match(r'^[0-9]+$', tm_id)
+    assert re.match(r'^[0-9]+$', tm_id), 'tm_id does not pass regex'
+    try:
+        teamsetup = json.loads(request.POST['players_json'])
+        with transaction.atomic():
+            season = Season.get_current_season()
 
-    teamsetup = json.loads(request.POST['players_json'])
-    with transaction.atomic():
-        season = Season.get_current_season()
+            tm = Match.objects.filter(id=tm_id).first()
+            if tm is None:
+                raise Http404('teammatch %s not found!' % tm_id)
 
-        tm = Match.objects.filter(id=tm_id).first()
-        if tm is None:
-            raise Http404('teammatch %s not found!' % tm_id)
+            available_players = [tm.team_a.get_players(), tm.team_a.get_players()]
 
-        available_players = [tm.team_a.get_players(), tm.team_a.get_players()]
-
-        for m in tm.get_all_games():
-            ts = teamsetup[str(m.id)]
-            assert len(ts) == 2
-            m.player_a = _select_players(season, tm.team_a, available_players[0], ts[0])
-            m.player_b = _select_players(season, tm.team_b, available_players[1], ts[1])
-            m.save()
-
+            for m in tm.get_all_games():
+                ts = teamsetup[str(m.id)]
+                assert len(ts) == 2
+                m.player_a = _select_players(season, tm.team_a, available_players[0], ts[0])
+                m.player_b = _select_players(season, tm.team_b, available_players[1], ts[1])
+                m.save()
+    except BaseException as e:
+        print(str(e))
+        logger.error(str(e))
+        raise e
     return HttpResponse(json.dumps({
         'status': 'ok',
     }), content_type='application/json')
