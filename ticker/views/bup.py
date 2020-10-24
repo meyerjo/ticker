@@ -284,8 +284,8 @@ def bup_teamsetup(request):
             for m in tm.get_all_games():
                 ts = teamsetup[str(m.id)]
                 assert len(ts) == 2
-                m.player_a = _select_players(season, tm.team_a, available_players[0], ts[0])
-                m.player_b = _select_players(season, tm.team_b, available_players[1], ts[1])
+                m.player_a.set(_select_players(season, tm.team_a, available_players[0], ts[0]))
+                m.player_b.set(_select_players(season, tm.team_b, available_players[1], ts[1]))
                 m.save()
     except BaseException as e:
         print(str(e))
