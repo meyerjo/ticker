@@ -38,7 +38,7 @@ def has_valid_token(f):
 
 @cache_page(15*60)
 def simple_ticker_login(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         messages.info(request, 'Sie sind bereits eingeloggt')
     return render(request, 'user/simple_ticker_authenticate.html', dict())
 

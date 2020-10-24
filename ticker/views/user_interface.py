@@ -184,7 +184,7 @@ def manage_colors(request):
 
 def login(request):
     from django.contrib.auth import authenticate, login
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('manage_dashboard'))
 
     if 'username' not in request.POST or 'password' not in request.POST:
@@ -202,7 +202,7 @@ def login(request):
 
 def login_umpire(request):
     from django.contrib.auth import authenticate, login
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('manage_dashboard_umpire'))
 
     if 'username' not in request.POST or 'password' not in request.POST:
@@ -252,7 +252,7 @@ def manage_edit_matchdate(request, matchdate_id):
 
 @login_required()
 def manage_presentation(request, presentation=None):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
     p = Profile.objects.filter(user=request.user).first()
     club = p.associated_club
