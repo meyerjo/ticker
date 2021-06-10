@@ -1,4 +1,4 @@
-django==3.1.2
+django==3.1.12
 celery==4.4.2
 redis
 django-celery-beat
